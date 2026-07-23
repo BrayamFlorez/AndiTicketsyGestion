@@ -1,0 +1,670 @@
+/*
+ * dashboard.css
+ * Estilos del módulo Dashboard — tema VSCode Dark
+ * Complementa Tailwind; no lo reemplaza.
+ * Incluir en: resources/views/dashboard/index.blade.php vía @push('styles')
+ */
+
+/* ── Tokens del tema (alineados con el layout base) ─────────────────────── */
+:root {
+    --db-bg:           #121212;   /* Fondo principal (Alineado con el body bg-[#121212]) */
+    --db-surface:      #1e1e1e;   /* Tarjetas (Alineado con Sidebar/Navbar) */
+    --db-surface-2:    #2d2d2d;   /* Hover, inputs, filas alternas */
+    --db-border:       #2d2d2d;   /* Bordes sutiles para separar tarjetas del fondo */
+    --db-accent:       #007acc;   /* Azul VSCode */
+    --db-accent-hover: #005f9e;
+    --db-accent-dim:   rgba(0, 122, 204, 0.12); /* Para fondos de iconos */
+    --db-text:         #cccccc;   /* Texto principal */
+    --db-text-muted:   #9ca3af;   /* Labels secundarios (Un poco más claro para mejor lectura) */
+    --db-text-bright:  #ffffff;
+
+    /* Estado de tickets */
+    --db-status-open:        #6b7280; /* secondary / abierto */
+    --db-status-assigned:    #007acc; /* primary / asignado */
+    --db-status-inprogress:  #d97706; /* warning / en_progreso */
+    --db-status-resolved:    #16a34a; /* success / resuelto */
+    --db-status-closed:      #374151; /* dark / cerrado */
+    --db-status-cancelled:   #dc2626; /* danger / cancelado */
+
+    /* Prioridades */
+    --db-priority-low:      #16a34a;
+    --db-priority-medium:   #0891b2;
+    --db-priority-high:     #d97706;
+    --db-priority-critical: #dc2626;
+}
+
+/* ── Sección de encabezado del dashboard ─────────────────────────────────── */
+.db-header h4 {
+    color: var(--db-text-bright);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+.db-header p {
+    color: var(--db-text-muted);
+    font-size: 0.78rem;
+}
+
+/* ── Tarjetas de métrica ─────────────────────────────────────────────────── */
+.db-stat-card {
+    background-color: var(--db-surface);
+    border: 1px solid var(--db-border);
+    border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: border-color 0.2s, transform 0.15s;
+}
+.db-stat-card:hover {
+    border-color: var(--db-accent);
+    transform: translateY(-2px);
+}
+
+.db-stat-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.5rem;
+    background-color: var(--db-accent-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--db-accent);
+    font-size: 1.1rem;
+}
+/* Variantes de color para el ícono */
+.db-stat-icon.danger   { background-color: rgba(220, 38,  38,  0.12); color: #f87171; }
+.db-stat-icon.success  { background-color: rgba(22,  163, 74,  0.12); color: #4ade80; }
+.db-stat-icon.warning  { background-color: rgba(217, 119, 6,   0.12); color: #fbbf24; }
+.db-stat-icon.info     { background-color: rgba(8,   145, 178, 0.12); color: #22d3ee; }
+
+.db-stat-value {
+    font-size: 1.875rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--db-text-bright);
+    font-variant-numeric: tabular-nums;
+}
+.db-stat-label {
+    font-size: 0.72rem;
+    color: var(--db-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-top: 0.2rem;
+}
+
+/* ── Tarjetas de contenido (tablas, listas) ───────────────────────────────── */
+.db-card {
+    background-color: var(--db-surface);
+    border: 1px solid var(--db-border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.db-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--db-border);
+}
+.db-card-header span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--db-text);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* ── Tabla del dashboard ─────────────────────────────────────────────────── */
+.db-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+.db-table thead tr {
+    background-color: var(--db-bg);
+}
+.db-table thead th {
+    padding: 0.65rem 1rem;
+    text-align: left;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--db-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    white-space: nowrap;
+}
+.db-table tbody tr {
+    border-top: 1px solid var(--db-border);
+    transition: background-color 0.15s;
+}
+.db-table tbody tr:hover {
+    background-color: var(--db-surface-2);
+}
+.db-table tbody td {
+    padding: 0.75rem 1rem;
+    color: var(--db-text);
+    vertical-align: middle;
+}
+.db-table .db-ticket-title {
+    font-weight: 600;
+    color: var(--db-text-bright);
+    text-decoration: none;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 280px;
+}
+.db-table .db-ticket-title:hover {
+    color: var(--db-accent);
+}
+.db-table .db-sub {
+    font-size: 0.68rem;
+    color: var(--db-text-muted);
+    margin-top: 0.1rem;
+}
+
+/* ── Badges de estado y prioridad ────────────────────────────────────────── */
+.db-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+.db-badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: currentColor;
+    flex-shrink: 0;
+}
+
+/* Colores por estado */
+.db-badge.abierto      { background: rgba(107,114,128,.15); color: #9ca3af; }
+.db-badge.asignado     { background: rgba(0,122,204,.15);   color: #38bdf8; }
+.db-badge.en_progreso  { background: rgba(217,119,6,.15);   color: #fbbf24; }
+.db-badge.resuelto     { background: rgba(22,163,74,.15);   color: #4ade80; }
+.db-badge.cerrado      { background: rgba(55,65,81,.4);     color: #6b7280; }
+.db-badge.cancelado    { background: rgba(220,38,38,.15);   color: #f87171; }
+
+/* Colores por prioridad */
+.db-badge.baja         { background: rgba(22,163,74,.15);   color: #4ade80; }
+.db-badge.media        { background: rgba(8,145,178,.15);   color: #22d3ee; }
+.db-badge.alta         { background: rgba(217,119,6,.15);   color: #fbbf24; }
+.db-badge.critica      { background: rgba(220,38,38,.15);   color: #f87171; }
+
+/* ── Lista de estados (panel lateral) ────────────────────────────────────── */
+.db-status-list {
+    padding: 0.5rem 1.25rem 1rem;
+}
+.db-status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--db-border);
+    font-size: 0.78rem;
+}
+.db-status-row:last-child { border-bottom: none; }
+.db-status-row .db-status-count {
+    font-weight: 800;
+    color: var(--db-text-bright);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Lista de técnicos (carga de trabajo) ─────────────────────────────────── */
+.db-tech-list {
+    padding: 0.5rem 1.25rem 1rem;
+}
+.db-tech-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--db-border);
+}
+.db-tech-row:last-child { border-bottom: none; }
+.db-tech-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--db-text);
+}
+/* Badge de carga por cantidad */
+.db-load-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+}
+.db-load-badge.low      { background: rgba(22,163,74,.15);  color: #4ade80; }
+.db-load-badge.mid      { background: rgba(217,119,6,.15);  color: #fbbf24; }
+.db-load-badge.high     { background: rgba(220,38,38,.15);  color: #f87171; }
+
+/* ── Botón de acción (outline accent) ────────────────────────────────────── */
+.db-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.85rem;
+    border-radius: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: background-color 0.15s, color 0.15s;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+/* Agregado: Variante Ghost para el botón "Volver al listado" */
+.db-btn.ghost {
+    background: transparent;
+    color: var(--db-text-muted);
+}
+.db-btn.ghost:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--db-text-bright);
+}
+
+.db-btn.outline {
+    border: 1px solid var(--db-accent);
+    color: var(--db-accent);
+    background: transparent;
+}
+.db-btn.outline:hover {
+    background: var(--db-accent);
+    color: #fff;
+}
+.db-btn.solid {
+    background: var(--db-accent);
+    color: #fff;
+}
+.db-btn.solid:hover {
+    background: var(--db-accent-hover);
+}
+.db-btn.danger-outline {
+    border: 1px solid #dc2626;
+    color: #f87171;
+    background: transparent;
+}
+.db-btn.danger-outline:hover {
+    background: rgba(220,38,38,.15);
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.db-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--db-text-muted);
+}
+.db-empty i {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    color: var(--db-border);
+}
+.db-empty p {
+    font-size: 0.82rem;
+    margin-bottom: 1rem;
+}
+
+/* ── Avatar inicial (usuario) ────────────────────────────────────────────── */
+.db-avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.25rem;
+    background: var(--db-accent-dim);
+    color: var(--db-accent);
+    font-size: 0.7rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .db-stat-value { font-size: 1.5rem; }
+    .db-table .db-ticket-title { max-width: 160px; }
+}
+
+/*
+ * Override de paginación Tailwind de Laravel para tema oscuro
+ */
+
+/* Contenedor de paginación */
+nav[role="navigation"][aria-label="Pagination Navigation"] {
+    color: var(--db-text);
+}
+
+/* Botones de página */
+nav[role="navigation"] span[aria-current="page"] > span,
+nav[role="navigation"] a {
+    background-color: var(--db-surface) !important;
+    border-color: var(--db-border) !important;
+    color: var(--db-text-muted) !important;
+    font-size: 0.78rem !important;
+}
+
+nav[role="navigation"] a:hover {
+    background-color: var(--db-surface-2) !important;
+    color: var(--db-text-bright) !important;
+}
+
+/* Página activa */
+nav[role="navigation"] span[aria-current="page"] > span {
+    background-color: var(--db-accent) !important;
+    border-color: var(--db-accent) !important;
+    color: #fff !important;
+    font-weight: 700;
+}
+
+/* "Mostrando X a Y de Z resultados" */
+nav[role="navigation"] p,
+nav[role="navigation"] p span {
+    color: var(--db-text-muted) !important;
+    font-size: 0.78rem !important;
+}
+
+.db-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background-color: var(--db-surface);
+    border: 1px solid var(--db-border);
+    color: var(--db-text-muted);
+    text-decoration: none;
+    transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+    white-space: nowrap;
+}
+.db-chip:hover {
+    border-color: var(--db-accent);
+    color: var(--db-accent);
+}
+.db-chip i {
+    font-size: 0.7rem;
+    opacity: 0.9;
+}
+.db-chip.active {
+    background-color: var(--db-accent-dim);
+    border-color: var(--db-accent);
+    color: var(--db-accent);
+}
+
+/*
+ * Pegar al final de public/css/dashboard.css
+ * Dropdown de acciones — usa position: fixed para no ser cortado
+ * por contenedores con overflow.
+ */
+
+.db-dropdown-fixed {
+    position: fixed;
+    min-width: 220px;
+    background-color: var(--db-surface);
+    border: 1px solid var(--db-border);
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+    padding: 0.35rem;
+    z-index: 1000;
+}
+
+.db-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--db-text);
+    text-decoration: none;
+    border-radius: 0.3rem;
+    transition: background-color 0.12s, color 0.12s;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.db-dropdown-item:hover {
+    background-color: var(--db-surface-2);
+    color: var(--db-text-bright);
+}
+
+.db-dropdown-item i {
+    width: 14px;
+    text-align: center;
+    color: var(--db-text-muted);
+    font-size: 0.78rem;
+}
+
+.db-dropdown-item:hover i {
+    color: var(--db-accent);
+}
+
+/* Variante destructiva (eliminar) */
+.db-dropdown-item.danger {
+    color: #f87171;
+}
+
+.db-dropdown-item.danger i {
+    color: #f87171;
+}
+
+.db-dropdown-item.danger:hover {
+    background-color: rgba(220, 38, 38, 0.12);
+    color: #fca5a5;
+}
+
+.db-dropdown-item.danger:hover i {
+    color: #fca5a5;
+}
+
+/* Divisor entre grupos de acciones */
+.db-dropdown-divider {
+    height: 1px;
+    background-color: var(--db-border);
+    margin: 0.35rem 0.25rem;
+}
+
+/* Mini etiqueta para sub-secciones del dropdown */
+.db-dropdown-label {
+    padding: 0.45rem 0.75rem 0.25rem;
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--db-text-muted);
+    letter-spacing: 0.08em;
+}
+
+/* Forms inline (botones de acción inline) */
+form.inline {
+    display: inline-block;
+    margin: 0;
+}
+
+/*
+ * Pegar al final de public/css/dashboard.css
+ * Stepper visual del ciclo de vida del ticket
+ */
+
+.db-stepper {
+    display: flex;
+    align-items: flex-start;
+    padding: 1.5rem 1rem;
+    overflow-x: auto;
+    gap: 0;
+}
+
+.db-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 90px;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.db-step-circle {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 2px solid var(--db-border);
+    background-color: var(--db-bg);
+    color: var(--db-text-muted);
+    transition: all 0.2s ease;
+}
+
+.db-step.completed .db-step-circle {
+    background-color: var(--db-accent);
+    border-color: var(--db-accent);
+    color: #ffffff;
+}
+
+.db-step.current .db-step-circle {
+    background-color: var(--db-surface);
+    border-color: var(--db-accent);
+    color: var(--db-accent);
+    box-shadow: 0 0 0 4px rgba(0, 122, 204, 0.15);
+    animation: db-pulse 2s ease-in-out infinite;
+}
+
+@keyframes db-pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(0, 122, 204, 0.15); }
+    50%      { box-shadow: 0 0 0 8px rgba(0, 122, 204, 0.08); }
+}
+
+.db-step.cancelled .db-step-circle {
+    background-color: rgba(220, 38, 38, 0.15);
+    border-color: #dc2626;
+    color: #f87171;
+}
+
+.db-step-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--db-text);
+    white-space: nowrap;
+}
+.db-step.pending .db-step-label  { color: var(--db-text-muted); }
+.db-step.cancelled .db-step-label { color: #f87171; }
+
+.db-step-date {
+    font-size: 0.65rem;
+    color: var(--db-text-muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Línea conectora entre pasos */
+.db-step-connector {
+    flex: 1;
+    height: 2px;
+    background-color: var(--db-border);
+    margin-top: 19px;   /* alinear con centro del círculo (40px / 2 - 1px) */
+    min-width: 24px;
+    transition: background-color 0.3s;
+}
+
+.db-step-connector.completed {
+    background-color: var(--db-accent);
+}
+
+/* Banner cuando el ticket fue cancelado */
+.db-cancel-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    border-radius: 0.5rem;
+    padding: 0.85rem 1.2rem;
+    margin: 0 1rem 0;
+    color: #fca5a5;
+    font-size: 0.85rem;
+}
+.db-cancel-banner i {
+    font-size: 1.1rem;
+    color: #f87171;
+}
+.db-cancel-banner strong {
+    color: #fca5a5;
+}
+
+/* Header destacado del estado actual */
+.db-current-state {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.25rem;
+    background: linear-gradient(135deg, rgba(0, 122, 204, 0.05), transparent);
+    border-bottom: 1px solid var(--db-border);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.db-current-state-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.db-current-state-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--db-text-muted);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+/* Botón ancho completo (útil en card de acciones) */
+.db-btn.w-full {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Sección de zona peligrosa dentro de la card de acciones */
+.db-danger-zone {
+    border-top: 1px solid rgba(220, 38, 38, 0.3);
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+.db-danger-zone-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #f87171;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+

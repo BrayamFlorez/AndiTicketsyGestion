@@ -1,11 +1,14 @@
 {{-- resources/views/dashboard/partials/tecnico.blade.php --}}
 
 <div class="db-header mb-6">
-    <h4>Mis tickets asignados</h4>
-    <p>Hola, {{ auth()->user()->name }} — aquí están tus tickets activos</p>
+    <h4>Mi jornada</h4>
+    <p>Hola, {{ auth()->user()->name }} — tickets asignados y aprobaciones pendientes</p>
 </div>
 
-{{-- ── Tarjetas de métrica ──────────────────────────────────────────────── --}}
+{{-- ── Métricas: tickets ────────────────────────────────────────────── --}}
+<h5 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">
+    <i class="fas fa-ticket-alt mr-1"></i> Tickets
+</h5>
 <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
 
     <div class="db-stat-card">
@@ -42,8 +45,32 @@
 
 </div>
 
-{{-- ── Tabla de tickets activos ─────────────────────────────────────────── --}}
-<div class="db-card">
+{{-- ── Métricas: flujos ─────────────────────────────────────────────── --}}
+<h5 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">
+    <i class="fas fa-project-diagram mr-1"></i> Aprobaciones pendientes
+</h5>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+
+    <div class="db-stat-card">
+        <div class="db-stat-icon danger"><i class="fas fa-hourglass-half"></i></div>
+        <div>
+            <div class="db-stat-value">{{ $flujosPendientesCount }}</div>
+            <div class="db-stat-label">Requieren mi decisión</div>
+        </div>
+    </div>
+
+    <div class="db-stat-card">
+        <div class="db-stat-icon info"><i class="fas fa-user-friends"></i></div>
+        <div>
+            <div class="db-stat-value">{{ $flujosParticipandoCount }}</div>
+            <div class="db-stat-label">Participando</div>
+        </div>
+    </div>
+
+</div>
+
+{{-- ── Tabla: tickets activos ───────────────────────────────────────── --}}
+<div class="db-card mb-4">
     <div class="db-card-header">
         <span>Tickets activos — ordenados por prioridad</span>
         <a href="{{ route('tickets.index') }}" class="db-btn outline">Ver todos</a>
@@ -52,12 +79,7 @@
         <table class="db-table">
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Título</th>
-                    <th>Empresa / Sede</th>
-                    <th>Prioridad</th>
-                    <th>Estado</th>
-                    <th></th>
+                    <th>#</th><th>Título</th><th>Empresa / Sede</th><th>Prioridad</th><th>Estado</th><th></th>
                 </tr>
             </thead>
             <tbody>
@@ -90,6 +112,39 @@
                             <div class="db-empty">
                                 <i class="fas fa-check-double"></i>
                                 <p>No tienes tickets activos — ¡todo al día!</p>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{{-- ── Tabla: flujos que requieren mi decisión ──────────────────────── --}}
+<div class="db-card">
+    <div class="db-card-header">
+        <span>Aprobaciones pendientes</span>
+        <a href="{{ route('flujos.instancias.index', ['tab' => 'pendientes']) }}" class="db-btn outline">
+            Ver bandeja
+        </a>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="db-table">
+            <thead>
+                <tr>
+                    <th>Código</th><th>Trámite</th><th>Etapa</th><th>Estado</th><th>Iniciado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($flujosPendientes as $flujo)
+                    @include('dashboard.partials._flujo_row', ['flujo' => $flujo])
+                @empty
+                    <tr>
+                        <td colspan="5">
+                            <div class="db-empty">
+                                <i class="fas fa-check-double"></i>
+                                <p>Sin decisiones pendientes por ahora</p>
                             </div>
                         </td>
                     </tr>

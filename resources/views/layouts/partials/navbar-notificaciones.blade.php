@@ -22,7 +22,7 @@
     <div x-show="open" @click.away="open = false"
         x-transition:enter="transition ease-out duration-100"
         x-transition:enter-start="transform opacity-0 scale-95"
-        class="absolute right-0 mt-3 w-96 max-w-[calc(100vw-2rem)] bg-[#1e1e1e] rounded-xl shadow-2xl border border-gray-800 z-50 overflow-hidden"
+        class="absolute right-0 mt-3 w-[420px] max-w-[calc(100vw-2rem)] bg-[#1e1e1e] rounded-xl shadow-2xl border border-gray-800 z-50 overflow-hidden"
         x-cloak>
 
         {{-- Cabecera --}}
@@ -46,41 +46,9 @@
         </div>
 
         {{-- Lista --}}
-        <div class="max-h-96 overflow-y-auto">
+        <div class="max-h-[480px] overflow-y-auto">
             @forelse ($notifsRecientes as $notif)
-                @php
-                    $data = $notif->data;
-                    $leida = $notif->read_at !== null;
-                    $iconColor = match ($data['color'] ?? 'accent') {
-                        'success' => 'text-green-400',
-                        'warning' => 'text-yellow-400',
-                        'danger'  => 'text-red-400',
-                        default   => 'text-[#007acc]',
-                    };
-                @endphp
-
-                <form action="{{ route('notificaciones.leer', $notif->id) }}" method="POST" class="block">
-                    @csrf
-                    <button type="submit"
-                        class="w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-[#2d2d2d] transition-colors border-l-2 {{ $leida ? 'border-transparent opacity-60' : 'border-[#007acc]' }}">
-                        <span class="w-7 h-7 rounded-lg bg-[#121212] border border-gray-800 flex items-center justify-center flex-shrink-0">
-                            <i class="fas {{ $data['icono'] ?? 'fa-bell' }} {{ $iconColor }} text-xs"></i>
-                        </span>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs font-semibold text-white line-clamp-2 leading-tight">
-                                {{ $data['mensaje'] ?? 'Notificación' }}
-                            </p>
-                            <div class="flex items-center gap-2 mt-1 flex-wrap">
-                                @if (!empty($data['codigo']))
-                                    <span class="text-[9px] font-mono text-gray-500 uppercase tracking-wider">{{ $data['codigo'] }}</span>
-                                @endif
-                                <span class="text-[9px] text-gray-500">
-                                    <i class="fas fa-clock mr-0.5"></i>{{ $notif->created_at->diffForHumans() }}
-                                </span>
-                            </div>
-                        </div>
-                    </button>
-                </form>
+                @include('layouts.partials._notificacion_item', ['notif' => $notif, 'compact' => true])
             @empty
                 <div class="text-center py-10 px-4">
                     <i class="fas fa-bell-slash text-2xl text-gray-700 mb-2"></i>

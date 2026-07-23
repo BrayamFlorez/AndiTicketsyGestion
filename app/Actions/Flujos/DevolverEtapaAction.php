@@ -39,7 +39,7 @@ class DevolverEtapaAction
             WorkflowStage::RECHAZO_DEVOLVER_INICIADOR        => $this->devolverAIniciador($instance, $step),
             WorkflowStage::RECHAZO_DEVOLVER_ETAPA_ANTERIOR   => $this->devolverAEtapaAnterior($instance, $etapa),
             WorkflowStage::RECHAZO_DEVOLVER_ETAPA_ESPECIFICA => $this->devolverAEtapaEspecifica($instance, $etapa),
-            WorkflowStage::RECHAZO_FINALIZAR                 => $this->finalizarComoCancelado($instance),
+            WorkflowStage::RECHAZO_FINALIZAR                 => $this->finalizarComoCancelado($instance, $decisionRechazo),
             default                                          => $this->devolverAIniciador($instance, $step),
         };
     }
@@ -83,7 +83,7 @@ class DevolverEtapaAction
         $this->iniciarEtapa->ejecutar($instance, $destino);
     }
 
-    private function finalizarComoCancelado(WorkflowInstance $instance): void
+    private function finalizarComoCancelado(WorkflowInstance $instance, WorkflowStepAssignment $decisionRechazo): void
     {
         $instance->update([
             'estado'          => WorkflowInstance::ESTADO_CANCELADO,
@@ -91,6 +91,13 @@ class DevolverEtapaAction
             'cerrado_en'      => now(),
         ]);
 
-        event(new FlujoCerrado($instance->fresh()));
+        // El "actor" del cierre es quien rechazó definitivamente
+        $decisionRechazo->loadMissing('user');
+
+        event(new FlujoCerrado(
+            $instance->fresh(),
+            $decisionRechazo->user,
+            $decisionRechazo->comentario,
+        ));
     }
 }

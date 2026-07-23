@@ -39,14 +39,21 @@ class AvanzarEtapaAction
             ->first();
 
         if (! $siguienteEtapa) {
-            // No hay más etapas → aprobación final
             $instance->update([
                 'estado'          => WorkflowInstance::ESTADO_APROBADO,
                 'etapa_actual_id' => null,
                 'cerrado_en'      => now(),
             ]);
 
-            event(new FlujoCerrado($instance->fresh()));
+            // Último aprobador = quien acaba de firmar la etapa final
+            $ultimoAprobador = $step->assignments()
+                ->where('estado', WorkflowStepAssignment::ESTADO_APROBADO)
+                ->with('user')
+                ->latest('decidido_en')
+                ->first()
+                ?->user;
+
+            event(new FlujoCerrado($instance->fresh(), $ultimoAprobador));
             return;
         }
 

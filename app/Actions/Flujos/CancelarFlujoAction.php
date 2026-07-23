@@ -20,7 +20,7 @@ class CancelarFlujoAction
             ]);
         }
 
-        return DB::transaction(function () use ($instance, $motivo) {
+        return DB::transaction(function () use ($instance, $motivo, $usuario) {
 
             $stepActual = $instance->steps()
                 ->where('estado', WorkflowInstanceStep::ESTADO_EN_CURSO)
@@ -46,7 +46,7 @@ class CancelarFlujoAction
                 'cerrado_en' => now(),
             ]);
 
-            event(new FlujoCerrado($instance->fresh()));
+            event(new FlujoCerrado($instance->fresh(), $usuario, $motivo));
 
             return $instance->fresh();
         });

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\WorkflowStageActor;
 
 class WorkflowInstance extends Model
 {
@@ -84,5 +85,32 @@ class WorkflowInstance extends Model
             self::ESTADO_EN_PROGRESO,
             self::ESTADO_REQUIERE_CORRECCION,
         ]);
+    }
+
+    /**
+     * Instancias abiertas donde el usuario tiene al menos una asignación
+     * pendiente (por asignación directa o por rol Spatie del step actual).
+     */
+    public function scopePendientesParaUsuario($query, User $user)
+    {
+        $idsRolesUsuario = $user->roles->pluck('id');
+
+        return $query->abiertas()
+            ->whereHas('steps', function ($q) use ($user, $idsRolesUsuario) {
+                $q->where('estado', WorkflowInstanceStep::ESTADO_EN_CURSO)
+                  ->whereHas('assignments', function ($aq) use ($user, $idsRolesUsuario) {
+                      $aq->where('estado', WorkflowStepAssignment::ESTADO_PENDIENTE)
+                         ->where(function ($sq) use ($user, $idsRolesUsuario) {
+                             $sq->where('user_id', $user->id)
+                                ->orWhere(function ($rq) use ($idsRolesUsuario) {
+                                    $rq->whereNull('user_id')
+                                       ->whereHas('stageActor', function ($actorQ) use ($idsRolesUsuario) {
+                                           $actorQ->where('actor_type', WorkflowStageActor::TIPO_ROL)
+                                                  ->whereIn('actor_id', $idsRolesUsuario);
+                                       });
+                                });
+                         });
+                  });
+            });
     }
 }

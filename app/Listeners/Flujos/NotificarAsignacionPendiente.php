@@ -13,9 +13,14 @@ class NotificarAsignacionPendiente implements ShouldQueue
 {
     public function handle(AsignacionCreada $event): void
     {
-        $assignment = $event->assignment->loadMissing('stageActor', 'step.stage', 'step.instance');
-        $instance   = $assignment->step->instance;
+        $assignment = $event->assignment->loadMissing([
+            'stageActor',
+            'step.stage',
+            'step.instance.iniciador',       // ← necesario para el mensaje enriquecido
+            'step.instance.documentType',    // ← ídem
+        ]);
 
+        $instance = $assignment->step->instance;
         $destinatarios = $this->resolverDestinatarios($assignment);
 
         if ($destinatarios->isEmpty()) {
@@ -28,10 +33,6 @@ class NotificarAsignacionPendiente implements ShouldQueue
         );
     }
 
-    /**
-     * Si la asignación apunta a un usuario específico, ese es el destinatario.
-     * Si apunta a un rol, todos los usuarios con ese rol son destinatarios.
-     */
     private function resolverDestinatarios($assignment)
     {
         if ($assignment->user_id) {

@@ -20,4 +20,20 @@ class Flujos
             default                            => 'fa-file',
         };
     }
+
+    /**
+     * Devuelve las iniciales de un nombre (máximo 2 caracteres).
+     * "María del Carmen Torres" → "MT" · "Ana" → "AN"
+     */
+    public static function iniciales(string $nombre): string
+    {
+        $words = preg_split('/\s+/', trim($nombre)) ?: [];
+        $words = array_values(array_filter($words));
+
+        if (count($words) >= 2) {
+            return strtoupper(mb_substr($words[0], 0, 1) . mb_substr(end($words), 0, 1));
+        }
+
+        return strtoupper(mb_substr($words[0] ?? '', 0, 2));
+    }
 }

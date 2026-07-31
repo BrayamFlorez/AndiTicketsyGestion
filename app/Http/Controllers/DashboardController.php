@@ -42,7 +42,7 @@ class DashboardController extends Controller
                 'totalUsuarios'      => User::count(),
                 'ticketsRecientes'   => Ticket::with(['solicitante', 'asignado', 'empresa'])
                     ->latest()->limit(8)->get(),
-                'flujosRecientes'    => WorkflowInstance::with(['template:id,nombre', 'iniciador:id,name', 'etapaActual:id,nombre', 'documentType:id,nombre,icono'])
+                'flujosRecientes'    => WorkflowInstance::with(['template:id,nombre', 'iniciador:id,name', 'etapaActual:id,nombre', 'documentType:id,nombre,icono','currentStep.stage:id,nombre,sla_horas'])
                     ->latest('iniciado_en')->limit(8)->get(),
                 'flujosPorPlantilla' => WorkflowTemplate::activos()
                     ->withCount(['instances as instancias_abiertas' => fn ($q) => $q->abiertas()])
@@ -63,7 +63,7 @@ class DashboardController extends Controller
                 'totalEquipos'           => Equipo::count(),
                 'ticketsRecientes'       => Ticket::with(['solicitante', 'asignado', 'empresa'])
                     ->latest()->limit(8)->get(),
-                'flujosRecientes'        => WorkflowInstance::with(['template:id,nombre', 'iniciador:id,name', 'etapaActual:id,nombre', 'documentType:id,nombre,icono'])
+                'flujosRecientes'        => WorkflowInstance::with(['template:id,nombre', 'iniciador:id,name', 'etapaActual:id,nombre', 'documentType:id,nombre,icono','currentStep.stage:id,nombre,sla_horas'])
                     ->latest('iniciado_en')->limit(8)->get(),
                 'misFlujosPendientes'    => WorkflowInstance::pendientesParaUsuario($user)->count(),
                 'tecnicos' => User::tecnicos()->activos()->withCount([
@@ -90,7 +90,7 @@ class DashboardController extends Controller
 
             // Flujos donde participa
             'flujosPendientes'       => WorkflowInstance::pendientesParaUsuario($user)
-                ->with(['template:id,nombre', 'iniciador:id,name', 'etapaActual:id,nombre', 'documentType:id,nombre,icono'])
+                ->with(['template:id,nombre', 'iniciador:id,name', 'etapaActual:id,nombre', 'documentType:id,nombre,icono','currentStep.stage:id,nombre,sla_horas'])
                 ->orderBy('iniciado_en')
                 ->limit(6)->get(),
             'flujosPendientesCount'  => WorkflowInstance::pendientesParaUsuario($user)->count(),
@@ -115,7 +115,7 @@ class DashboardController extends Controller
 
             // Flujos iniciados por el usuario
             'misFlujos' => WorkflowInstance::where('iniciado_por', $user->id)
-                ->with(['template:id,nombre', 'etapaActual:id,nombre', 'documentType:id,nombre,icono'])
+                ->with(['template:id,nombre', 'etapaActual:id,nombre', 'documentType:id,nombre,icono','currentStep.stage:id,nombre,sla_horas'])
                 ->latest('iniciado_en')->limit(6)->get(),
             'misFlujosAbiertos'    => WorkflowInstance::where('iniciado_por', $user->id)->abiertas()->count(),
             'misFlujosCorreccion'  => WorkflowInstance::where('iniciado_por', $user->id)

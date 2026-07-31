@@ -67,6 +67,7 @@ class WorkflowInstanceController extends Controller
                 'iniciador:id,name',
                 'etapaActual:id,nombre',
                 'documentType:id,nombre,icono',
+                'currentStep.stage:id,nombre,sla_horas',
             ])
             ->withCount('attachments')
             // ── Filtros comunes ──

@@ -24,8 +24,15 @@
             {{ $flujo->template->nombre }}
         </div>
     </td>
-    <td class="db-sub" style="color:var(--db-text)">
-        {{ $flujo->etapaActual->nombre ?? '—' }}
+    <td>
+        <div class="text-xs" style="color: var(--db-text)">
+            {{ $flujo->etapaActual->nombre ?? '—' }}
+        </div>
+        @if ($flujo->currentStep ?? null)
+            <div class="mt-1">
+                @include('flujos.instancias.partials._sla_badge', ['step' => $flujo->currentStep])
+            </div>
+        @endif
     </td>
     <td><span class="db-badge {{ $cfg['color'] }}">{{ $cfg['texto'] }}</span></td>
     <td class="db-sub">{{ $flujo->iniciado_en?->format('d/m/Y') }}</td>

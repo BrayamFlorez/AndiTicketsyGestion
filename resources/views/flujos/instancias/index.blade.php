@@ -134,11 +134,14 @@
                     @forelse ($instancias as $instancia)
                         <tr class="group transition-colors hover:bg-[var(--db-surface-2)]">
                             <td class="px-6 py-4">
-                                <p class="text-[10px] text-gray-500 font-mono uppercase tracking-wider">{{ $instancia->codigo }}</p>
+                                <p class="text-[10px] text-gray-500 font-mono uppercase tracking-wider">
+                                    {{ $instancia->codigo }}</p>
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <p class="text-sm font-bold text-white">{{ $instancia->titulo }}</p>
                                     @if ($instancia->attachments_count > 0)
-                                        <span class="text-[10px] text-gray-400 flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#1a1a1b] border border-gray-800" title="Adjuntos totales">
+                                        <span
+                                            class="text-[10px] text-gray-400 flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#1a1a1b] border border-gray-800"
+                                            title="Adjuntos totales">
                                             <i class="fas fa-paperclip"></i> {{ $instancia->attachments_count }}
                                         </span>
                                     @endif
@@ -163,6 +166,11 @@
                                     <div class="text-xs text-white flex items-center gap-1.5">
                                         <i class="fas fa-map-marker-alt text-gray-500"></i>
                                         {{ $instancia->etapaActual->nombre }}
+                                    </div>
+                                    <div class="mt-1.5">
+                                        @include('flujos.instancias.partials._sla_badge', [
+                                            'step' => $instancia->currentStep,
+                                        ])
                                     </div>
                                 @else
                                     <span class="db-sub">—</span>

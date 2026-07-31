@@ -113,4 +113,11 @@ class WorkflowInstance extends Model
                   });
             });
     }
+
+    public function currentStep()
+    {
+        return $this->hasOne(WorkflowInstanceStep::class)
+            ->where('estado', WorkflowInstanceStep::ESTADO_EN_CURSO)
+            ->latest('id');
+    }
 }

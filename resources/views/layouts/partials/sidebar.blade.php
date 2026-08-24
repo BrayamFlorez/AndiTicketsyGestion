@@ -233,6 +233,14 @@
                             <span class="ml-2 uppercase tracking-tight whitespace-nowrap">Roles y Accesos</span>
                         </a>
                     @endcan
+
+                    @can('auditoria.ver')
+                        <a href="{{ route('auditoria.index') }}"
+                            class="flex items-center px-3 py-1.5 rounded-lg text-xs transition-colors {{ request()->routeIs('auditoria.*') ? 'bg-[#323233] text-[#007acc] font-bold' : 'text-gray-400 hover:bg-[#2d2d2d] hover:text-white' }}">
+                            <i class="fas fa-shield-alt w-5 text-center text-[11px]"></i>
+                            <span class="ml-2 uppercase tracking-tight whitespace-nowrap">Auditoría</span>
+                        </a>
+                    @endcan
                 </div>
             </div>
         @endif

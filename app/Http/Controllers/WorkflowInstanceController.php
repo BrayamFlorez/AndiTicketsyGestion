@@ -25,6 +25,8 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Models\WorkflowTemplate;
+use App\Events\Auditing\DocumentoVisualizado;
+use App\Events\Auditing\AdjuntoDescargado;
 
 class WorkflowInstanceController extends Controller
 {
@@ -154,6 +156,10 @@ class WorkflowInstanceController extends Controller
     {
         $this->authorize('view', $instancia);
         $user = auth()->user();
+
+        // Auditoría: registra quién visualizó el documento y desde qué IP.
+        // Ver App\Listeners\Auditing\DocumentAuditSubscriber.
+        event(new DocumentoVisualizado($instancia, $user));
 
         $instancia->load([
             'template:id,nombre',
@@ -380,6 +386,10 @@ class WorkflowInstanceController extends Controller
             404,
             'Archivo no encontrado en el almacenamiento.'
         );
+
+        // Auditoría: registra quién descargó el adjunto y desde qué IP.
+        // Ver App\Listeners\Auditing\DocumentAuditSubscriber.
+        event(new AdjuntoDescargado($instancia, $attachment, auth()->user()));
 
         return Storage::disk('private')->download(
             $attachment->ruta,

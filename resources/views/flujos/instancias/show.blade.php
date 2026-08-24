@@ -20,9 +20,16 @@
                 {{ $instancia->iniciado_en?->format('d/m/Y H:i') }}
             </p>
         </div>
-        <a href="{{ route('flujos.instancias.index') }}" class="db-btn ghost">
-            <i class="fas fa-arrow-left mr-2"></i> Volver
-        </a>
+        <div class="flex items-center gap-2">
+            @can('auditoria.ver')
+                <a href="{{ route('auditoria.show', $instancia) }}" class="db-btn ghost" title="Ver historial de auditoría">
+                    <i class="fas fa-shield-alt mr-2"></i> Auditoría
+                </a>
+            @endcan
+            <a href="{{ route('flujos.instancias.index') }}" class="db-btn ghost">
+                <i class="fas fa-arrow-left mr-2"></i> Volver
+            </a>
+        </div>
     </div>
 
     @if (session('exito'))

@@ -1,72 +1,107 @@
+{{-- resources/views/roles/edit.blade.php --}}
 <x-app-layout>
-    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <header class="bg-[#1e1e1e] p-6 text-white flex justify-between items-center border-b-4 border-[#007acc]">
-            <div class="flex items-center">
-                <i class="fas fa-user-shield text-[#007acc] mr-4 text-xl"></i>
-                <div>
-                    <h2 class="font-bold uppercase tracking-tighter">Modificar Privilegios de Rol</h2>
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Editando: <span class="text-[#007acc]">{{ $role->name }}</span></p>
-                </div>
-            </div>
-            <a href="{{ route('roles.index') }}" class="text-xs font-bold text-gray-400 hover:text-white transition uppercase tracking-widest">
-                <i class="fas fa-arrow-left mr-1"></i> Volver
-            </a>
-        </header>
+    <x-slot name="title">Editar Rol</x-slot>
 
-        <form method="POST" action="{{ route('roles.update', $role->id) }}" class="p-8">
-            @csrf
-            @method('PUT')
-            
-            <div class="mb-10 max-w-md">
-                <label class="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Identificador del Rol</label>
-                <input type="text" name="name" value="{{ old('name', $role->name) }}" 
-                    class="w-full border-gray-200 focus:border-[#007acc] focus:ring-[#007acc] rounded-md shadow-sm font-mono text-sm uppercase" required>
-                <x-input-error :messages="$errors->get('name')" class="mt-2" />
+    {{-- Cabecera de la Página --}}
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="text-title-md2 font-bold text-black dark:text-white flex items-center gap-2">
+                <i class="fas fa-user-shield text-primary"></i> Modificar Privilegios de Rol
+            </h2>
+            <p class="text-xs text-bodydark2 mt-1">
+                Editando: <strong class="text-primary font-mono uppercase">{{ $role->name }}</strong>
+            </p>
+        </div>
+
+        <a href="{{ route('roles.index') }}" 
+           class="inline-flex items-center justify-center gap-2 rounded border border-stroke py-2 px-4 text-center text-xs font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition shadow-sm">
+            <i class="fas fa-arrow-left text-[10px]"></i> Volver
+        </a>
+    </div>
+
+    {{-- Formulario Principal --}}
+    <form method="POST" action="{{ route('roles.update', $role->id) }}" 
+          class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+        @csrf
+        @method('PUT')
+        
+        <div class="p-6 space-y-6">
+
+            {{-- Identificador del Rol --}}
+            <div class="max-w-md">
+                <label for="name" class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                    Identificador del Rol <span class="text-meta-1">*</span>
+                </label>
+                <input type="text" id="name" name="name" value="{{ old('name', $role->name) }}" required
+                       placeholder="EJ: TECNICO_SENIOR"
+                       class="w-full rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-mono uppercase outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white @error('name') border-meta-1 @enderror">
+                <x-input-error :messages="$errors->get('name')" class="mt-1" />
             </div>
 
-            <div class="mb-4">
-                <div class="flex items-center mb-6 border-b border-gray-100 pb-2">
-                    <h3 class="text-xs font-black text-[#1e1e1e] uppercase tracking-[2px]">Ajuste de Matriz de Permisos</h3>
+            {{-- Matriz de Permisos --}}
+            <div>
+                <div class="mb-3 pb-2 border-b border-stroke dark:border-strokedark flex items-center justify-between">
+                    <h3 class="font-bold text-black dark:text-white uppercase tracking-wider text-xs flex items-center gap-1.5">
+                        <i class="fas fa-key text-primary"></i> Matriz de Permisos
+                    </h3>
+                    <span class="text-[10px] text-bodydark2 uppercase">
+                        {{ count($rolePermissions) }} de {{ count($permissions) }} seleccionados
+                    </span>
                 </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     @foreach($permissions as $permission)
-                        <label class="relative flex items-center p-4 rounded-xl border border-gray-100 hover:border-[#007acc]/30 hover:bg-blue-50/30 cursor-pointer transition-all group {{ in_array($permission->name, $rolePermissions) ? 'bg-blue-50 border-[#007acc]/20' : '' }}">
-                            <div class="flex items-center h-5">
+                        @php
+                            $isChecked = in_array($permission->name, $rolePermissions);
+                        @endphp
+                        <label class="relative flex items-center p-3.5 rounded border transition cursor-pointer select-none {{ $isChecked ? 'border-primary bg-primary/5 dark:bg-primary/10' : 'border-stroke bg-gray-2 dark:border-strokedark dark:bg-meta-4/20 hover:border-primary/50' }}">
+                            <div class="flex h-5 items-center">
                                 <input type="checkbox" name="permissions[]" value="{{ $permission->name }}" 
-                                    {{ in_array($permission->name, $rolePermissions) ? 'checked' : '' }}
-                                    class="rounded border-gray-300 text-[#007acc] focus:ring-[#007acc] w-5 h-5 transition-all">
+                                       {{ $isChecked ? 'checked' : '' }}
+                                       class="rounded border-stroke text-primary focus:ring-primary dark:border-form-strokedark dark:bg-form-input">
                             </div>
-                            <div class="ml-4">
-                                <span class="text-[11px] font-black text-gray-600 group-hover:text-[#007acc] uppercase tracking-tighter transition-colors">
+                            
+                            <div class="ml-3 min-w-0 flex-1">
+                                <span class="text-xs font-bold text-black dark:text-white block truncate">
                                     {{ str_replace('.', ' › ', $permission->name) }}
                                 </span>
                             </div>
-                            
-                            @if(in_array($permission->name, $rolePermissions))
-                                <div class="absolute top-2 right-2">
-                                    <i class="fas fa-check-circle text-[#007acc] text-[10px]"></i>
-                                </div>
+
+                            @if($isChecked)
+                                <span class="text-primary text-xs ml-2">
+                                    <i class="fas fa-check-circle"></i>
+                                </span>
                             @endif
                         </label>
                     @endforeach
                 </div>
             </div>
 
-            <div class="pt-8 mt-10 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="flex items-center text-blue-600 bg-blue-50 px-5 py-3 rounded-lg border border-blue-100 max-w-md">
-                    <i class="fas fa-info-circle mr-3 text-lg"></i>
-                    <p class="text-[10px] font-bold uppercase tracking-tight leading-relaxed">
-                        Nota: Los cambios en los permisos se aplicarán a todos los usuarios vinculados a este rol de forma inmediata.
+            {{-- Nota Informativa --}}
+            <div class="rounded border border-primary/20 bg-primary/5 p-4 dark:bg-primary/10">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary shrink-0">
+                        <i class="fas fa-info-circle text-sm"></i>
+                    </div>
+                    <p class="text-xs font-medium text-black dark:text-white">
+                        <strong>Nota importante:</strong> Los cambios aplicados a esta matriz se reflejarán de manera inmediata en todos los usuarios activos que tengan asignado este rol.
                     </p>
                 </div>
-
-                <button type="submit" 
-                    class="w-full md:w-auto inline-flex items-center justify-center bg-[#007acc] hover:bg-[#005a9e] text-white px-12 py-4 rounded-md font-black text-xs uppercase tracking-[2px] transition-all duration-300 shadow-[0_10px_20px_rgba(0,122,204,0.3)] hover:shadow-[0_15px_25px_rgba(0,122,204,0.4)] transform hover:-translate-y-1 active:scale-95">
-                    <i class="fas fa-sync-alt mr-2 animate-hover"></i>
-                    Actualizar Rol Institucional
-                </button>
             </div>
-        </form>
-    </div>
+
+        </div>
+
+        {{-- Footer de Acciones --}}
+        <div class="flex items-center justify-end gap-2 bg-gray-2 dark:bg-meta-4/40 px-6 py-3 border-t border-stroke dark:border-strokedark">
+            <a href="{{ route('roles.index') }}" 
+               class="inline-flex items-center justify-center rounded border border-stroke py-1.5 px-4 text-center text-xs font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition">
+                Cancelar
+            </a>
+            <button type="submit" 
+                    class="inline-flex items-center gap-1.5 rounded bg-primary py-1.5 px-5 text-center text-xs font-bold uppercase tracking-wider text-white hover:bg-opacity-90 transition shadow-sm cursor-pointer">
+                <i class="fas fa-sync-alt text-[10px]"></i> Actualizar Rol
+            </button>
+        </div>
+
+    </form>
 </x-app-layout>

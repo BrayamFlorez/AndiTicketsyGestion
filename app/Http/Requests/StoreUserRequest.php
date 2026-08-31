@@ -28,39 +28,30 @@ class StoreUserRequest extends FormRequest
             'sede_id'    => ['nullable', 'integer', 'exists:sedes,id'],
 
             // Para técnicos (array de coberturas)
-            'coberturas'                => ['nullable', 'array'],
-            'coberturas.*.empresa_id'   => ['required_with:coberturas.*.sede_id', 'integer', 'exists:empresas,id'],
-            'coberturas.*.sede_id'      => ['nullable', 'integer', 'exists:sedes,id'],
+            'coberturas'              => ['nullable', 'array'],
+            'coberturas.*.empresa_id' => ['nullable', 'integer', 'exists:empresas,id'],
+            'coberturas.*.sede_id'    => ['nullable', 'integer', 'exists:sedes,id'],
         ];
     }
 
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
-            // Si es usuario final, la sede (si se da) debe pertenecer a la empresa
-            if ($this->input('rol') === 'usuario'
-                && $this->filled('sede_id') && $this->filled('empresa_id')) {
-                $valido = Sede::where('id', $this->sede_id)
-                    ->where('empresa_id', $this->empresa_id)
-                    ->exists();
-                if (! $valido) {
-                    $validator->errors()->add('sede_id', 'La sede no pertenece a la empresa elegida.');
-                }
+            $rol = $this->input('rol');
+
+            if (! \App\Support\Roles::requiereCobertura($rol)) {
+                return;
             }
 
-            // Si es técnico, cada cobertura (si tiene sede) debe coincidir empresa+sede
-            if ($this->input('rol') === 'tecnico' && $this->filled('coberturas')) {
-                foreach ($this->coberturas as $i => $cob) {
-                    if (! empty($cob['empresa_id']) && ! empty($cob['sede_id'])) {
-                        $valido = Sede::where('id', $cob['sede_id'])
-                            ->where('empresa_id', $cob['empresa_id'])
-                            ->exists();
-                        if (! $valido) {
-                            $validator->errors()->add("coberturas.{$i}.sede_id",
-                                'La sede no pertenece a la empresa de esta fila.');
-                        }
-                    }
-                }
+            $validas = collect($this->input('coberturas', []))
+                ->filter(fn ($c) => ! empty($c['empresa_id']))
+                ->count();
+
+            if ($validas === 0) {
+                $validator->errors()->add(
+                    'coberturas',
+                    'Este rol requiere al menos una cobertura de empresa asignada.'
+                );
             }
         });
     }

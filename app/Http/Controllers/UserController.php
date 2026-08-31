@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Models\Empresa;
 use App\Models\Sede;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,10 +38,13 @@ class UserController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        // Conteo de coberturas para técnicos (1 query, evita N+1)
-        $tecnicoIds = $usuarios->filter(fn($u) => $u->hasRole('tecnico'))->pluck('id');
+        // Conteo de coberturas para roles que las usan (1 query, evita N+1)
+        $idsConCobertura = $usuarios
+            ->filter(fn ($u) => $u->roles->contains(fn ($r) => Roles::requiereCobertura($r->name)))
+            ->pluck('id');
+
         $coberturasPorTecnico = DB::table('empresa_user')
-            ->whereIn('user_id', $tecnicoIds)
+            ->whereIn('user_id', $idsConCobertura)
             ->select('user_id', DB::raw('COUNT(DISTINCT empresa_id) as total_empresas'))
             ->groupBy('user_id')
             ->pluck('total_empresas', 'user_id');
@@ -77,9 +81,10 @@ class UserController extends Controller
 
             $rol = $request->input('rol');
 
-            // Solo usuarios finales tienen empresa/sede principal
-            $empresa_id = $rol === 'usuario' ? $request->input('empresa_id') : null;
-            $sede_id    = $rol === 'usuario' ? $request->input('sede_id') : null;
+            // Empresa/sede principal solo para roles vinculados a un lugar de trabajo
+            $vinculado  = Roles::requiereEmpresaPrincipal($rol);
+            $empresa_id = $vinculado ? $request->input('empresa_id') : null;
+            $sede_id    = $vinculado ? $request->input('sede_id') : null;
 
             $usuario = User::create([
                 'name'       => $request->name,
@@ -92,8 +97,8 @@ class UserController extends Controller
 
             $usuario->assignRole($rol);
 
-            // Coberturas solo para técnicos
-            if ($rol === 'tecnico') {
+            // Coberturas para roles que operan sobre empresas/sedes asignadas
+            if (Roles::requiereCobertura($rol)) {
                 $this->sincronizarCoberturas($usuario, $request->input('coberturas', []));
             }
 
@@ -117,17 +122,23 @@ class UserController extends Controller
 
         $usuario->load(['roles', 'empresasAsignadas']);
 
-        // Cargar coberturas actuales para precargar el formulario
+        // Coberturas actuales para precargar el formulario
         $coberturasActuales = DB::table('empresa_user')
             ->where('user_id', $usuario->id)
+            ->orderBy('empresa_id')
             ->get(['empresa_id', 'sede_id'])
-            ->toArray();
+            ->map(fn ($fila) => [
+                'empresa_id' => (int) $fila->empresa_id,
+                'sede_id'    => $fila->sede_id !== null ? (int) $fila->sede_id : '',
+            ])
+            ->values()
+            ->all();
 
         return view('usuarios.edit', array_merge(
             $this->datosParaFormulario(),
             [
                 'usuario'            => $usuario,
-                'rolActual'          => $usuario->roles->first()?->name ?? 'usuario',
+                'rolActual'          => $usuario->roles->first()?->name ?? '',
                 'coberturasActuales' => $coberturasActuales,
             ]
         ));
@@ -145,8 +156,10 @@ class UserController extends Controller
         DB::transaction(function () use ($request, $usuario) {
 
             $rol = $request->input('rol');
-            $empresa_id = $rol === 'usuario' ? $request->input('empresa_id') : null;
-            $sede_id    = $rol === 'usuario' ? $request->input('sede_id') : null;
+
+            $vinculado  = Roles::requiereEmpresaPrincipal($rol);
+            $empresa_id = $vinculado ? $request->input('empresa_id') : null;
+            $sede_id    = $vinculado ? $request->input('sede_id') : null;
 
             $data = [
                 'name'       => $request->name,
@@ -164,8 +177,8 @@ class UserController extends Controller
             $usuario->update($data);
             $usuario->syncRoles([$rol]);
 
-            // Coberturas: si es técnico, sincronizar. Si no, limpiar.
-            if ($rol === 'tecnico') {
+            // Coberturas: sincronizar si el rol las usa, limpiar si no
+            if (Roles::requiereCobertura($rol)) {
                 $this->sincronizarCoberturas($usuario, $request->input('coberturas', []));
             } else {
                 DB::table('empresa_user')->where('user_id', $usuario->id)->delete();
@@ -228,7 +241,7 @@ class UserController extends Controller
 
     /**
      * Roles que el creador/editor puede asignar.
-     * Admin no puede crear/asignar admin ni super-admin (evita escalamiento).
+     * Evita escalamiento: nadie otorga un rol de mayor autoridad que el suyo.
      */
     private function rolesDisponiblesPara(User $user): array
     {
@@ -238,27 +251,38 @@ class UserController extends Controller
             return $todos;
         }
 
-        return array_values(array_diff($todos, ['super-admin', 'admin']));
+        $restringidos = ['super-admin', 'admin'];
+
+        // Solo admin (o super-admin) puede otorgar el rol gerente
+        if (! $user->hasRole('admin')) {
+            $restringidos[] = 'gerente';
+        }
+
+        return array_values(array_diff($todos, $restringidos));
     }
 
     /**
-     * Datos comunes para create/edit (empresas, sedes precargadas, roles).
+     * Datos comunes para create/edit.
+     * Incluye los grupos de roles para que el formulario decida qué sección mostrar.
      */
     private function datosParaFormulario(): array
     {
         return [
-            'roles'             => $this->rolesDisponiblesPara(Auth::user()),
-            'empresas'          => Empresa::activas()->orderBy('nombre')->get(['id', 'nombre']),
-            'sedesPorEmpresa'   => Sede::activas()
+            'roles'           => $this->rolesDisponiblesPara(Auth::user()),
+            'empresas'        => Empresa::activas()->orderBy('nombre')->get(['id', 'nombre']),
+            'sedesPorEmpresa' => Sede::activas()
                 ->orderBy('nombre')
                 ->get(['id', 'nombre', 'empresa_id'])
                 ->groupBy('empresa_id'),
+
+            'rolesConCobertura'  => Roles::CON_COBERTURA,
+            'rolesConEmpresa'    => Roles::CON_EMPRESA_PRINCIPAL,
+            'rolesTransversales' => Roles::TRANSVERSALES,
         ];
     }
 
     /**
      * Bloquea acciones de admin sobre super-admins.
-     * Super-admin puede modificar a cualquiera; admin no puede tocar super-admins.
      */
     private function bloquearSiNoPuedeGestionar(User $objetivo): void
     {
@@ -269,28 +293,50 @@ class UserController extends Controller
     }
 
     /**
-     * Sincroniza las filas de empresa_user para un técnico.
+     * Sincroniza las filas de empresa_user para un usuario con cobertura.
      * Reemplaza todas las coberturas actuales por las nuevas.
+     * Descarta pares inválidos (sede que no pertenece a la empresa indicada).
      */
-    private function sincronizarCoberturas(User $tecnico, array $coberturas): void
+    private function sincronizarCoberturas(User $usuario, array $coberturas): void
     {
-        // Limpiar y normalizar entrada
-        $filas = collect($coberturas)
-            ->filter(fn($c) => ! empty($c['empresa_id']))
-            ->map(fn($c) => [
-                'user_id'     => $tecnico->id,
-                'empresa_id'  => (int) $c['empresa_id'],
-                'sede_id'     => ! empty($c['sede_id']) ? (int) $c['sede_id'] : null,
+        $entradas = collect($coberturas)
+            ->filter(fn ($c) => ! empty($c['empresa_id']))
+            ->map(fn ($c) => [
+                'empresa_id' => (int) $c['empresa_id'],
+                'sede_id'    => ! empty($c['sede_id']) ? (int) $c['sede_id'] : null,
+            ])
+            // Deduplicar: misma empresa+sede no se repite
+            ->unique(fn ($c) => $c['empresa_id'] . '|' . ($c['sede_id'] ?? 'NULL'))
+            ->values();
+
+        // Mapa sede_id => empresa_id para validar coherencia
+        $sedeIds = $entradas->pluck('sede_id')->filter()->unique();
+
+        $sedesValidas = $sedeIds->isEmpty()
+            ? collect()
+            : Sede::whereIn('id', $sedeIds)->pluck('empresa_id', 'id');
+
+        $filas = $entradas
+            ->filter(function ($c) use ($sedesValidas) {
+                // Cobertura global de empresa: siempre válida
+                if ($c['sede_id'] === null) {
+                    return true;
+                }
+                // Cobertura de sede: la sede debe pertenecer a esa empresa
+                return ($sedesValidas[$c['sede_id']] ?? null) === $c['empresa_id'];
+            })
+            ->map(fn ($c) => [
+                'user_id'     => $usuario->id,
+                'empresa_id'  => $c['empresa_id'],
+                'sede_id'     => $c['sede_id'],
                 'asignado_at' => now(),
                 'created_at'  => now(),
                 'updated_at'  => now(),
             ])
-            // Deduplicar: misma empresa+sede no se repite
-            ->unique(fn($c) => $c['empresa_id'] . '|' . ($c['sede_id'] ?? 'NULL'))
             ->values()
             ->all();
 
-        DB::table('empresa_user')->where('user_id', $tecnico->id)->delete();
+        DB::table('empresa_user')->where('user_id', $usuario->id)->delete();
 
         if (! empty($filas)) {
             DB::table('empresa_user')->insert($filas);
@@ -300,12 +346,12 @@ class UserController extends Controller
     private function aplicarFiltros(Builder $query, Request $request): void
     {
         $query
-            ->when($request->filled('rol'),        fn($q) => $q->role($request->rol))
-            ->when($request->filled('empresa_id'), fn($q) => $q->where('empresa_id', $request->empresa_id))
-            ->when($request->filled('activo'),     fn($q) => $q->where('activo', $request->activo === '1'))
+            ->when($request->filled('rol'),        fn ($q) => $q->role($request->rol))
+            ->when($request->filled('empresa_id'), fn ($q) => $q->where('empresa_id', $request->empresa_id))
+            ->when($request->filled('activo'),     fn ($q) => $q->where('activo', $request->activo === '1'))
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%' . trim($request->q) . '%';
-                $q->where(fn($sub) => $sub
+                $q->where(fn ($sub) => $sub
                     ->where('name', 'like', $term)
                     ->orWhere('email', 'like', $term));
             });
@@ -314,7 +360,7 @@ class UserController extends Controller
     private function filtrosActivos(Request $request): array
     {
         return collect($request->only(['rol', 'empresa_id', 'activo', 'q']))
-            ->filter(fn($v) => $v !== null && $v !== '')
+            ->filter(fn ($v) => $v !== null && $v !== '')
             ->toArray();
     }
 }

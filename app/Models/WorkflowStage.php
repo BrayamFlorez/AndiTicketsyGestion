@@ -26,6 +26,7 @@ class WorkflowStage extends Model
         'workflow_template_id',
         'nombre',
         'descripcion',
+        'codigo_externo',
         'orden',
         'modo',
         'politica_rechazo',

@@ -18,6 +18,16 @@ class Ticket extends Model
         'otro'      => 'Otro',
     ];
 
+    const ICONOS_CATEGORIA = [
+        'hardware'  => 'fa-desktop',
+        'software'  => 'fa-code',
+        'red'       => 'fa-network-wired',
+        'impresora' => 'fa-print',
+        'telefonia' => 'fa-phone',
+        'acceso'    => 'fa-key',
+        'otro'      => 'fa-ticket-alt',
+    ];
+
     const PRIORIDADES = [
         'baja'    => 'Baja',
         'media'   => 'Media',
@@ -66,8 +76,16 @@ class Ticket extends Model
 
     // Relaciones
 
-    public function solicitante(): BelongsTo  { return $this->belongsTo(User::class, 'solicitante_id'); }
-    public function asignado(): BelongsTo     { return $this->belongsTo(User::class, 'asignado_a'); }
+    public function solicitante()
+    {
+        // Cambiar 'user_id' por 'solicitante_id'
+        return $this->belongsTo(User::class, 'solicitante_id')->withTrashed(); 
+    }
+
+    public function asignado()
+    {
+        return $this->belongsTo(User::class, 'asignado_a')->withTrashed();
+    }
     public function empresa(): BelongsTo      { return $this->belongsTo(Empresa::class); }
     public function sede(): BelongsTo         { return $this->belongsTo(Sede::class); }
 
@@ -116,7 +134,7 @@ class Ticket extends Model
      */
     public function tecnicosDisponibles(): Collection
     {
-        $query = User::tecnicos()->activos();
+        $query = User::activos()->role(\App\Support\Roles::CON_COBERTURA);
 
         if ($this->empresa_id) {
             $query->whereExists(function ($sub) {
@@ -177,6 +195,11 @@ class Ticket extends Model
         return $this->evidencia_resolucion
             ? url('archivos-privados/' . $this->evidencia_resolucion)
             : null;
+    }
+
+    public function getIconoCategoriaAttribute(): string
+    {
+        return self::ICONOS_CATEGORIA[$this->categoria] ?? 'fa-ticket-alt';
     }
 
     // Estados del ciclo de vida

@@ -17,6 +17,7 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkflowInstanceController;
 use App\Http\Controllers\WorkflowTemplateController;
+use App\Http\Controllers\SettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +30,7 @@ Route::get('/', function () {
 });
 
 Route::view('/motor-flujos', 'publico.motor-flujos')->name('publico.motor-flujos');
+Route::view('/doc-flujos', 'publico.docs-flujos')->name('publico.doc-flujos');
 
 // Cargar rutas de prueba temporalmente
 require __DIR__ . '/test_routes.php';
@@ -66,6 +68,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{usuario}/toggle-activo', [UserController::class, 'toggleActivo'])->middleware('can:usuarios.editar')->name('toggle-activo');
     });
     Route::resource('roles', RoleController::class);
+    Route::get(
+        'roles/{role}/confirmar-eliminacion',
+        [RoleController::class, 'confirmarEliminacion']
+    )
+        ->name('roles.confirmar-eliminacion');
 
     // ── Entidades Base ──
     Route::resource('empresas', EmpresaController::class)->middleware('can:empresas.gestionar');
@@ -133,7 +140,15 @@ Route::middleware(['auth'])->group(function () {
 
         // 3. Instancias de flujo (¡Solucionado!)
         Route::prefix('instancias')->name('instancias.')->group(function () {
-            
+            Route::patch('/{instancia}/cabecera', [WorkflowInstanceController::class, 'actualizarCabecera'])
+                ->name('cabecera');
+            Route::post('/{instancia}/steps/{step}/comentarios', [WorkflowInstanceController::class, 'agregarComentarioStep'])
+                ->name('steps.comentar');
+            Route::patch(
+                '/{instancia}/steps/{step}/codigo-referencia',
+                [WorkflowInstanceController::class, 'actualizarCodigoReferenciaStep']
+            )
+                ->name('steps.codigo-referencia');
             Route::get('/', [WorkflowInstanceController::class, 'index'])->middleware('can:flujos.ver-participando')->name('index');
             Route::get('/create', [WorkflowInstanceController::class, 'create'])->middleware('can:flujos.iniciar')->name('create');
             Route::post('/', [WorkflowInstanceController::class, 'store'])->middleware('can:flujos.iniciar')->name('store');
@@ -148,14 +163,24 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{instancia}/asignaciones/{assignment}/actuar', [WorkflowInstanceController::class, 'actuar'])->name('asignaciones.actuar');
             Route::post('/{instancia}/corregir', [WorkflowInstanceController::class, 'corregir'])->name('corregir');
             Route::post('/{instancia}/desistir', [WorkflowInstanceController::class, 'desistir'])->name('desistir');
-            
+
             Route::post('/{instancia}/cancelar', [WorkflowInstanceController::class, 'cancelar'])
                 ->middleware('can:flujos.cancelar-cualquiera')->name('cancelar');
             Route::post('/{instancia}/reabrir', [WorkflowInstanceController::class, 'reabrir'])
                 ->middleware('can:flujos.reabrir')->name('reabrir');
         });
-
     }); // Fin del grupo 'flujos'
+
+    // Configuración de ajustes 
+    Route::get(
+        '/configuracion/ajustes',
+        [SettingsController::class, 'index']
+    )->name('configuracion.ajustes.index');
+
+    Route::patch(
+        '/configuracion/ajustes/{setting}',
+        [SettingsController::class, 'update']
+    )->name('configuracion.ajustes.update');
 
     // ── Mantenimiento Preventivo ──
     Route::controller(MantenimientoPreventivoController::class)->name('mpreventivo.')->group(function () {
@@ -172,7 +197,6 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{mantenimiento}', 'destroy')->name('destroy');
         });
     });
-
 });
 
 // Autenticación por defecto de Laravel/Breeze

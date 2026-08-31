@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Fix global para opciones de select en modo oscuro */
+select option {
+    background-color: #1c2434 !important;
+    color: #ffffff !important;
+}
+
+/* Estado deshabilitado o placeholder */
+select option:disabled,
+select option[value=""] {
+    color: #8a99ad !important;
+}

@@ -52,6 +52,7 @@ class StoreWorkflowTemplateRequest extends FormRequest
             'etapas.*.id'                       => ['nullable', 'integer'],
             'etapas.*.nombre'                   => ['required', 'string', 'max:150'],
             'etapas.*.descripcion'              => ['nullable', 'string', 'max:1000'],
+            'etapas.*.codigo_externo'           => ['nullable', 'string', 'max:50', 'regex:/^[A-Za-z0-9\-_]+$/'],
             'etapas.*.orden'                    => ['required', 'integer', 'min:1'],
             'etapas.*.modo'                     => ['required', 'in:' . implode(',', $modosStage)],
             'etapas.*.politica_rechazo'         => ['required', 'in:' . implode(',', $politicasRechazo)],
@@ -70,6 +71,7 @@ class StoreWorkflowTemplateRequest extends FormRequest
     {
         return [
             'etapas.required'          => 'La plantilla debe tener al menos una etapa.',
+            'etapas.*.codigo_externo.regex' => 'El código de etapa solo admite letras, números, guiones y guion bajo.',
             'etapas.*.actores.required' => 'Cada etapa debe tener al menos un actor asignado.',
             'etapas.*.actores.min'      => 'Cada etapa debe tener al menos un actor asignado.',
         ];

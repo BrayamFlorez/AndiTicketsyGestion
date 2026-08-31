@@ -1,127 +1,158 @@
+{{-- resources/views/flujos/tipos-documento/index.blade.php --}}
 <x-app-layout>
     <x-slot name="title">Tipos de Documento</x-slot>
 
-    @push('styles')
-        <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
-    @endpush
-
-    {{-- Cabecera --}}
-    <div class="db-header mb-6 flex items-center justify-between flex-wrap gap-3">
+    {{-- ── Cabecera y Acción Principal ────────────────────────────────── --}}
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h2 class="text-2xl font-black text-white uppercase tracking-tighter">Tipos de Documento</h2>
-            <p class="text-xs text-gray-400 font-medium uppercase tracking-widest">
-                Catálogo de documentos que circulan por flujos de trabajo
+            <h2 class="text-title-md2 font-bold text-black dark:text-white flex items-center gap-2">
+                <i class="fas fa-folder text-primary"></i> Tipos de Documento
+            </h2>
+            <p class="text-xs text-bodydark2 mt-1">
+                Catálogo de tipos de documento que circulan por los flujos de trabajo
             </p>
         </div>
 
         @can('flujos.tipos-documento.gestionar')
-            <a href="{{ route('flujos.tipos-documento.create') }}" class="db-btn solid py-2.5 px-4 shadow-lg shadow-[#007acc]/20">
-                <i class="fas fa-plus mr-2 text-sm"></i> Nuevo Tipo
+            <a href="{{ route('flujos.tipos-documento.create') }}" 
+               class="inline-flex items-center justify-center gap-2 rounded bg-primary py-2 px-4 text-center text-xs font-bold uppercase tracking-wider text-white hover:bg-opacity-90 transition shadow-sm">
+                <i class="fas fa-plus text-[10px]"></i> Nuevo Tipo
             </a>
         @endcan
     </div>
 
-    {{-- Toast de éxito --}}
+    {{-- Alert de éxito --}}
     @if (session('exito'))
-        <div class="mb-4 px-4 py-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-300 text-sm">
-            <i class="fas fa-check-circle mr-2"></i> {{ session('exito') }}
+        <div class="mb-6 flex w-full border-l-6 border-meta-3 bg-meta-3/10 px-7 py-3 shadow-md dark:bg-meta-3/20 dark:border-meta-3 rounded-sm">
+            <div class="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-meta-3 text-white shrink-0">
+                <i class="fas fa-check"></i>
+            </div>
+            <div class="w-full">
+                <h5 class="mb-1 font-bold text-meta-3">Operación Exitosa</h5>
+                <p class="text-sm text-meta-3">{{ session('exito') }}</p>
+            </div>
         </div>
     @endif
 
-    {{-- Filtros --}}
-    <form method="GET" action="{{ route('flujos.tipos-documento.index') }}" class="db-card" style="margin-bottom: 1.25rem;">
-        <div class="form-card-body" style="padding: 1rem 1.25rem;">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div class="form-group sm:col-span-2">
-                    <label class="form-label" for="q">Buscar</label>
+    {{-- ── Formulario de Filtros (Card TailAdmin) ─────────────────────── --}}
+    <div class="rounded-sm border border-stroke bg-white px-5 pt-5 pb-4 shadow-default dark:border-strokedark dark:bg-boxdark mb-6">
+        <form method="GET" action="{{ route('flujos.tipos-documento.index') }}">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                
+                {{-- Búsqueda --}}
+                <div class="sm:col-span-2">
+                    <label for="q" class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">Buscar</label>
                     <input type="text" id="q" name="q" value="{{ $filtros['q'] ?? '' }}"
-                        placeholder="Nombre o identificador..." class="form-input">
+                           placeholder="Nombre o identificador (slug)..."
+                           class="w-full rounded border border-stroke bg-transparent py-1.5 px-3 text-xs outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white">
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Estado</label>
-                    <select name="activo" class="form-select">
-                        <option value="">Todos</option>
-                        <option value="1" @selected(($filtros['activo'] ?? '') === '1')>Activos</option>
-                        <option value="0" @selected(($filtros['activo'] ?? '') === '0')>Inactivos</option>
-                    </select>
+
+                {{-- Estado --}}
+                <div>
+                    <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">Estado</label>
+                    <div class="relative z-20">
+                        <select name="activo" class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white cursor-pointer">
+                            <option value="" class="bg-[#1c2434] text-gray-400">Todos</option>
+                            <option value="1" @selected(($filtros['activo'] ?? '') === '1') class="bg-[#1c2434] text-white">Activos</option>
+                            <option value="0" @selected(($filtros['activo'] ?? '') === '0') class="bg-[#1c2434] text-white">Inactivos</option>
+                        </select>
+                        <span class="absolute top-1/2 right-3 -translate-y-1/2 z-30 pointer-events-none">
+                            <i class="fas fa-chevron-down text-[10px] text-bodydark2"></i>
+                        </span>
+                    </div>
                 </div>
+
             </div>
 
-            <div class="flex items-center justify-end gap-2 mt-3">
+            <div class="flex items-center justify-end gap-2 mt-4 border-t border-stroke pt-3 dark:border-strokedark">
                 @if (!empty(array_filter($filtros, fn ($v) => $v !== null && $v !== '')))
-                    <a href="{{ route('flujos.tipos-documento.index') }}" class="db-btn ghost">
-                        <i class="fas fa-times"></i> Limpiar
+                    <a href="{{ route('flujos.tipos-documento.index') }}" 
+                       class="inline-flex items-center gap-1.5 rounded border border-stroke py-1.5 px-3 text-xs font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition">
+                        <i class="fas fa-times text-[10px]"></i> Limpiar
                     </a>
                 @endif
-                <button type="submit" class="db-btn outline">
-                    <i class="fas fa-filter"></i> Filtrar
+                <button type="submit" 
+                        class="inline-flex items-center gap-1.5 rounded bg-primary py-1.5 px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-opacity-90 transition shadow-sm cursor-pointer">
+                    <i class="fas fa-filter text-[10px]"></i> Filtrar
                 </button>
             </div>
-        </div>
-    </form>
+        </form>
+    </div>
 
-    {{-- Tabla --}}
-    <div class="db-card">
-        <div class="overflow-x-auto">
-            <table class="db-table w-full">
+    {{-- ── Tabla de Tipos de Documento ───────────────────────────────── --}}
+    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-6">
+        <div class="max-w-full overflow-x-auto">
+            <table class="w-full table-auto">
                 <thead>
-                    <tr>
-                        <th class="px-6 py-4">Tipo</th>
-                        <th class="px-6 py-4">Plantilla Asociada</th>
-                        <th class="px-6 py-4 text-center">Estado</th>
-                        <th class="px-6 py-4 text-center">Acciones</th>
+                    <tr class="bg-gray-2 text-left dark:bg-meta-4">
+                        <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase">Tipo</th>
+                        <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase">Plantilla Asociada</th>
+                        <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase text-center w-28">Estado</th>
+                        <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase text-center w-24">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-stroke dark:divide-strokedark">
                     @forelse ($tipos as $tipo)
-                        <tr class="group transition-colors hover:bg-[var(--db-surface-2)]">
+                        <tr class="hover:bg-gray-2 dark:hover:bg-meta-4/50 transition">
 
-                            {{-- Columna 1: Tipo --}}
-                            <td class="px-6 py-4">
+                            {{-- Columna 1: Tipo & Ícono --}}
+                            <td class="py-3.5 px-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg bg-[#007acc]/10 flex items-center justify-center text-[#007acc] shadow-inner">
-                                        <i class="fas {{ $tipo->icono ?: 'fa-file-alt' }}"></i>
+                                    <div class="flex h-9 w-9 items-center justify-center rounded bg-primary/10 text-primary shrink-0">
+                                        <i class="fas {{ $tipo->icono ?: 'fa-file-alt' }} text-sm"></i>
                                     </div>
                                     <div>
-                                        <p class="text-sm font-bold text-white">{{ $tipo->nombre }}</p>
-                                        <p class="text-[10px] text-gray-500 font-mono uppercase tracking-wider">{{ $tipo->slug }}</p>
+                                        <span class="text-xs font-bold text-black dark:text-white block">{{ $tipo->nombre }}</span>
+                                        <span class="text-[10px] text-bodydark2 block font-mono uppercase">{{ $tipo->slug }}</span>
                                     </div>
                                 </div>
                             </td>
 
                             {{-- Columna 2: Plantilla --}}
-                            <td class="px-6 py-4">
+                            <td class="py-3.5 px-4">
                                 @if ($tipo->template)
-                                    <div class="text-[0.8rem] text-white font-semibold flex items-center gap-1.5">
-                                        <i class="fas fa-project-diagram text-gray-500"></i>
+                                    <div class="text-xs font-semibold text-black dark:text-white flex items-center gap-1.5">
+                                        <i class="fas fa-project-diagram text-primary text-[10px]"></i>
                                         {{ $tipo->template->nombre }}
                                     </div>
                                 @else
-                                    <span class="db-badge abierto" style="font-size: 0.65rem;">Sin plantilla</span>
+                                    <span class="inline-flex rounded-full bg-meta-1/10 px-2.5 py-0.5 text-[10px] font-bold uppercase text-meta-1">
+                                        Sin plantilla
+                                    </span>
                                 @endif
                             </td>
 
                             {{-- Columna 3: Estado --}}
-                            <td class="px-6 py-4 text-center">
-                                <span class="db-badge {{ $tipo->activo ? 'en_progreso' : 'cancelado' }}" style="font-size: 0.65rem;">
-                                    {{ $tipo->activo ? 'Activo' : 'Inactivo' }}
-                                </span>
+                            <td class="py-3.5 px-4 text-center">
+                                @if ($tipo->activo)
+                                    <span class="inline-flex rounded-full bg-meta-3/10 px-2.5 py-0.5 text-[10px] font-bold uppercase text-meta-3">
+                                        Activo
+                                    </span>
+                                @else
+                                    <span class="inline-flex rounded-full bg-meta-1/10 px-2.5 py-0.5 text-[10px] font-bold uppercase text-meta-1">
+                                        Inactivo
+                                    </span>
+                                @endif
                             </td>
 
                             {{-- Columna 4: Acciones --}}
-                            <td class="px-6 py-4">
-                                <div class="flex justify-center items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <td class="py-3.5 px-4 text-center">
+                                <div class="flex items-center justify-center gap-1">
                                     @can('flujos.tipos-documento.gestionar')
-                                        <a href="{{ route('flujos.tipos-documento.edit', $tipo) }}" class="db-btn ghost" title="Editar">
-                                            <i class="fas fa-pen"></i>
+                                        <a href="{{ route('flujos.tipos-documento.edit', $tipo) }}" 
+                                           class="flex h-7 w-7 items-center justify-center rounded border border-stroke text-bodydark2 hover:border-primary hover:text-primary dark:border-strokedark transition"
+                                           title="Editar">
+                                            <i class="fas fa-pen text-[10px]"></i>
                                         </a>
-                                        <form action="{{ route('flujos.tipos-documento.destroy', $tipo) }}" method="POST" class="inline"
-                                            onsubmit="return confirm('¿Eliminar el tipo {{ $tipo->nombre }}?')">
+
+                                        <form action="{{ route('flujos.tipos-documento.destroy', $tipo) }}" method="POST"
+                                              onsubmit="return confirm('¿Eliminar el tipo {{ $tipo->nombre }}?')" class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="db-btn danger-outline" title="Eliminar">
-                                                <i class="fas fa-trash-alt"></i>
+                                            <button type="submit" 
+                                                    class="flex h-7 w-7 items-center justify-center rounded border border-stroke text-meta-1 hover:border-meta-1 dark:border-strokedark transition"
+                                                    title="Eliminar">
+                                                <i class="fas fa-trash-alt text-[10px]"></i>
                                             </button>
                                         </form>
                                     @endcan
@@ -130,12 +161,12 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4">
-                                <div class="db-empty py-8 text-center">
-                                    <i class="fas fa-folder-open text-4xl mb-3 text-gray-700"></i>
-                                    <p class="text-gray-400">
+                            <td colspan="4" class="py-8 text-center">
+                                <div class="flex flex-col items-center text-bodydark2">
+                                    <i class="fas fa-folder-open text-3xl mb-2"></i>
+                                    <p class="text-xs">
                                         @if (!empty(array_filter($filtros, fn ($v) => $v !== null && $v !== '')))
-                                            No hay tipos que coincidan con los filtros.
+                                            No hay tipos que coincidan con los filtros aplicados.
                                         @else
                                             Aún no hay tipos de documento registrados.
                                         @endif
@@ -148,8 +179,9 @@
             </table>
         </div>
 
+        {{-- Paginación --}}
         @if ($tipos->hasPages())
-            <div class="px-4 py-3 border-t border-gray-800">
+            <div class="border-t border-stroke py-3 px-4 dark:border-strokedark">
                 {{ $tipos->links() }}
             </div>
         @endif

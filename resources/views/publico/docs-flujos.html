@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentación · Motor de Flujos · Peñaranda Digital</title>
+<meta name="description" content="Guía de usuario del módulo de flujos de trabajo — cómo iniciar, aprobar, corregir y administrar procesos de aprobación en Peñaranda Digital.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+    --bg: #0d0d0f;
+    --bg-2: #16161a;
+    --bg-3: #1c1c22;
+    --bg-4: #232329;
+    --border: #2a2a32;
+    --border-strong: #3a3a44;
+    --accent: #007acc;
+    --accent-2: #22a3ff;
+    --accent-glow: rgba(0, 122, 204, 0.25);
+    --warn: #f59e0b;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --purple: #a855f7;
+    --text: #f5f5f7;
+    --text-2: #b4b4bc;
+    --text-3: #6b6b75;
+    --grid: rgba(60, 60, 72, 0.35);
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    font-size: 15px;
+    min-height: 100vh;
+}
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+    mask: radial-gradient(ellipse 80% 60% at 50% 20%, black 0%, transparent 90%);
+    -webkit-mask: radial-gradient(ellipse 80% 60% at 50% 20%, black 0%, transparent 90%);
+}
+
+.wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ─── Header ─────────────────────────────────────────────────── */
+header {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+    position: sticky;
+    top: 0;
+    background: rgba(13, 13, 15, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 100;
+}
+.header-row { display: flex; justify-content: space-between; align-items: center; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: grid; place-items: center;
+    color: white; font-size: 14px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 4px 12px var(--accent-glow);
+}
+.brand-name { font-family: var(--font-display); font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
+.brand-sub { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); letter-spacing: 0.05em; }
+.header-meta {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.05em;
+}
+.header-meta a {
+    color: var(--text-3);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+.header-meta a:hover { color: var(--accent-2); }
+
+.mobile-toggle {
+    display: none;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+/* ─── Hero ───────────────────────────────────────────────────── */
+.doc-hero {
+    padding: 60px 0 40px;
+    border-bottom: 1px dashed var(--border);
+    margin-bottom: 20px;
+}
+.doc-hero-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent-2);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+.doc-hero-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 44px;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: 20px;
+    max-width: 800px;
+}
+.doc-hero-sub {
+    color: var(--text-2);
+    font-size: 17px;
+    line-height: 1.6;
+    max-width: 720px;
+}
+.doc-hero-meta {
+    margin-top: 24px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.03em;
+}
+
+/* ─── Layout de 3 columnas ─────────────────────────────────── */
+.docs-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr 200px;
+    gap: 40px;
+    padding: 20px 0 80px;
+    align-items: start;
+}
+
+/* ─── Sidebar de navegación ────────────────────────────────── */
+.docs-nav {
+    position: sticky;
+    top: 90px;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    padding-right: 8px;
+}
+.docs-nav::-webkit-scrollbar { width: 4px; }
+.docs-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+.docs-nav-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+.docs-nav-label:first-child { margin-top: 0; }
+.docs-nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    color: var(--text-2);
+    text-decoration: none;
+    font-size: 13px;
+    border-radius: 6px;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    line-height: 1.4;
+}
+.docs-nav a:hover { background: var(--bg-2); color: var(--text); }
+.docs-nav a.active {
+    background: var(--bg-3);
+    color: var(--accent-2);
+    border-left-color: var(--accent);
+    font-weight: 500;
+}
+.docs-nav a i {
+    font-size: 11px;
+    color: var(--text-3);
+    width: 12px;
+    text-align: center;
+    flex-shrink: 0;
+}
+.docs-nav a.active i { color: var(--accent-2); }
+
+/* ─── Main content ─────────────────────────────────────────── */
+.docs-main { min-width: 0; }
+
+.doc-section {
+    margin-bottom: 60px;
+    scroll-margin-top: 90px;
+}
+.doc-section h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 8px;
+    padding-top: 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    scroll-margin-top: 90px;
+    position: relative;
+}
+.doc-section h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 19px;
+    letter-spacing: -0.01em;
+    margin: 32px 0 12px;
+    color: var(--text);
+    scroll-margin-top: 90px;
+    position: relative;
+}
+.doc-section .section-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-3);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+}
+.doc-section .section-intro {
+    color: var(--text-2);
+    font-size: 15px;
+    margin: 8px 0 24px;
+    max-width: 700px;
+    line-height: 1.7;
+}
+.doc-section p {
+    color: var(--text-2);
+    margin-bottom: 16px;
+    max-width: 700px;
+    line-height: 1.7;
+}
+.doc-section p b { color: var(--text); font-weight: 500; }
+.doc-section p em { color: var(--text); font-style: normal; background: rgba(0, 122, 204, 0.08); padding: 1px 5px; border-radius: 3px; }
+.doc-section a { color: var(--accent-2); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s; }
+.doc-section a:hover { border-bottom-color: var(--accent-2); }
+
+/* Anchor link on headings */
+.anchor {
+    color: var(--text-3);
+    opacity: 0;
+    margin-left: 8px;
+    font-size: 0.65em;
+    text-decoration: none;
+    transition: opacity 0.15s, color 0.15s;
+}
+.doc-section h2:hover .anchor,
+.doc-section h3:hover .anchor { opacity: 1; }
+.anchor:hover { color: var(--accent-2); }
+
+/* ─── For role badges ──────────────────────────────────────── */
+.for-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    vertical-align: middle;
+    font-weight: 500;
+}
+.for-role.usuario  { background: rgba(0, 122, 204, 0.12); color: var(--accent-2); border: 1px solid rgba(0, 122, 204, 0.25); }
+.for-role.tecnico  { background: rgba(34, 197, 94, 0.12); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.25); }
+.for-role.admin    { background: rgba(168, 85, 247, 0.12); color: var(--purple); border: 1px solid rgba(168, 85, 247, 0.25); }
+.for-role.todos    { background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border-strong); }
+
+/* ─── Listas ───────────────────────────────────────────────── */
+.doc-section ul, .doc-section ol {
+    color: var(--text-2);
+    padding-left: 20px;
+    margin-bottom: 16px;
+    max-width: 700px;
+    line-height: 1.7;
+}
+.doc-section ul li, .doc-section ol li {
+    margin-bottom: 8px;
+    padding-left: 4px;
+}
+.doc-section ul li::marker { color: var(--accent); }
+.doc-section ol li::marker { color: var(--accent-2); font-weight: 600; }
+.doc-section ul li b, .doc-section ol li b { color: var(--text); font-weight: 500; }
+
+/* ─── Callouts ─────────────────────────────────────────────── */
+.callout {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-left-width: 3px;
+    border-radius: 8px;
+    margin: 20px 0;
+    max-width: 700px;
+    align-items: start;
+}
+.callout-icon {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    display: grid; place-items: center;
+    font-size: 11px;
+    margin-top: 2px;
+}
+.callout-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+.callout-body { color: var(--text-2); font-size: 14px; line-height: 1.6; }
+.callout-body p { margin: 6px 0; }
+.callout-body p:first-child { margin-top: 0; }
+.callout-body p:last-child { margin-bottom: 0; }
+
+.callout.tip { border-left-color: var(--accent-2); }
+.callout.tip .callout-icon { background: rgba(0, 122, 204, 0.12); color: var(--accent-2); }
+.callout.tip .callout-title { color: var(--accent-2); }
+
+.callout.warn { border-left-color: var(--warn); }
+.callout.warn .callout-icon { background: rgba(245, 158, 11, 0.12); color: var(--warn); }
+.callout.warn .callout-title { color: var(--warn); }
+
+.callout.admin { border-left-color: var(--purple); }
+.callout.admin .callout-icon { background: rgba(168, 85, 247, 0.12); color: var(--purple); }
+.callout.admin .callout-title { color: var(--purple); }
+
+.callout.example { border-left-color: var(--text-3); }
+.callout.example .callout-icon { background: var(--bg-3); color: var(--text-2); }
+.callout.example .callout-title { color: var(--text-2); }
+
+/* ─── Steps (numbered guide) ───────────────────────────────── */
+.steps { list-style: none; padding: 0; margin: 24px 0; max-width: 700px; }
+.steps li {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 20px;
+    padding: 16px 0;
+    border-top: 1px dashed var(--border);
+    align-items: start;
+}
+.steps li:first-child { border-top: none; padding-top: 0; }
+.step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 122, 204, 0.12);
+    border: 1px solid rgba(0, 122, 204, 0.3);
+    color: var(--accent-2);
+    display: grid; place-items: center;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 2px;
+}
+.step-body h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    margin-bottom: 6px;
+    color: var(--text);
+}
+.step-body p { margin-bottom: 6px; font-size: 14px; }
+.step-body p:last-child { margin-bottom: 0; }
+
+/* ─── Term box (glossary) ──────────────────────────────────── */
+.term-list { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 16px 0 24px; max-width: 700px; }
+.term-item {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    align-items: start;
+}
+.term-item-icon {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    background: rgba(0, 122, 204, 0.08);
+    border: 1px solid rgba(0, 122, 204, 0.2);
+    color: var(--accent-2);
+    display: grid; place-items: center;
+    font-size: 12px;
+    margin-top: 2px;
+}
+.term-item-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+.term-item-def { font-size: 13px; color: var(--text-2); line-height: 1.55; margin-bottom: 6px; }
+.term-item-def b { color: var(--text); font-weight: 500; }
+.term-item-eg {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-3);
+    line-height: 1.55;
+}
+.term-item-eg code { color: var(--accent-2); background: var(--bg-3); padding: 1px 5px; border-radius: 3px; }
+
+/* ─── Code inline & blocks ─────────────────────────────────── */
+.doc-section p code, .doc-section li code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: var(--bg-3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent-2);
+    border: 1px solid var(--border);
+}
+
+/* ─── Toc lateral derecho ──────────────────────────────────── */
+.docs-toc {
+    position: sticky;
+    top: 90px;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    font-size: 12px;
+}
+.docs-toc-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    margin-bottom: 4px;
+}
+.docs-toc ul { list-style: none; padding: 0; }
+.docs-toc li { margin-bottom: 2px; }
+.docs-toc a {
+    display: block;
+    padding: 5px 12px;
+    color: var(--text-3);
+    text-decoration: none;
+    line-height: 1.4;
+    border-left: 2px solid var(--border);
+    transition: color 0.15s, border-left-color 0.15s;
+}
+.docs-toc a:hover { color: var(--text); }
+.docs-toc a.active { color: var(--accent-2); border-left-color: var(--accent); }
+.docs-toc a.sub { padding-left: 24px; font-size: 11px; }
+
+/* ─── Footer ─────────────────────────────────────────────── */
+footer {
+    padding: 40px 0 60px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.02em;
+}
+.footer-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+.footer-row a { color: var(--text-3); text-decoration: none; transition: color 0.15s; }
+.footer-row a:hover { color: var(--accent-2); }
+
+/* ─── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1150px) {
+    .docs-layout { grid-template-columns: 240px 1fr; gap: 32px; }
+    .docs-toc { display: none; }
+}
+@media (max-width: 860px) {
+    .docs-layout { grid-template-columns: 1fr; }
+    .docs-nav {
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        width: 280px;
+        max-height: none;
+        background: var(--bg-2);
+        border-right: 1px solid var(--border);
+        padding: 80px 16px 20px;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        z-index: 90;
+    }
+    .docs-nav.open { transform: translateX(0); }
+    .mobile-toggle { display: inline-flex; align-items: center; gap: 8px; }
+    .doc-hero-title { font-size: 32px; }
+    .doc-section h2 { font-size: 24px; }
+}
+
+/* ─── Print ────────────────────────────────────────────────── */
+@media print {
+    body::before { display: none; }
+    header, footer, .docs-nav, .docs-toc, .mobile-toggle { display: none !important; }
+    .docs-layout { grid-template-columns: 1fr; padding: 0; }
+    .doc-section { page-break-inside: avoid; }
+    body { background: white; color: black; font-size: 12px; }
+    .doc-section h2, .doc-section h3, .doc-hero-title, .step-body h4, .term-item-name, .callout-title { color: black; }
+    .doc-section p, .doc-section li, .step-body p, .term-item-def, .callout-body { color: #333; }
+    .callout { border: 1px solid #999; background: #f5f5f5; }
+    .term-item { border: 1px solid #999; background: #f5f5f5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="wrap header-row">
+        <div class="brand">
+            <div class="brand-mark"><i class="fas fa-book"></i></div>
+            <div>
+                <div class="brand-name">Documentación</div>
+                <div class="brand-sub">MOTOR/FLUJOS</div>
+            </div>
+        </div>
+        <div class="header-meta">
+            <a href="/motor-flujos"><i class="fas fa-external-link-alt"></i> Ver simulación</a>
+            <button class="mobile-toggle" onclick="document.querySelector('.docs-nav').classList.toggle('open')">
+                <i class="fas fa-bars"></i> Índice
+            </button>
+        </div>
+    </div>
+</header>
+
+<div class="wrap">
+
+<div class="doc-hero">
+    <div class="doc-hero-label">GUÍA DE USUARIO · v1.0</div>
+    <h1 class="doc-hero-title">Cómo usar el motor de flujos</h1>
+    <p class="doc-hero-sub">
+        Todo lo que necesitás saber para iniciar, aprobar, corregir y administrar
+        procesos de aprobación en Peñaranda Digital. Escrito para <b>usuarios comunes</b>
+        — sin jerga técnica salvo cuando es necesaria.
+    </p>
+    <div class="doc-hero-meta">
+        <span>13 secciones</span>
+        <span>·</span>
+        <span>Lectura completa ≈ 15 min</span>
+        <span>·</span>
+        <span>Actualizado Julio 2026</span>
+    </div>
+</div>
+
+<div class="docs-layout">
+
+<!-- ═══════════════════════════════════════════ SIDEBAR NAV ═══ -->
+<nav class="docs-nav" id="docsNav">
+    <div class="docs-nav-label">Empezar aquí</div>
+    <a href="#intro"><i class="fas fa-play"></i> Introducción</a>
+    <a href="#conceptos"><i class="fas fa-book-open"></i> Conceptos básicos</a>
+    <a href="#roles"><i class="fas fa-users"></i> Tu rol en el sistema</a>
+
+    <div class="docs-nav-label">Guías por tarea</div>
+    <a href="#iniciar"><i class="fas fa-play-circle"></i> Iniciar un flujo</a>
+    <a href="#aprobar"><i class="fas fa-gavel"></i> Aprobar o rechazar</a>
+    <a href="#corregir"><i class="fas fa-undo"></i> Corregir un flujo</a>
+
+    <div class="docs-nav-label">Usar la interfaz</div>
+    <a href="#bandeja"><i class="fas fa-inbox"></i> Bandeja de flujos</a>
+    <a href="#adjuntos"><i class="fas fa-paperclip"></i> Adjuntos</a>
+    <a href="#notificaciones"><i class="fas fa-bell"></i> Notificaciones</a>
+    <a href="#sla"><i class="fas fa-hourglass-half"></i> SLA y tiempos</a>
+
+    <div class="docs-nav-label">Administración</div>
+    <a href="#plantillas"><i class="fas fa-project-diagram"></i> Diseñar plantillas</a>
+    <a href="#valvulas"><i class="fas fa-life-ring"></i> Válvulas de escape</a>
+
+    <div class="docs-nav-label">Referencia</div>
+    <a href="#faq"><i class="fas fa-question-circle"></i> Preguntas frecuentes</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════ MAIN CONTENT ═══ -->
+<main class="docs-main">
+
+<!-- ─────────────────────────────────── INTRODUCCIÓN ─────────── -->
+<section class="doc-section" id="intro">
+    <h2>
+        <span class="section-num">01 ·</span> Introducción
+        <a href="#intro" class="anchor">#</a>
+        <span class="for-role todos">Todos</span>
+    </h2>
+    <p class="section-intro">
+        El <b>motor de flujos</b> es el módulo que se encarga de <em>gestionar aprobaciones</em>
+        dentro del sistema. Reemplaza los correos sueltos, los grupos de WhatsApp y las cadenas
+        de firmas físicas por un proceso trazable, con historial completo.
+    </p>
+
+    <h3 id="intro-cuando">¿Cuándo lo usás? <a href="#intro-cuando" class="anchor">#</a></h3>
+    <p>Siempre que un documento o solicitud necesite <b>autorización de una o varias personas</b>
+    antes de considerarse válido. Ejemplos típicos:</p>
+    <ul>
+        <li><b>Cotizaciones comerciales</b> que necesitan aprobación de finanzas antes de enviar al cliente.</li>
+        <li><b>Solicitudes de compra</b> que pasan por jefe de área y luego por gerencia.</li>
+        <li><b>Contratos</b> que revisa legal, luego finanzas, y firma la dirección.</li>
+        <li><b>Autorizaciones internas</b> como accesos especiales, viajes o excepciones de política.</li>
+    </ul>
+
+    <h3 id="intro-como">Cómo funciona en 30 segundos <a href="#intro-como" class="anchor">#</a></h3>
+    <p>
+        Alguien <b>inicia un flujo</b> eligiendo un tipo de documento (cotización, contrato...).
+        El sistema aplica automáticamente la <em>plantilla</em> asociada a ese tipo — una secuencia
+        de etapas ordenadas. En cada etapa, las personas autorizadas reciben una <em>asignación</em>
+        y deben decidir: aprobar, rechazar o devolver. El flujo avanza según lo que decidan, y
+        todo queda registrado con nombre, fecha y comentario.
+    </p>
+
+    <div class="callout tip">
+        <div class="callout-icon"><i class="fas fa-lightbulb"></i></div>
+        <div>
+            <div class="callout-title">Consejo para leer esta guía</div>
+            <div class="callout-body">
+                <p>Si nunca usaste el sistema, seguí el orden del menú: primero <a href="#conceptos">Conceptos básicos</a>,
+                después <a href="#roles">Tu rol</a>, y por último las guías por tarea que apliquen a lo que hacés.</p>
+                <p>Si ya lo usás y buscás algo puntual, cada sección tiene su propio link — copialo con el ícono <code>#</code> que aparece al pasar el mouse.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─────────────────────────────────── CONCEPTOS ─────────────── -->
+<section class="doc-section" id="conceptos">
+    <h2>
+        <span class="section-num">02 ·</span> Conceptos básicos
+        <a href="#conceptos" class="anchor">#</a>
+        <span class="for-role todos">Todos</span>
+    </h2>
+    <p class="section-intro">
+        Los <b>12 términos que usa el módulo</b>, cada uno con definición corta y ejemplo concreto.
+        Si algo en la interfaz no se entiende, la respuesta suele estar acá.
+    </p>
+
+    <div class="term-list">
+
+        <div class="term-item">
+            <div class="term-item-icon"><i class="fas fa-project-diagram"></i></div>
+            <div>
+                <div class="term-item-name">Flujo <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-3); margin-left: 6px;">o Trámite</span></div>
+                <div class="term-item-def">Un caso concreto pasando por el proceso de aprobación. Es la <b>unidad principal del sistema</b>: cada flujo es un expediente que nace, avanza y se cierra.</div>
+                <div class="term-item-eg">Cada uno tiene un código único como <code>FLJ-2026-000127</code>.</div>
+            </div>
+        </div>
+
+        <div class="term-item">
+            <div class="term-item-icon"><i class="fas fa-file-alt"></i></div>
+            <div>
+                <div class="term-item-name">Tipo de documento</div>
+                <div class="term-item-def">La <b>categoría del trámite</b>. Al iniciar un flujo, primero elegís el tipo — eso determina qué plantilla se le aplica automáticamente.</div>
+                <div class="term-item-eg">Ej: <em>Cotización, Contrato, Autorización de compra.</em></div>
+            </div>
+        </div>
+
+        <div class="term-item">
+            <div class="term-item-icon"><i class="fas fa-map"></i></div>
+            <div>
+                <div class="term-item-name">Plantilla de flujo</div>
+                <div class="term-item-def">El <b>diseño reutilizable</b>: qué etapas tiene el proceso, en qué orden, con qué reglas y quién puede firmar cada una. La configura el admin una sola vez.</div>
+                <div class="term-item-eg">Ej: <em>"Aprobación de Cotización v1" con 3 etapas.</em></div>
+            </div>
+        </div>
+
+        <div class="term-item">
+            <div class="term-item-icon"><i class="fas fa-flag"></i></div>
+            <div>
+                <div class="term-item-name">Etapa</div>
+                <div class="term-item-def">Un <b>paso dentro del flujo</b> donde alguien tiene que decidir. Las etapas están ordenadas — cuando una se cierra positivamente, el flujo pasa a la siguiente.</div>
+                <div class="term-item-eg">Ej: <em>Revisión Técnica → Aprobación Financiera → Firma Final.</em></div>
+            </div>
+        </div>
+
+        <div class="term-item">
+            <div class="term-item-icon"><i class="fas fa-user-tag"></i></div>
+            <div>
+                <div class="term-item-name">Actor</div>
+                <div class="term-item-def"><b>Quién puede decidir en una etapa.</b> Puede ser un rol entero (cualquier persona con ese rol) o una persona específica. Una etapa puede tener varios actores.</div>
+                <div class="term-item-eg">Ej: rol <code>tecnico</code>, o usuario específico "María Torres".</div>
+            </div>
+        </div>
+
+        <div class="term-item">
+            <div class="term-item-icon"><i class="fas fa-play-circle"></i></div>
+            <div>
+                <div class="term-item-name">Iniciador</div>
+                <div class="term-item-def">La persona que <b>arranca el flujo</b>. Sigue siendo dueña del trámite hasta el final: puede desistir en cualquier momento, y si algún aprobador rechaza, es quien debe corregir y reenviar.</div>
+                <div class="term-item-eg">Suele ser el operador de ventas o el usuario final.</div>
+            </div>
+        </div>
+
+        <div class="term-item">
+            <div class="term-item-icon"><i class="fas fa-cogs"></i></div>
+            <div>
+                <div class="term-item-name">Modo de etapa</div>
+                <div class="term-item-def">Cómo se resuelve una etapa cuando hay varios actores. Tres opciones: <b>secuencial</b> (un solo actor), <b>paralelo-todos</b> (todos deben firmar) o <b>paralelo-cualquiera</b> (basta con uno).</div>
+                <div class="term-item-eg">Ej: "Requiere dos firmas de admin" = paralelo-todos.</div>
+            </div>
+        </div>
+
+        <div class="term-item">
+            <div class="term-item-icon"><i class="fas fa-undo"></i></div>
+            <div>
+                <div class="term-item-name">Política de rechazo</div>
+                <div class="term-item-def">Qué le pasa al flujo cuando alguien rechaza en una etapa: <b>volver al iniciador</b>, retroceder una etapa, saltar a una etapa específica o cerrarse. Se declara por etapa — nunca es implícita.</div>
+                <div class="term-item-eg">Ningún rechazo mata el flujo por accidente.</div>
+            </div>
+        </div>
+
+        <div class="term-item">
+            <div class="term-item-icon"><i class="fas fa-history"></i></div>
+            <div>
+                <div class="term-item-name">Revisión</div>
+                <div class="term-item-def">El <b>número de iteración del flujo</b>. Empieza en 1. Aumenta cada vez que el iniciador corrige y reenvía tras un rechazo. Sirve para agrupar cambios y adjuntos por intento.</div>
+                <div class="term-item-eg">Ej: Rev. 1 → rechazo → corrige → Rev. 2.</div>
+            </div>
+        </div>
+
+        <div class="term-item">
+            <div class="term-item-icon"><i class="fas fa-hand-paper"></i></div>
+            <div>
+                <div class="term-item-name">Asignación</div>
+                <div class="term-item-def">La <b>decisión pendiente</b> que le corresponde a un actor. Aparece en su bandeja hasta que la resuelve. Cada firma esperada es una asignación distinta.</div>
+                <div class="term-item-eg">"María tiene una asignación en Revisión Técnica."</div>
+            </div>
+        </div>
+
+        <div class="term-item">
+            <div class="term-item-icon"><i class="fas fa-paperclip"></i></div>
+            <div>
+                <div class="term-item-name">Adjuntos</div>
+                <div class="term-item-def">Los <b>archivos del expediente</b>. Pueden estar a nivel trámite (los sube el iniciador) o a nivel etapa (los sube el actor que aprueba como soporte de su firma).</div>
+                <div class="term-item-eg">Ej: <em>Cotización.pdf · Aprobación_finanzas.jpg</em></div>
+            </div>
+        </div>
+
+        <div class="term-item">
+            <div class="term-item-icon"><i class="fas fa-inbox"></i></div>
+            <div>
+                <div class="term-item-name">Bandeja</div>
+                <div class="term-item-def">La <b>vista donde cada usuario ve lo suyo</b>: sus pendientes, sus flujos iniciados y los que requieren corrección. Con pestañas y buscador.</div>
+                <div class="term-item-eg">Pestañas: <em>Mis Pendientes · Iniciados por mí · Cerrados.</em></div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ─────────────────────────────────── ROLES ─────────────────── -->
+<section class="doc-section" id="roles">
+    <h2>
+        <span class="section-num">03 ·</span> Tu rol en el sistema
+        <a href="#roles" class="anchor">#</a>
+        <span class="for-role todos">Todos</span>
+    </h2>
+    <p class="section-intro">
+        Según tu perfil de usuario, ves y hacés cosas distintas. Todos convivimos en el mismo
+        sistema, pero cada uno tiene su propia experiencia.
+    </p>
+
+    <h3 id="rol-usuario">Si sos usuario / iniciador <a href="#rol-usuario" class="anchor">#</a></h3>
+    <p>Tu rol principal es <b>iniciar trámites</b> y hacerles seguimiento. Podés:</p>
+    <ul>
+        <li><b>Iniciar</b> flujos eligiendo el tipo de documento adecuado.</li>
+        <li><b>Adjuntar</b> el expediente base al inicio del flujo.</li>
+        <li><b>Seguir</b> el avance desde la pestaña "Iniciados por mí".</li>
+        <li><b>Corregir</b> si algún aprobador te devuelve el trámite, y reenviarlo.</li>
+        <li><b>Desistir</b> si ya no necesitás continuar.</li>
+    </ul>
+    <p>Lo que <b>no podés</b> hacer: aprobar tu propio flujo, saltarte etapas, ni modificar la estructura del proceso.</p>
+
+    <h3 id="rol-tecnico">Si sos técnico o admin (aprobador) <a href="#rol-tecnico" class="anchor">#</a></h3>
+    <p>Tu rol es <b>tomar decisiones</b> sobre trámites que otros iniciaron. Podés:</p>
+    <ul>
+        <li><b>Recibir</b> notificación cuando te asignan una decisión.</li>
+        <li><b>Aprobar</b>, rechazar o devolver con un comentario.</li>
+        <li><b>Adjuntar</b> soportes de tu firma cuando la etapa lo requiera.</li>
+        <li><b>Ver</b> la pestaña "Mis Pendientes" con todo lo que te toca.</li>
+        <li><b>Consultar</b> la línea de tiempo completa del trámite antes de decidir.</li>
+    </ul>
+    <p>Lo que <b>no podés</b> hacer: modificar el contenido del trámite, ni tomar decisiones en etapas que no te corresponden.</p>
+
+    <h3 id="rol-admin">Si sos administrador <a href="#rol-admin" class="anchor">#</a></h3>
+    <p>Además de participar como aprobador, tenés capacidades de gestión. Podés:</p>
+    <ul>
+        <li><b>Diseñar</b> plantillas de flujo y tipos de documento.</li>
+        <li><b>Ver</b> todos los flujos del sistema, no solo los tuyos.</li>
+        <li><b>Cancelar</b> flujos que quedaron colgados o son inválidos.</li>
+        <li><b>Reabrir</b> flujos que fueron cancelados por error.</li>
+        <li><b>Actuar</b> como válvula de escape sin romper el historial de auditoría.</li>
+    </ul>
+
+    <div class="callout tip">
+        <div class="callout-icon"><i class="fas fa-info"></i></div>
+        <div>
+            <div class="callout-title">Los roles se apilan</div>
+            <div class="callout-body">
+                <p>Un admin puede iniciar flujos como cualquier usuario. Un técnico también. Los permisos <em>suman</em> — no son excluyentes.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─────────────────────────────────── INICIAR ───────────────── -->
+<section class="doc-section" id="iniciar">
+    <h2>
+        <span class="section-num">04 ·</span> Iniciar un flujo
+        <a href="#iniciar" class="anchor">#</a>
+        <span class="for-role usuario">Usuario</span>
+    </h2>
+    <p class="section-intro">
+        Guía paso a paso para arrancar un trámite nuevo, desde entrar al sistema hasta ver que
+        el flujo empezó a circular.
+    </p>
+
+    <ol class="steps">
+        <li>
+            <div class="step-num">1</div>
+            <div class="step-body">
+                <h4>Ir a "Iniciar Flujo" o "Nuevo Flujo"</h4>
+                <p>Encontrás el botón en dos lugares: en el sidebar (menú lateral) bajo "Flujos de Trabajo",
+                y en el navbar superior cuando estás dentro de tu bandeja. Ambos llevan al mismo lugar.</p>
+            </div>
+        </li>
+        <li>
+            <div class="step-num">2</div>
+            <div class="step-body">
+                <h4>Elegir el tipo de documento</h4>
+                <p>Vas a ver tarjetas con los tipos disponibles (Cotización, Contrato, etc.).
+                Al hacer clic en una, se muestra abajo un preview de las etapas que va a recorrer el flujo.
+                Esto te da una idea de cuántas aprobaciones va a necesitar antes de cerrar.</p>
+                <p>Si no hay ningún tipo disponible, es porque el admin no ha configurado ninguno — pedile
+                que cree al menos uno.</p>
+            </div>
+        </li>
+        <li>
+            <div class="step-num">3</div>
+            <div class="step-body">
+                <h4>Llenar título y descripción</h4>
+                <p>El <b>título</b> es lo que ven todos los aprobadores en su bandeja, así que sé específico:
+                "Cotización cliente ACME — Servicios Q3 2026" es mejor que solo "Cotización".</p>
+                <p>La <b>descripción</b> es donde explicás contexto: monto, cliente, plazo, condiciones especiales,
+                cualquier cosa que ayude a los aprobadores a decidir sin adivinar.</p>
+            </div>
+        </li>
+        <li>
+            <div class="step-num">4</div>
+            <div class="step-body">
+                <h4>Iniciar</h4>
+                <p>Presionás el botón "Iniciar Flujo" y el sistema te redirige al detalle del trámite recién creado.
+                Vas a ver el código generado (algo como <code>FLJ-2026-000127</code>), el estado en progreso,
+                y la primera etapa activa.</p>
+            </div>
+        </li>
+        <li>
+            <div class="step-num">5</div>
+            <div class="step-body">
+                <h4>Adjuntar documentos del expediente</h4>
+                <p>Desde el detalle del flujo, en la sección "Documentos del expediente", subí los archivos
+                que corresponden al trámite: el PDF de la cotización, planos, cotizaciones anteriores del
+                cliente, cualquier soporte que los aprobadores puedan necesitar.</p>
+                <p>Se agrupan como <em>Revisión 1</em> (activa). Si te devuelven para corregir, los que subas
+                después quedan en Revisión 2, pero los de la Rev. 1 siguen visibles para auditoría.</p>
+            </div>
+        </li>
+        <li>
+            <div class="step-num">6</div>
+            <div class="step-body">
+                <h4>Esperar notificaciones</h4>
+                <p>El motor ya se encargó de avisarle a los actores de la primera etapa. Vas a recibir
+                notificaciones (mail + campana) cuando alguien apruebe, rechace o cuando el flujo
+                cambie de etapa o se cierre.</p>
+            </div>
+        </li>
+    </ol>
+
+    <div class="callout warn">
+        <div class="callout-icon"><i class="fas fa-exclamation"></i></div>
+        <div>
+            <div class="callout-title">Antes de iniciar, revisá el borrador</div>
+            <div class="callout-body">
+                <p>Una vez iniciado el flujo, <b>no podés modificar la estructura</b> (título, tipo, plantilla).
+                Sí podés agregar más adjuntos y — si te devuelven — corregir. Pero es mejor arrancar con la información completa
+                para no gastar revisiones.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─────────────────────────────────── APROBAR ───────────────── -->
+<section class="doc-section" id="aprobar">
+    <h2>
+        <span class="section-num">05 ·</span> Aprobar o rechazar
+        <a href="#aprobar" class="anchor">#</a>
+        <span class="for-role tecnico">Técnico/Admin</span>
+    </h2>
+    <p class="section-intro">
+        Guía para cuando te llega una asignación pendiente. Cómo revisar el trámite,
+        tomar una decisión informada y adjuntar soportes si hace falta.
+    </p>
+
+    <h3 id="aprobar-recibir">Cómo te enterás de que tenés algo pendiente <a href="#aprobar-recibir" class="anchor">#</a></h3>
+    <p>Cuando se te asigna una decisión, recibís <b>dos avisos simultáneos</b>:</p>
+    <ul>
+        <li>Un <b>correo</b> con el título del trámite, quién lo inició, en qué etapa estás y un botón para ir directamente al detalle.</li>
+        <li>Un <b>badge rojo en la campana</b> del navbar. Al hacer clic ves un dropdown con las últimas notificaciones.</li>
+    </ul>
+    <p>Además, en el sidebar aparece un contador al lado de "Mi Bandeja" con el número de pendientes.</p>
+
+    <h3 id="aprobar-revisar">Revisar antes de decidir <a href="#aprobar-revisar" class="anchor">#</a></h3>
+    <p>Al entrar al detalle del flujo, vas a ver:</p>
+    <ul>
+        <li><b>Información general</b>: título, tipo de documento, iniciador, etapa actual, revisión.</li>
+        <li><b>Documentos del expediente</b>: los archivos que subió el iniciador.</li>
+        <li><b>Línea de tiempo</b>: todas las etapas por las que pasó el flujo, quién actuó, cuándo y con qué comentario. Incluye adjuntos por etapa.</li>
+        <li><b>Panel de decisión</b>: tres botones (Aprobar / Rechazar / Devolver) más un campo de comentario.</li>
+    </ul>
+
+    <h3 id="aprobar-decidir">Aprobar, rechazar o devolver <a href="#aprobar-decidir" class="anchor">#</a></h3>
+
+    <div class="callout tip">
+        <div class="callout-icon"><i class="fas fa-check"></i></div>
+        <div>
+            <div class="callout-title">Aprobar</div>
+            <div class="callout-body">
+                <p>Significa "de mi parte, adelante". El comentario es opcional pero útil ("OK, precios validados con contabilidad"). Al aprobar, el motor evalúa:</p>
+                <ul style="margin: 8px 0; padding-left: 20px;">
+                    <li>Si la etapa es <em>secuencial</em>, avanza al siguiente paso.</li>
+                    <li>Si es <em>paralelo-todos</em>, espera a las demás firmas.</li>
+                    <li>Si es <em>paralelo-cualquiera</em>, avanza inmediatamente y las asignaciones hermanas quedan cerradas.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="callout warn">
+        <div class="callout-icon"><i class="fas fa-times"></i></div>
+        <div>
+            <div class="callout-title">Rechazar</div>
+            <div class="callout-body">
+                <p>Significa "hay algo que no está bien y debe corregirse". El <b>comentario es obligatorio</b> —
+                explicá qué debe ajustar el iniciador. La política de rechazo declarada en la etapa decide
+                a dónde va el flujo (volver al iniciador es lo más común).</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="callout example">
+        <div class="callout-icon"><i class="fas fa-undo"></i></div>
+        <div>
+            <div class="callout-title">Devolver</div>
+            <div class="callout-body">
+                <p>Es parecido a rechazar, pero suele usarse cuando lo que falta es una aclaración o
+                complemento menor. Semánticamente, un rechazo "cierra tu decisión negativa" y una devolución
+                "te desentendés hasta que aclaren". Ambos activan la política de rechazo de la etapa.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 id="aprobar-adjuntar">Adjuntar soporte a tu decisión <a href="#aprobar-adjuntar" class="anchor">#</a></h3>
+    <p>Algunas etapas están marcadas como "requieren adjunto": vas a ver un aviso amarillo en la sección de documentos.
+    En ese caso, tenés que subir al menos un archivo <em>a la etapa</em> antes de poder aprobar. El archivo queda
+    vinculado a tu paso — cualquiera que consulte el historial va a ver que fue tu soporte de aprobación.</p>
+
+    <p>Aunque no sea obligatorio, siempre podés adjuntar. Es buena práctica cuando tu firma dependió de un
+    correo del cliente, una hoja de cálculo con márgenes, o un dictamen técnico.</p>
+</section>
+
+<!-- ─────────────────────────────────── CORREGIR ──────────────── -->
+<section class="doc-section" id="corregir">
+    <h2>
+        <span class="section-num">06 ·</span> Corregir un flujo devuelto
+        <a href="#corregir" class="anchor">#</a>
+        <span class="for-role usuario">Usuario</span>
+    </h2>
+    <p class="section-intro">
+        Cuando alguien rechaza o devuelve tu trámite, no se pierde: pasa a estado
+        <em>requiere corrección</em> y volvés a tener el control. Así lo retomás.
+    </p>
+
+    <ol class="steps">
+        <li>
+            <div class="step-num">1</div>
+            <div class="step-body">
+                <h4>Detectar el rechazo</h4>
+                <p>Vas a recibir una notificación con <b>quién rechazó</b> y el <b>motivo textual</b>. También aparece en tu campana
+                con un badge amarillo. En Mi Bandeja, la pestaña <em>Requieren corrección</em> se activa con un contador.</p>
+            </div>
+        </li>
+        <li>
+            <div class="step-num">2</div>
+            <div class="step-body">
+                <h4>Entrar al detalle y leer los comentarios</h4>
+                <p>La línea de tiempo muestra la etapa donde te devolvieron. Ampliá la asignación del que
+                rechazó — su comentario está entre comillas. Si hay varios que rechazaron, revisá cada uno.</p>
+            </div>
+        </li>
+        <li>
+            <div class="step-num">3</div>
+            <div class="step-body">
+                <h4>Corregir lo indicado</h4>
+                <p>Fuera del sistema: ajustá el documento, corrigilo, hacé lo que te pidieron.
+                Después subilo como nuevo adjunto al expediente. El nuevo archivo va a quedar
+                etiquetado con la próxima revisión.</p>
+            </div>
+        </li>
+        <li>
+            <div class="step-num">4</div>
+            <div class="step-body">
+                <h4>Reenviar corregido</h4>
+                <p>En el panel derecho vas a ver un botón azul "Reenviar corregido". Al presionarlo:</p>
+                <ul style="margin: 8px 0; padding-left: 20px;">
+                    <li>La revisión se incrementa (Rev. 1 → Rev. 2).</li>
+                    <li>El flujo arranca <b>desde la primera etapa</b> con actores nuevos.</li>
+                    <li>Los documentos y firmas de la Rev. 1 quedan congelados como historial.</li>
+                </ul>
+            </div>
+        </li>
+    </ol>
+
+    <div class="callout tip">
+        <div class="callout-icon"><i class="fas fa-history"></i></div>
+        <div>
+            <div class="callout-title">El historial nunca se pierde</div>
+            <div class="callout-body">
+                <p>Aunque el flujo arranque de nuevo, los adjuntos, las firmas y los comentarios de la
+                revisión anterior siguen visibles. La línea de tiempo muestra todas las revisiones apiladas.
+                Podés comparar qué cambió entre iteraciones.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 id="corregir-desistir">¿Y si ya no querés continuar? <a href="#corregir-desistir" class="anchor">#</a></h3>
+    <p>En cualquier momento, mientras el flujo esté abierto, podés usar el botón "Desistir del flujo".
+    Se cierra como <em>cancelado</em> y ya no consume tiempo de nadie. Es apropiado cuando el trámite
+    dejó de ser necesario (el cliente se echó atrás, cambió el proyecto, etc.).</p>
+</section>
+
+<!-- ─────────────────────────────────── BANDEJA ───────────────── -->
+<section class="doc-section" id="bandeja">
+    <h2>
+        <span class="section-num">07 ·</span> Bandeja de flujos
+        <a href="#bandeja" class="anchor">#</a>
+        <span class="for-role todos">Todos</span>
+    </h2>
+    <p class="section-intro">
+        Tu <b>vista personalizada</b> de todo lo que te involucra. Con pestañas para separar por
+        categoría, buscador para encontrar cualquier trámite o archivo, y filtros por plantilla y fecha.
+    </p>
+
+    <h3 id="bandeja-pestanas">Las pestañas y su significado <a href="#bandeja-pestanas" class="anchor">#</a></h3>
+    <ul>
+        <li><b>Mis Pendientes</b> — flujos donde tenés una decisión sin resolver. Es la pestaña más importante para técnicos y admins.</li>
+        <li><b>Iniciados por mí</b> — los flujos que arrancaste vos, sin importar en qué etapa estén.</li>
+        <li><b>Requieren corrección</b> — subconjunto de los tuyos que necesitan que corrijas y reenvíes.</li>
+        <li><b>Todos los flujos</b> — visible solo para admins con permiso de ver todo el sistema.</li>
+        <li><b>Cerrados</b> — flujos que ya terminaron (aprobados, cancelados o archivados).</li>
+    </ul>
+
+    <h3 id="bandeja-buscar">Buscar y filtrar <a href="#bandeja-buscar" class="anchor">#</a></h3>
+    <p>El buscador principal busca en varios lugares a la vez:</p>
+    <ul>
+        <li><b>Código</b> del flujo (ej. <code>FLJ-2026-000127</code>).</li>
+        <li><b>Título</b> y <b>descripción</b> del trámite.</li>
+        <li><b>Nombre del iniciador</b>.</li>
+        <li><b>Nombre de archivo adjunto</b> — útil para encontrar dónde vive un PDF específico.</li>
+    </ul>
+    <p>El botón "Más filtros" abre opciones adicionales: filtrar por plantilla específica, tipo de documento
+    o rango de fechas de inicio. Los filtros se combinan entre sí y con la búsqueda de texto.</p>
+
+    <div class="callout tip">
+        <div class="callout-icon"><i class="fas fa-search"></i></div>
+        <div>
+            <div class="callout-title">Los filtros se preservan al cambiar de pestaña</div>
+            <div class="callout-body">
+                <p>Si buscás "ACME" en Cerrados y después vas a Todos los flujos, la búsqueda sigue activa.
+                Presioná la X junto al buscador para limpiar y volver a la vista completa.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 id="bandeja-badges">Cómo leer los badges de las filas <a href="#bandeja-badges" class="anchor">#</a></h3>
+    <ul>
+        <li><b>Badge de estado</b>: <em>En progreso</em>, <em>Requiere corrección</em>, <em>Aprobado</em>, <em>Cancelado</em>. El color indica el color semántico del estado.</li>
+        <li><b>Badge de adjuntos</b>: un clip con número, si el flujo tiene archivos subidos.</li>
+        <li><b>Badge de SLA</b>: aparece bajo el nombre de la etapa. Rojo si venció, amarillo si está cerca. Ver <a href="#sla">sección SLA</a>.</li>
+    </ul>
+</section>
+
+<!-- ─────────────────────────────────── ADJUNTOS ──────────────── -->
+<section class="doc-section" id="adjuntos">
+    <h2>
+        <span class="section-num">08 ·</span> Adjuntos y expediente
+        <a href="#adjuntos" class="anchor">#</a>
+        <span class="for-role todos">Todos</span>
+    </h2>
+    <p class="section-intro">
+        Los archivos son parte esencial del flujo. El sistema los organiza en <b>dos niveles</b>
+        (trámite y etapa) y los agrupa por revisión para mantener trazabilidad.
+    </p>
+
+    <h3 id="adjuntos-niveles">Los dos niveles de adjunto <a href="#adjuntos-niveles" class="anchor">#</a></h3>
+
+    <div class="callout tip">
+        <div class="callout-icon"><i class="fas fa-folder"></i></div>
+        <div>
+            <div class="callout-title">Adjuntos del expediente (nivel trámite)</div>
+            <div class="callout-body">
+                <p>Los sube el <b>iniciador</b>, mientras el flujo está abierto. Son los documentos base del
+                trámite: la cotización en PDF, planos, condiciones. Aparecen en la sección "Documentos del expediente"
+                del detalle.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="callout tip">
+        <div class="callout-icon"><i class="fas fa-tag"></i></div>
+        <div>
+            <div class="callout-title">Adjuntos de etapa</div>
+            <div class="callout-body">
+                <p>Los sube el <b>aprobador</b> mientras está resolviendo su asignación. Son el soporte de su
+                firma: hoja de márgenes, dictamen técnico, correo del cliente. Aparecen dentro de la línea
+                de tiempo, en el bloque de la etapa correspondiente.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 id="adjuntos-revisiones">Agrupación por revisión <a href="#adjuntos-revisiones" class="anchor">#</a></h3>
+    <p>Cada archivo queda etiquetado con el número de revisión en el que se subió. Al corregir un flujo devuelto,
+    los archivos nuevos van a Rev. 2, pero los de Rev. 1 siguen consultables y descargables como historial.</p>
+    <p>Esto significa que <b>el expediente crece con el tiempo, nunca se sobrescribe</b>. Un auditor puede revisar
+    exactamente qué documento estaba activo en cada intento del trámite.</p>
+
+    <h3 id="adjuntos-descargar">Descargar un archivo <a href="#adjuntos-descargar" class="anchor">#</a></h3>
+    <p>Cualquiera con acceso al detalle del flujo puede descargar cualquier adjunto. Clic en el nombre del
+    archivo — se descarga con su nombre original. La descarga pasa por una verificación de permisos: si no tenés
+    acceso al flujo, no podés descargar sus archivos.</p>
+
+    <div class="callout warn">
+        <div class="callout-icon"><i class="fas fa-eye-slash"></i></div>
+        <div>
+            <div class="callout-title">Los archivos son privados</div>
+            <div class="callout-body">
+                <p>Los adjuntos se guardan en almacenamiento privado del servidor, nunca son accesibles
+                por URL directa. Solo se pueden descargar desde el sistema, con la sesión activa y el permiso
+                correspondiente.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 id="adjuntos-formatos">Formatos aceptados <a href="#adjuntos-formatos" class="anchor">#</a></h3>
+    <p>PDF, Word (.doc, .docx), Excel (.xls, .xlsx), CSV, TXT, imágenes (JPG, PNG) y ZIP.
+    Tamaño máximo por archivo: <b>20 MB</b>. Si necesitás subir algo más grande, comprimilo o partilo.</p>
+</section>
+
+<!-- ─────────────────────────────────── NOTIFICACIONES ────────── -->
+<section class="doc-section" id="notificaciones">
+    <h2>
+        <span class="section-num">09 ·</span> Notificaciones
+        <a href="#notificaciones" class="anchor">#</a>
+        <span class="for-role todos">Todos</span>
+    </h2>
+    <p class="section-intro">
+        El sistema te avisa cada vez que algo pasa en un flujo donde estás involucrado.
+        Dos canales simultáneos: <em>mail</em> y <em>campana in-app</em>.
+    </p>
+
+    <h3 id="notif-tipos">Los cuatro tipos de aviso <a href="#notif-tipos" class="anchor">#</a></h3>
+    <ul>
+        <li><b>Asignación pendiente</b> — te enteras cuando te toca decidir. Incluye quién inició el trámite, en qué etapa, y descripción del caso.</li>
+        <li><b>Requiere corrección</b> — el iniciador se entera cuando alguien rechaza. Incluye quién rechazó, motivo textual, y a qué revisión pasa el flujo.</li>
+        <li><b>Flujo aprobado</b> — el iniciador se entera cuando el trámite pasa todas sus etapas. Incluye la lista de firmantes.</li>
+        <li><b>Flujo cancelado</b> — el iniciador se entera si un admin cancela o si una política de rechazo cierra el flujo. Incluye motivo.</li>
+    </ul>
+
+    <h3 id="notif-campana">La campana del navbar <a href="#notif-campana" class="anchor">#</a></h3>
+    <p>Al hacer clic en la campana del navbar, se abre un dropdown con las últimas 6 notificaciones. Cada
+    ítem muestra:</p>
+    <ul>
+        <li><b>Avatar del actor</b> (iniciales del que causó la notificación).</li>
+        <li><b>Mensaje descriptivo</b>: "Camila Ríos requiere tu aprobación..."</li>
+        <li><b>Contexto</b>: tipo de documento, etapa, código del flujo.</li>
+        <li><b>Comentario si aplica</b> (motivo del rechazo, por ejemplo).</li>
+        <li><b>Tiempo</b> desde que ocurrió.</li>
+    </ul>
+    <p>Al hacer clic en una notificación, te lleva directo al detalle del flujo y la marca como leída.</p>
+
+    <h3 id="notif-marcar">Marcar como leídas <a href="#notif-marcar" class="anchor">#</a></h3>
+    <p>Las no leídas tienen un borde izquierdo azul y el fondo más contrastado. Las leídas se atenúan.
+    Podés marcarlas una por una (al hacer clic), o todas de una vez con el botón "Marcar todas" en la
+    cabecera del dropdown.</p>
+    <p>En la vista completa (<em>"Ver todas"</em>), tenés pestañas para filtrar por leídas/no leídas.</p>
+</section>
+
+<!-- ─────────────────────────────────── SLA ───────────────────── -->
+<section class="doc-section" id="sla">
+    <h2>
+        <span class="section-num">10 ·</span> SLA y tiempos
+        <a href="#sla" class="anchor">#</a>
+        <span class="for-role todos">Todos</span>
+    </h2>
+    <p class="section-intro">
+        Algunas etapas tienen un <em>SLA</em> — el tiempo objetivo esperado para resolverse.
+        Es una alerta visual, no un mecanismo de cancelación automática.
+    </p>
+
+    <h3 id="sla-que-es">¿Qué es el SLA? <a href="#sla-que-es" class="anchor">#</a></h3>
+    <p>SLA significa <b>Service Level Agreement</b> — "acuerdo de nivel de servicio". Cuando el admin diseña
+    la plantilla, puede declarar que una etapa debe resolverse en X horas. Por ejemplo, una revisión técnica
+    en 24 horas, una aprobación gerencial en 48.</p>
+
+    <h3 id="sla-como-se-ve">Cómo se ve en la interfaz <a href="#sla-como-se-ve" class="anchor">#</a></h3>
+    <p>En la bandeja de flujos, bajo el nombre de la etapa actual, puede aparecer un badge:</p>
+    <ul>
+        <li><b>Rojo · "Vencido Xh"</b> — el tiempo del SLA ya pasó, y sigue sin resolverse.</li>
+        <li><b>Amarillo · "Xh restantes"</b> — está cerca de vencer (queda menos del 25% del tiempo original).</li>
+        <li><b>Sin badge</b> — o no tiene SLA definido, o está dentro del rango holgado.</li>
+    </ul>
+
+    <div class="callout warn">
+        <div class="callout-icon"><i class="fas fa-info"></i></div>
+        <div>
+            <div class="callout-title">El SLA no cancela nada automáticamente</div>
+            <div class="callout-body">
+                <p>Es información visual para <em>saber priorizar</em>. Un flujo vencido sigue esperando decisión igual
+                que uno al día. La responsabilidad de acelerar es humana, no del motor. Cuando la etapa se
+                resuelve, el badge desaparece.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─────────────────────────────────── PLANTILLAS ────────────── -->
+<section class="doc-section" id="plantillas">
+    <h2>
+        <span class="section-num">11 ·</span> Diseñar plantillas
+        <a href="#plantillas" class="anchor">#</a>
+        <span class="for-role admin">Admin</span>
+    </h2>
+    <p class="section-intro">
+        Las plantillas son <b>el corazón de la configuración</b>. Un admin las diseña una vez y se aplican
+        a todos los flujos futuros de ese tipo. Diseñarlas bien ahorra correcciones después.
+    </p>
+
+    <h3 id="plantillas-crear">Crear una plantilla nueva <a href="#plantillas-crear" class="anchor">#</a></h3>
+    <ol class="steps">
+        <li>
+            <div class="step-num">1</div>
+            <div class="step-body">
+                <h4>Ir a Flujos → Plantillas de Flujo</h4>
+                <p>Solo los admins ven esta entrada en el sidebar. Ahí ves todas las plantillas existentes,
+                con contadores de etapas, instancias en curso y estado.</p>
+            </div>
+        </li>
+        <li>
+            <div class="step-num">2</div>
+            <div class="step-body">
+                <h4>Presionar "Nueva plantilla"</h4>
+                <p>Se abre el editor. Empezás por darle nombre y descripción — el nombre es lo que
+                verán los usuarios al iniciar un flujo, así que sé claro.</p>
+            </div>
+        </li>
+        <li>
+            <div class="step-num">3</div>
+            <div class="step-body">
+                <h4>Agregar etapas ordenadas</h4>
+                <p>Presioná "Agregar etapa" para cada paso del proceso. Cada etapa tiene:</p>
+                <ul style="margin: 6px 0; padding-left: 20px;">
+                    <li><b>Nombre y descripción</b>: qué se debe validar acá.</li>
+                    <li><b>Modo</b>: secuencial, paralelo-todos, o paralelo-cualquiera.</li>
+                    <li><b>Política de rechazo</b>: qué hacer si alguien rechaza.</li>
+                    <li><b>SLA opcional</b>: tiempo objetivo en horas.</li>
+                    <li><b>Requiere adjunto</b>: si el aprobador debe subir soporte para poder firmar.</li>
+                </ul>
+                <p>Podés reordenar las etapas arrastrándolas con el ícono <code>⋮⋮</code>.</p>
+            </div>
+        </li>
+        <li>
+            <div class="step-num">4</div>
+            <div class="step-body">
+                <h4>Asignar actores por etapa</h4>
+                <p>En cada etapa, presioná el selector de tipo (rol vs usuario) y agregá quien puede firmar.
+                Si es un rol Spatie (como "tecnico" o "admin"), cualquier persona con ese rol podrá actuar.
+                Si es un usuario específico, solo esa persona.</p>
+                <p>Para modo paralelo-todos, agregá tantas filas como firmas necesites — el motor las cuenta.</p>
+            </div>
+        </li>
+        <li>
+            <div class="step-num">5</div>
+            <div class="step-body">
+                <h4>Guardar y activar</h4>
+                <p>Al guardar, la plantilla queda disponible. Recordá que necesitás también crear un
+                <em>tipo de documento</em> asociado (en Flujos → Tipos de Documento) para que los usuarios
+                puedan iniciar flujos de este tipo.</p>
+            </div>
+        </li>
+    </ol>
+
+    <div class="callout admin">
+        <div class="callout-icon"><i class="fas fa-lock"></i></div>
+        <div>
+            <div class="callout-title">Plantillas con flujos activos se bloquean</div>
+            <div class="callout-body">
+                <p>Si una plantilla ya fue usada (tiene instancias creadas), <b>no podés modificar su estructura</b>
+                — solo nombre, descripción y activo/inactivo. Esto protege el historial. Si necesitás cambios estructurales,
+                creá una nueva versión de la plantilla y desactivá la anterior.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 id="plantillas-tipos">Crear tipos de documento <a href="#plantillas-tipos" class="anchor">#</a></h3>
+    <p>Un tipo de documento es la <em>etiqueta comercial</em> del flujo. En Flujos → Tipos de Documento,
+    creás uno con nombre (ej. "Cotización"), ícono, y lo asociás a una plantilla activa. Los usuarios
+    finales verán este tipo al iniciar un flujo, no la plantilla directamente.</p>
+</section>
+
+<!-- ─────────────────────────────────── VÁLVULAS ──────────────── -->
+<section class="doc-section" id="valvulas">
+    <h2>
+        <span class="section-num">12 ·</span> Válvulas de escape
+        <a href="#valvulas" class="anchor">#</a>
+        <span class="for-role admin">Admin</span>
+    </h2>
+    <p class="section-intro">
+        Los admins tienen tres herramientas para <b>intervenir manualmente</b> cuando el flujo natural
+        no alcanza. Usadas con cuidado — no rompen el historial, pero interrumpen el proceso normal.
+    </p>
+
+    <h3 id="valvulas-cancelar">Cancelar un flujo <a href="#valvulas-cancelar" class="anchor">#</a></h3>
+    <p>Con el permiso <code>flujos.cancelar-cualquiera</code>, un admin puede cerrar cualquier flujo
+    abierto. El flujo pasa a estado <em>cancelado</em>, el iniciador recibe notificación con el motivo,
+    y todas las asignaciones pendientes se cierran. La razón queda registrada.</p>
+    <p>Casos típicos: el cliente se cayó, el proyecto cambió, el flujo quedó abandonado y ya no aplica.</p>
+
+    <h3 id="valvulas-reabrir">Reabrir un cancelado <a href="#valvulas-reabrir" class="anchor">#</a></h3>
+    <p>Si un flujo fue cancelado por error, un admin con permiso <code>flujos.reabrir</code> puede revivirlo.
+    El flujo vuelve al estado <em>en progreso</em> desde la <b>última etapa donde estaba activo</b>, con
+    asignaciones frescas. Todo el historial anterior se conserva.</p>
+
+    <div class="callout admin">
+        <div class="callout-icon"><i class="fas fa-shield-alt"></i></div>
+        <div>
+            <div class="callout-title">La auditoría siempre gana</div>
+            <div class="callout-body">
+                <p>Ninguna intervención del admin borra o modifica registros pasados. Cancelar deja el flujo
+                cerrado con su historia intacta. Reabrir crea una nueva línea. Todo queda visible para un auditor.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 id="valvulas-cuando">¿Cuándo intervenir? <a href="#valvulas-cuando" class="anchor">#</a></h3>
+    <ul>
+        <li><b>Actor de rol renunció o dejó el sistema</b> y hay una asignación colgada. → cancelar + iniciador reinicia.</li>
+        <li><b>Un flujo se creó por error</b> con datos incorrectos. → cancelar con motivo.</li>
+        <li><b>Se canceló un flujo importante por error</b>. → reabrir.</li>
+        <li><b>Un flujo lleva semanas colgado</b> sin actividad. → contactar al actor pendiente o cancelar si perdió sentido.</li>
+    </ul>
+</section>
+
+<!-- ─────────────────────────────────── FAQ ───────────────────── -->
+<section class="doc-section" id="faq">
+    <h2>
+        <span class="section-num">13 ·</span> Preguntas frecuentes
+        <a href="#faq" class="anchor">#</a>
+        <span class="for-role todos">Todos</span>
+    </h2>
+    <p class="section-intro">
+        Las dudas más comunes de quienes usan el sistema por primera vez.
+    </p>
+
+    <h3 id="faq-iniciar">¿Puedo iniciar un flujo si soy usuario común? <a href="#faq-iniciar" class="anchor">#</a></h3>
+    <p>Sí. Cualquiera con el permiso <code>flujos.iniciar</code> puede arrancar un trámite. Solo necesitás
+    que exista al menos un <em>tipo de documento</em> con plantilla activa en el sistema.</p>
+
+    <h3 id="faq-recibir">¿Cómo sé que me tocó aprobar algo? <a href="#faq-recibir" class="anchor">#</a></h3>
+    <p>Te llega un <b>correo</b>, aparece un badge rojo en la <b>campana</b> del navbar, y la pestaña
+    <em>Mis Pendientes</em> de tu bandeja muestra un contador. Además, el sidebar tiene un contador al lado
+    de "Mi Bandeja".</p>
+
+    <h3 id="faq-rechazo">¿Qué pasa si rechazo una etapa? <a href="#faq-rechazo" class="anchor">#</a></h3>
+    <p>Depende de la <em>política de rechazo</em> que le puso el diseñador a esa etapa: puede volver al
+    iniciador para que corrija, retroceder una etapa, saltar a una etapa específica, o cerrar el flujo.
+    Nunca es implícito — siempre está declarado.</p>
+
+    <h3 id="faq-cancelado">¿Puedo recuperar un flujo que se cerró por error? <a href="#faq-cancelado" class="anchor">#</a></h3>
+    <p>Solo un administrador puede reabrir un flujo cancelado. Cuando lo hace, el flujo retoma desde la
+    última etapa donde estaba activo, con asignaciones frescas.</p>
+
+    <h3 id="faq-adjuntos">¿Los documentos que subo se pierden al corregir? <a href="#faq-adjuntos" class="anchor">#</a></h3>
+    <p>No. Cada archivo queda etiquetado con la revisión en la que fue subido. Los adjuntos de revisiones
+    anteriores siguen visibles y descargables como historial. El expediente crece con el tiempo, nunca
+    se sobrescribe.</p>
+
+    <h3 id="faq-editar">¿Puedo editar el trámite después de iniciarlo? <a href="#faq-editar" class="anchor">#</a></h3>
+    <p>No en su estructura (título, tipo, plantilla). Pero podés <b>agregar más adjuntos</b> mientras esté
+    en progreso, y si te devuelven para corregir, tenés la oportunidad de reenviar una versión ajustada.</p>
+
+    <h3 id="faq-ver-historial">¿Los aprobadores ven quién más aprobó antes? <a href="#faq-ver-historial" class="anchor">#</a></h3>
+    <p>Sí. La línea de tiempo del detalle del flujo muestra cada decisión con quién la tomó, cuándo y con
+    qué comentario. La transparencia es parte del diseño — reduce dudas y evita repetir preguntas.</p>
+
+    <h3 id="faq-sla">¿Qué es el SLA que aparece en algunas etapas? <a href="#faq-sla" class="anchor">#</a></h3>
+    <p>Es el <b>tiempo objetivo</b> para resolver una etapa (en horas). Es informativo — no cancela nada
+    por sí solo. Solo activa un badge visual en la bandeja cuando la etapa lleva más tiempo del previsto.
+    Ver <a href="#sla">sección SLA</a> para detalles.</p>
+</section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════ TOC LATERAL ═══ -->
+<aside class="docs-toc" id="docsToc">
+    <div class="docs-toc-label">EN ESTA SECCIÓN</div>
+    <ul id="tocList"></ul>
+</aside>
+
+</div>
+
+</div>
+
+<footer>
+    <div class="wrap footer-row">
+        <div>DOCUMENTACIÓN &nbsp;·&nbsp; MOTOR/FLUJOS &nbsp;·&nbsp; PEÑARANDA DIGITAL</div>
+        <div>
+            <a href="/motor-flujos">Ver simulación</a> &nbsp;·&nbsp;
+            <a href="javascript:window.print()">Imprimir</a> &nbsp;·&nbsp;
+            v1.0 · Julio 2026
+        </div>
+    </div>
+</footer>
+
+<script>
+(function() {
+    // ── Scroll spy: resaltar sección activa en el sidebar ─────────
+    const sections = document.querySelectorAll('.doc-section');
+    const navLinks = document.querySelectorAll('.docs-nav a');
+    const tocList  = document.getElementById('tocList');
+
+    function updateActiveNav() {
+        const scrollY = window.scrollY;
+        let current = sections[0]?.id;
+
+        sections.forEach(section => {
+            const top = section.offsetTop - 120;
+            if (scrollY >= top) current = section.id;
+        });
+
+        navLinks.forEach(link => {
+            const href = link.getAttribute('href').substring(1);
+            link.classList.toggle('active', href === current);
+        });
+
+        // Actualizar TOC lateral con subsecciones (h3) de la sección activa
+        if (current) {
+            const activeSection = document.getElementById(current);
+            const subs = activeSection.querySelectorAll('h3[id]');
+
+            const items = [
+                `<li><a href="#${current}" class="${scrollY < activeSection.offsetTop + 100 ? 'active' : ''}">${activeSection.querySelector('h2').childNodes[0].textContent.trim() || 'Inicio'}</a></li>`
+            ];
+
+            subs.forEach(sub => {
+                const subTop = sub.offsetTop - 120;
+                const nextSub = sub.nextElementSibling;
+                const isActive = scrollY >= subTop && (
+                    !nextSub || scrollY < (subs[Array.from(subs).indexOf(sub) + 1]?.offsetTop - 120 || Infinity)
+                );
+                const text = sub.childNodes[0].textContent.trim();
+                items.push(`<li><a href="#${sub.id}" class="sub ${isActive ? 'active' : ''}">${text}</a></li>`);
+            });
+
+            tocList.innerHTML = items.join('');
+        }
+    }
+
+    updateActiveNav();
+    window.addEventListener('scroll', updateActiveNav, { passive: true });
+    window.addEventListener('resize', updateActiveNav);
+
+    // ── Cerrar nav móvil al hacer clic en un link ──────────────
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            document.querySelector('.docs-nav').classList.remove('open');
+        });
+    });
+
+    // ── Anchor copy: clic en # copia el link al portapapeles ──
+    document.querySelectorAll('.anchor').forEach(anchor => {
+        anchor.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = window.location.origin + window.location.pathname + anchor.getAttribute('href');
+            history.pushState(null, '', anchor.getAttribute('href'));
+            if (navigator.clipboard) navigator.clipboard.writeText(url);
+            document.getElementById(anchor.getAttribute('href').substring(1))?.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+})();
+</script>
+
+</body>
+</html>

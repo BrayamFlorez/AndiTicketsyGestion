@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ sidebarOpen: true }">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" 
+      x-data="{ sidebarToggle: false, darkMode: true }" 
+      :class="{ 'dark': darkMode }">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', env('APP_NAME')) }}</title>
+    <title>{{ config('app.name', env('APP_NAME', 'TailAdmin')) }}</title>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,46 +13,50 @@
     
     <style>
         [x-cloak] { display: none !important; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        
-        /* Respaldo: Fuerza el fondo oscuro en todo el HTML */
-        html, body {
-            background-color: #121212 !important;
-        }
     </style>
     @stack('styles')
 </head>
 
-<body class="bg-[#121212] text-gray-200 antialiased overflow-hidden">
+<body class="bg-whiten dark:bg-black-2 text-body dark:text-bodydark antialiased font-satoshi">
 
-    <div class="flex h-screen bg-[#121212]">
+    {{-- Page Wrapper --}}
+    <div class="flex h-screen overflow-hidden">
+
+        {{-- TailAdmin Sidebar --}}
         @include('layouts.partials.sidebar')
 
-        <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#121212]">
+        {{-- Backdrop / Overlay Móvil --}}
+        <div x-show="sidebarToggle" 
+            @click="sidebarToggle = false" 
+            x-cloak
+            class="fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm lg:hidden">
+        </div>
+
+        {{-- Content Area --}}
+        <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+
+            {{-- Header / Navbar TailAdmin --}}
             @include('layouts.partials.navbar')
 
-            <main class="flex-1 overflow-y-auto custom-scrollbar p-4 lg:p-8 flex flex-col justify-between">
-                
-                <div class="max-w-7xl mx-auto w-full">
+            {{-- Main Content --}}
+            <main class="flex-1 p-4 md:p-6 2xl:p-10 flex flex-col justify-between">
+                <div class="mx-auto max-w-screen-2xl w-full">
                     {{ $slot }}
                 </div>
                 
-                <div class="mt-auto pt-8">
+                {{-- Footer --}}
+                <div class="mt-auto pt-6">
                     @include('layouts.partials.footer')
                 </div>
-
             </main>
-        </div>
 
-        <div x-show="!sidebarOpen" @click="sidebarOpen = true" class="fixed inset-0 bg-black/50 z-40 lg:hidden" x-cloak></div>
+        </div>
     </div>
 
+    {{-- SweetAlert2 Notificaciones --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
@@ -82,11 +88,10 @@
                     icon: 'error',
                     title: '¡Acción denegada!',
                     text: "{!! session('error') !!}",
-                    confirmButtonColor: '#007acc',
+                    confirmButtonColor: '#3C50E0',
                     confirmButtonText: 'Entendido'
                 });
             @endif
-            
         });
     </script>
     

@@ -18,7 +18,8 @@ return new class extends Migration
                 ->restrictOnDelete();
 
             $table->unsignedInteger('revision')->default(1);
-
+            $table->string('codigo_referencia', 50)->nullable()
+                ->comment('Etiqueta personal del iniciador para búsqueda rápida (ej: COT-ACME-Q3)');
             $table->enum('estado', [
                 'pendiente',
                 'en_curso',
@@ -34,6 +35,7 @@ return new class extends Migration
 
             $table->index(['workflow_instance_id', 'revision']);
             $table->index(['workflow_instance_id', 'estado']);
+            $table->index('codigo_referencia');
         });
     }
 

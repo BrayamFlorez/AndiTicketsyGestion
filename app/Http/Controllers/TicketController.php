@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\Tickets\TicketAsignado;
+use App\Events\Tickets\TicketCancelado;
+use App\Events\Tickets\TicketCerrado;
+use App\Events\Tickets\TicketCreado;
+use App\Events\Tickets\TicketIniciado;
+use App\Events\Tickets\TicketResuelto;
 use App\Http\Requests\StoreTicketRequest;
 use App\Models\Empresa;
 use App\Models\Sede;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,8 +28,8 @@ class TicketController extends Controller
     |--------------------------------------------------------------------------
     | INDEX
     |--------------------------------------------------------------------------
-    | Nota: ya NO pasamos un $tecnicos global. Cada fila de la tabla calcula
-    | sus técnicos disponibles vía $ticket->tecnicosDisponibles().
+    | Cada fila de la tabla calcula sus técnicos disponibles vía
+    | $ticket->tecnicosDisponibles().
     */
     public function index(Request $request): View
     {
@@ -45,13 +52,12 @@ class TicketController extends Controller
             'empresas' => $user->can('tickets.ver-todos')
                 ? Empresa::activas()->orderBy('nombre')->get(['id', 'nombre'])
                 : collect(),
-            // Ya NO se pasa $tecnicos global — la vista calcula por ticket
         ]);
     }
 
     /*
     |--------------------------------------------------------------------------
-    | SHOW — Solo técnicos con cobertura del empresa+sede del ticket
+    | SHOW — Solo técnicos con cobertura de la empresa+sede del ticket
     |--------------------------------------------------------------------------
     */
     public function show(Ticket $ticket): View
@@ -77,30 +83,52 @@ class TicketController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | CREATE — Incluye coberturas para filtrado dinámico en Alpine
+    | CREATE
     |--------------------------------------------------------------------------
+    | Dos vistas posibles según el rol:
+    |  - 'admin'   → el usuario ELIGE empresa/sede destino. Aplica a roles
+    |                transversales (ven todas) y con cobertura (ven las suyas).
+    |  - 'usuario' → el ticket HEREDA la empresa/sede del solicitante.
     */
     public function create(): View|RedirectResponse
     {
         $user = Auth::user();
         abort_unless($user->can('tickets.crear'), 403);
 
-        $esAdmin = $user->hasAnyRole(['admin', 'super-admin']);
+        // ── Caso A: elige el destino del ticket ──
+        if ($this->puedeElegirDestino($user)) {
 
-        if ($esAdmin) {
-            $tecnicos = User::tecnicos()->activos()->orderBy('name')->get(['id', 'name']);
+            $empresasDisponibles = $this->empresasDisponiblesPara($user);
 
-            // Coberturas para filtrar en cliente cuando admin cambia empresa/sede
+            if ($empresasDisponibles->isEmpty()) {
+                return redirect()->route('dashboard')->with(
+                    'error',
+                    'No tienes empresas asignadas en tu cobertura. Contacta al administrador.'
+                );
+            }
+
+            $idsEmpresas = $empresasDisponibles->pluck('id');
+
+            $tecnicos = User::activos()
+                ->role(Roles::CON_COBERTURA)
+                ->orderBy('name')
+                ->get(['id', 'name']);
+
+            // Coberturas para filtrar técnicos en cliente al cambiar empresa/sede
             $coberturas = DB::table('empresa_user')
                 ->whereIn('user_id', $tecnicos->pluck('id'))
                 ->get(['user_id', 'empresa_id', 'sede_id']);
 
             return view('tickets.create', [
                 'vista'              => 'admin',
-                'empresas'           => Empresa::activas()->orderBy('nombre')->get(['id', 'nombre']),
-                'sedesPorEmpresa'    => Sede::activas()->orderBy('nombre')->get(['id', 'nombre', 'empresa_id'])->groupBy('empresa_id'),
+                'empresas'           => $empresasDisponibles,
+                'sedesPorEmpresa'    => Sede::activas()
+                    ->whereIn('empresa_id', $idsEmpresas)
+                    ->orderBy('nombre')
+                    ->get(['id', 'nombre', 'empresa_id'])
+                    ->groupBy('empresa_id'),
                 'usuariosPorEmpresa' => User::activos()
-                    ->whereNotNull('empresa_id')
+                    ->whereIn('empresa_id', $idsEmpresas)
                     ->orderBy('name')
                     ->get(['id', 'name', 'empresa_id'])
                     ->groupBy('empresa_id'),
@@ -109,9 +137,12 @@ class TicketController extends Controller
             ]);
         }
 
+        // ── Caso B: hereda su propia empresa ──
         if (! $user->empresa_id) {
-            return redirect()->route('dashboard')
-                ->with('error', 'No tienes una empresa asignada. Contacta al administrador para poder crear tickets.');
+            return redirect()->route('dashboard')->with(
+                'error',
+                'No tienes una empresa asignada. Contacta al administrador para poder crear tickets.'
+            );
         }
 
         return view('tickets.create', ['vista' => 'usuario']);
@@ -119,20 +150,31 @@ class TicketController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | STORE — Si admin asigna al crear, valida cobertura del tecnico elegido
+    | STORE
     |--------------------------------------------------------------------------
     */
     public function store(StoreTicketRequest $request): RedirectResponse
     {
-        $user = Auth::user();
-        $esAdmin = $user->hasAnyRole(['admin', 'super-admin']);
+        $user         = Auth::user();
+        $eligeDestino = $this->puedeElegirDestino($user);
 
-        // Si admin asigna técnico al crear, verificar cobertura antes de la transacción
-        if ($esAdmin && $request->filled('asignado_a')) {
+        // 1. La empresa elegida debe estar dentro del alcance del usuario
+        if ($eligeDestino && $request->filled('empresa_id')) {
+            $permitidas = $this->empresasDisponiblesPara($user)->pluck('id');
+
+            if (! $permitidas->contains((int) $request->empresa_id)) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['empresa_id' => 'No tienes cobertura sobre la empresa seleccionada.']);
+            }
+        }
+
+        // 2. Si asigna técnico al crear, verificar su cobertura
+        if ($eligeDestino && $request->filled('asignado_a')) {
             if (! $this->tecnicoTieneCobertura(
-                    (int) $request->asignado_a,
-                    (int) $request->empresa_id,
-                    $request->sede_id ? (int) $request->sede_id : null
+                (int) $request->asignado_a,
+                (int) $request->empresa_id,
+                $request->sede_id ? (int) $request->sede_id : null
             )) {
                 return back()
                     ->withInput()
@@ -140,14 +182,17 @@ class TicketController extends Controller
             }
         }
 
-        $ticket = DB::transaction(function () use ($request, $user, $esAdmin) {
+        $ticket = DB::transaction(function () use ($request, $user, $eligeDestino) {
 
             $data = $request->safe()->only(['titulo', 'categoria', 'prioridad', 'descripcion']);
 
-            if ($esAdmin) {
-                $data['solicitante_id'] = $request->solicitante_id;
-                $data['empresa_id']     = $request->empresa_id;
-                $data['sede_id']        = $request->sede_id;
+            if ($eligeDestino) {
+                // El solicitante puede ser otro usuario, o el propio creador
+                $data['solicitante_id'] = $request->filled('solicitante_id')
+                    ? $request->solicitante_id
+                    : $user->id;
+                $data['empresa_id'] = $request->empresa_id;
+                $data['sede_id']    = $request->sede_id;
 
                 if ($request->filled('asignado_a')) {
                     $data['asignado_a']  = $request->asignado_a;
@@ -171,6 +216,16 @@ class TicketController extends Controller
             return Ticket::create($data);
         });
 
+        // Disparar evento según si quedó asignado o no
+        if ($ticket->asignado_a) {
+            event(new TicketAsignado(
+                $ticket->fresh(['solicitante', 'asignado', 'empresa', 'sede']),
+                $user
+            ));
+        } else {
+            event(new TicketCreado($ticket->fresh(['solicitante', 'empresa'])));
+        }
+
         return redirect()
             ->route('tickets.show', $ticket)
             ->with('success', "Ticket #{$ticket->id} creado correctamente.");
@@ -178,45 +233,62 @@ class TicketController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | ASIGNAR — Valida que el tecnico tenga cobertura para este ticket
+    | ASIGNAR — Valida que el técnico tenga cobertura para este ticket
     |--------------------------------------------------------------------------
     */
     public function asignar(Request $request, Ticket $ticket): RedirectResponse
     {
         abort_unless($request->user()->can('tickets.asignar'), 403);
-        abort_if(in_array($ticket->estado, ['cerrado', 'cancelado']), 422,
-            'No se puede asignar un ticket cerrado o cancelado.');
+        abort_if(
+            in_array($ticket->estado, ['cerrado', 'cancelado']),
+            422,
+            'No se puede asignar un ticket cerrado o cancelado.'
+        );
 
         $data = $request->validate([
             'tecnico_id' => ['required', 'integer', 'exists:users,id'],
         ]);
 
-        // 1. Tecnico activo y con rol tecnico
+        // 1. Usuario activo con un rol que puede recibir asignaciones
         $tecnico = User::where('id', $data['tecnico_id'])
             ->where('activo', true)
-            ->role('tecnico')
+            ->role(Roles::CON_COBERTURA)
             ->first();
 
         if (! $tecnico) {
             return back()->withErrors([
-                'tecnico_id' => 'El usuario seleccionado no es un técnico activo válido.',
+                'tecnico_id' => 'El usuario seleccionado no puede recibir asignaciones de tickets.',
             ]);
         }
 
-        // 2. NUEVO: validar cobertura empresa+sede via empresa_user
+        // 2. Validar cobertura empresa+sede vía empresa_user
         if (! $this->tecnicoTieneCobertura($tecnico->id, $ticket->empresa_id, $ticket->sede_id)) {
             return back()->withErrors([
                 'tecnico_id' => 'Este técnico no tiene cobertura asignada para la empresa/sede de este ticket.',
             ]);
         }
 
-        $primeraAsignacion = is_null($ticket->asignado_a);
+        // Capturar quién era el técnico anterior ANTES del update
+        $asignadoAnteriorId = $ticket->asignado_a;
+        $primeraAsignacion  = is_null($asignadoAnteriorId);
 
         $ticket->update([
             'asignado_a'  => $tecnico->id,
             'estado'      => $ticket->estado === 'en_progreso' ? 'en_progreso' : 'asignado',
             'asignado_at' => $primeraAsignacion ? now() : $ticket->asignado_at,
         ]);
+
+        // Resolver técnico anterior solo si es distinto del nuevo
+        $tecnicoAnterior = null;
+        if ($asignadoAnteriorId && $asignadoAnteriorId !== $tecnico->id) {
+            $tecnicoAnterior = User::find($asignadoAnteriorId);
+        }
+
+        event(new TicketAsignado(
+            $ticket->fresh(['solicitante', 'asignado', 'empresa', 'sede']),
+            $request->user(),
+            $tecnicoAnterior,
+        ));
 
         $msg = $primeraAsignacion
             ? "Ticket #{$ticket->id} asignado a {$tecnico->name}."
@@ -227,7 +299,7 @@ class TicketController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | INICIAR, RESOLVER, CERRAR, CANCELAR, DESTROY — sin cambios
+    | CICLO DE VIDA
     |--------------------------------------------------------------------------
     */
     public function iniciar(Request $request, Ticket $ticket): RedirectResponse
@@ -235,12 +307,20 @@ class TicketController extends Controller
         $user = $request->user();
 
         abort_unless($user->can('tickets.iniciar'), 403);
-        abort_unless($ticket->asignado_a === $user->id, 403,
-            'Solo el técnico asignado puede iniciar este ticket.');
-        abort_unless($ticket->puedeIniciar(), 422,
-            'El ticket no se puede iniciar en su estado actual.');
+        abort_unless(
+            $ticket->asignado_a === $user->id,
+            403,
+            'Solo el técnico asignado puede iniciar este ticket.'
+        );
+        abort_unless(
+            $ticket->puedeIniciar(),
+            422,
+            'El ticket no se puede iniciar en su estado actual.'
+        );
 
         $ticket->update(['estado' => 'en_progreso', 'iniciado_at' => now()]);
+
+        event(new TicketIniciado($ticket->fresh(['solicitante', 'asignado'])));
 
         return back()->with('success', "Ticket #{$ticket->id} iniciado.");
     }
@@ -250,10 +330,16 @@ class TicketController extends Controller
         $user = $request->user();
 
         abort_unless($user->can('tickets.resolver'), 403);
-        abort_unless($ticket->asignado_a === $user->id, 403,
-            'Solo el técnico asignado puede resolver este ticket.');
-        abort_unless($ticket->puedeResolver(), 422,
-            'El ticket debe estar en progreso para marcarlo como resuelto.');
+        abort_unless(
+            $ticket->asignado_a === $user->id,
+            403,
+            'Solo el técnico asignado puede resolver este ticket.'
+        );
+        abort_unless(
+            $ticket->puedeResolver(),
+            422,
+            'El ticket debe estar en progreso para marcarlo como resuelto.'
+        );
 
         $data = $request->validate([
             'notas_resolucion'     => ['required', 'string', 'min:10', 'max:3000'],
@@ -276,16 +362,26 @@ class TicketController extends Controller
 
         $ticket->update($update);
 
+        event(new TicketResuelto($ticket->fresh(['solicitante', 'asignado'])));
+
         return back()->with('success', "Ticket #{$ticket->id} marcado como resuelto.");
     }
 
     public function cerrar(Request $request, Ticket $ticket): RedirectResponse
     {
         abort_unless($request->user()->can('tickets.cerrar'), 403);
-        abort_unless($ticket->puedeCerrar(), 422,
-            'El ticket no se puede cerrar en su estado actual.');
+        abort_unless(
+            $ticket->puedeCerrar(),
+            422,
+            'El ticket no se puede cerrar en su estado actual.'
+        );
 
         $ticket->update(['estado' => 'cerrado', 'cerrado_at' => now()]);
+
+        event(new TicketCerrado(
+            $ticket->fresh(['solicitante', 'asignado']),
+            $request->user(),
+        ));
 
         return back()->with('success', "Ticket #{$ticket->id} cerrado.");
     }
@@ -295,15 +391,27 @@ class TicketController extends Controller
         $user = $request->user();
         abort_unless($user->can('tickets.cancelar'), 403);
 
-        if (! $user->hasAnyRole(['admin', 'super-admin'])) {
-            abort_unless($ticket->solicitante_id === $user->id, 403,
-                'Solo puedes cancelar tus propios tickets.');
+        // Quien no tenga alcance transversal solo cancela sus propios tickets
+        if (! Roles::usuarioCumple($user, 'esTransversal')) {
+            abort_unless(
+                $ticket->solicitante_id === $user->id,
+                403,
+                'Solo puedes cancelar tus propios tickets.'
+            );
         }
 
-        abort_unless($ticket->puedeCancelar(), 422,
-            'El ticket no se puede cancelar en su estado actual.');
+        abort_unless(
+            $ticket->puedeCancelar(),
+            422,
+            'El ticket no se puede cancelar en su estado actual.'
+        );
 
         $ticket->update(['estado' => 'cancelado']);
+
+        event(new TicketCancelado(
+            $ticket->fresh(['solicitante', 'asignado']),
+            $user,
+        ));
 
         return back()->with('success', "Ticket #{$ticket->id} cancelado.");
     }
@@ -333,20 +441,60 @@ class TicketController extends Controller
     // ─────────────────────────────────────────────────────────────────────
 
     /**
+     * ¿Este usuario ELIGE el destino del ticket (empresa/sede), o lo hereda?
+     * Se decide por grupo de rol, no por strings sueltos.
+     */
+    private function puedeElegirDestino(User $user): bool
+    {
+        return Roles::usuarioCumple($user, 'eligeDestinoTicket');
+    }
+
+    /**
+     * Empresas sobre las que este usuario puede crear tickets.
+     *  - Transversales (admin, gerente, líder de ventas): todas las activas.
+     *  - Con cobertura (técnico, líder técnico): solo las de empresa_user.
+     *  - Resto: colección vacía (usan la vista 'usuario' y heredan la suya).
+     */
+    private function empresasDisponiblesPara(User $user)
+    {
+        if (Roles::usuarioCumple($user, 'esTransversal')) {
+            return Empresa::activas()->orderBy('nombre')->get(['id', 'nombre']);
+        }
+
+        if (Roles::usuarioCumple($user, 'requiereCobertura')) {
+            $ids = DB::table('empresa_user')
+                ->where('user_id', $user->id)
+                ->distinct()
+                ->pluck('empresa_id');
+
+            return Empresa::activas()
+                ->whereIn('id', $ids)
+                ->orderBy('nombre')
+                ->get(['id', 'nombre']);
+        }
+
+        return collect();
+    }
+
+    /**
      * Verifica si un técnico tiene cobertura asignada en empresa_user
      * para el contexto (empresa, sede) dado.
      *
-     * Si $empresaId es null, devuelve true (no hay restricción).
+     * Si $empresaId es null, devuelve true (no hay restricción que validar).
      */
     private function tecnicoTieneCobertura(int $tecnicoId, ?int $empresaId, ?int $sedeId): bool
     {
-        if (! $empresaId) return true;
+        if (! $empresaId) {
+            return true;
+        }
 
         return DB::table('empresa_user')
             ->where('user_id', $tecnicoId)
             ->where('empresa_id', $empresaId)
             ->where(function ($q) use ($sedeId) {
+                // Cobertura global de la empresa (sede_id NULL) siempre sirve
                 $q->whereNull('sede_id');
+                // O cobertura puntual de esa sede
                 if ($sedeId) {
                     $q->orWhere('sede_id', $sedeId);
                 }
@@ -376,14 +524,14 @@ class TicketController extends Controller
     private function aplicarFiltros(Builder $query, Request $request): void
     {
         $query
-            ->when($request->filled('estado'),     fn($q) => $q->where('estado', $request->estado))
-            ->when($request->filled('prioridad'),  fn($q) => $q->where('prioridad', $request->prioridad))
-            ->when($request->filled('categoria'),  fn($q) => $q->where('categoria', $request->categoria))
-            ->when($request->filled('empresa_id'), fn($q) => $q->where('empresa_id', $request->empresa_id))
-            ->when($request->boolean('sin_asignar'), fn($q) => $q->whereNull('asignado_a'))
+            ->when($request->filled('estado'),      fn ($q) => $q->where('estado', $request->estado))
+            ->when($request->filled('prioridad'),   fn ($q) => $q->where('prioridad', $request->prioridad))
+            ->when($request->filled('categoria'),   fn ($q) => $q->where('categoria', $request->categoria))
+            ->when($request->filled('empresa_id'),  fn ($q) => $q->where('empresa_id', $request->empresa_id))
+            ->when($request->boolean('sin_asignar'), fn ($q) => $q->whereNull('asignado_a'))
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%' . trim($request->q) . '%';
-                $q->where(fn($sub) => $sub
+                $q->where(fn ($sub) => $sub
                     ->where('titulo', 'like', $term)
                     ->orWhere('descripcion', 'like', $term));
             });
@@ -392,7 +540,7 @@ class TicketController extends Controller
     private function filtrosActivos(Request $request): array
     {
         return collect($request->only(['estado', 'prioridad', 'categoria', 'empresa_id', 'sin_asignar', 'q']))
-            ->filter(fn($v) => $v !== null && $v !== '')
+            ->filter(fn ($v) => $v !== null && $v !== '')
             ->toArray();
     }
 

@@ -1,66 +1,63 @@
+{{-- resources/views/layouts/partials/navbar-notificaciones.blade.php --}}
+
 @php
     $usuarioAuth        = auth()->user();
     $notifsNoLeidasCount = $usuarioAuth->unreadNotifications()->count();
     $notifsRecientes     = $usuarioAuth->notifications()->latest()->limit(6)->get();
 @endphp
 
-<div class="relative" x-data="{ open: false }">
-
-    {{-- Botón de campana --}}
-    <button @click="open = !open"
-        class="relative p-2 rounded-full text-gray-400 hover:bg-[#2d2d2d] hover:text-white focus:outline-none transition-colors"
-        aria-label="Notificaciones">
-        <i class="fas fa-bell text-sm"></i>
+<li class="relative" x-data="{ dropdownOpen: false }" @click.outside="dropdownOpen = false">
+    {{-- Botón de Campana --}}
+    <a class="relative flex h-8.5 w-8.5 items-center justify-center rounded-full border-[0.5px] border-stroke bg-gray hover:text-primary dark:border-strokedark dark:bg-meta-4 dark:text-white"
+       href="#" @click.prevent="dropdownOpen = !dropdownOpen">
+        <i class="fas fa-bell text-xs"></i>
+        
         @if ($notifsNoLeidasCount > 0)
-            <span class="absolute top-0 right-0 min-w-[16px] h-[16px] px-1 rounded-full bg-red-500 text-white text-[9px] font-black flex items-center justify-center leading-none">
-                {{ $notifsNoLeidasCount > 99 ? '99+' : $notifsNoLeidasCount }}
+            <span class="absolute -top-0.5 right-0 z-1 h-3 w-3 rounded-full bg-meta-1">
+                <span class="absolute -z-1 inline-flex h-full w-full animate-ping rounded-full bg-meta-1 opacity-75"></span>
             </span>
         @endif
-    </button>
+    </a>
 
-    {{-- Dropdown --}}
-    <div x-show="open" @click.away="open = false"
-        x-transition:enter="transition ease-out duration-100"
-        x-transition:enter-start="transform opacity-0 scale-95"
-        class="absolute right-0 mt-3 w-[420px] max-w-[calc(100vw-2rem)] bg-[#1e1e1e] rounded-xl shadow-2xl border border-gray-800 z-50 overflow-hidden"
-        x-cloak>
-
+    {{-- Dropdown de Notificaciones --}}
+    <div x-show="dropdownOpen" x-cloak
+         class="absolute -right-27 mt-2.5 flex h-90 w-80 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark sm:right-0 sm:w-96">
+        
         {{-- Cabecera --}}
-        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-stroke dark:border-strokedark">
             <div>
-                <p class="text-xs font-black text-white uppercase tracking-widest">Notificaciones</p>
-                @if ($notifsNoLeidasCount > 0)
-                    <p class="text-[10px] text-[#007acc] font-bold mt-0.5">{{ $notifsNoLeidasCount }} sin leer</p>
-                @else
-                    <p class="text-[10px] text-gray-500 mt-0.5">Al día</p>
-                @endif
+                <h5 class="text-xs font-bold text-black dark:text-white uppercase tracking-wider">Notificaciones</h5>
+                <p class="text-[10px] text-bodydark2">{{ $notifsNoLeidasCount }} pendientes</p>
             </div>
+
             @if ($notifsNoLeidasCount > 0)
                 <form action="{{ route('notificaciones.marcar-todas') }}" method="POST">
                     @csrf
-                    <button type="submit" class="text-[10px] text-gray-400 hover:text-[#007acc] font-bold uppercase tracking-wider transition-colors">
-                        <i class="fas fa-check-double mr-1"></i> Marcar todas
+                    <button type="submit" class="text-[10px] font-bold uppercase text-primary hover:underline">
+                        Marcar todas
                     </button>
                 </form>
             @endif
         </div>
 
-        {{-- Lista --}}
-        <div class="max-h-[480px] overflow-y-auto">
+        {{-- Contenedor de Items --}}
+        <ul class="flex h-auto flex-col overflow-y-auto no-scrollbar">
             @forelse ($notifsRecientes as $notif)
-                @include('layouts.partials._notificacion_item', ['notif' => $notif, 'compact' => true])
+                <li>
+                    @include('layouts.partials._notificacion_item', ['notif' => $notif, 'compact' => true])
+                </li>
             @empty
-                <div class="text-center py-10 px-4">
-                    <i class="fas fa-bell-slash text-2xl text-gray-700 mb-2"></i>
-                    <p class="text-xs text-gray-500">Sin notificaciones aún</p>
-                </div>
+                <li class="p-6 text-center text-xs text-bodydark2">
+                    <i class="fas fa-bell-slash text-xl mb-1 block text-strokedark"></i>
+                    Sin notificaciones aún.
+                </li>
             @endforelse
-        </div>
+        </ul>
 
-        {{-- Pie --}}
+        {{-- Footer --}}
         <a href="{{ route('notificaciones.index') }}"
-           class="block text-center px-4 py-3 border-t border-gray-800 text-[11px] font-bold text-[#007acc] hover:bg-[#2d2d2d] uppercase tracking-widest transition-colors">
-            Ver todas
+           class="block border-t border-stroke py-2 text-center text-xs font-bold uppercase text-primary hover:bg-gray dark:border-strokedark dark:hover:bg-meta-4">
+            Ver todas las notificaciones
         </a>
     </div>
-</div>
+</li>

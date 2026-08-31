@@ -2,11 +2,6 @@
 <x-app-layout>
     <x-slot name="title">Ticket #{{ $ticket->id }}</x-slot>
 
-    @push('styles')
-        <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
-    @endpush
-
     @php
         // ── Precómputo de permisos y estados ─────────────────────────────
         $user = auth()->user();
@@ -39,11 +34,10 @@
         $esCancelado = $ticket->estado === 'cancelado';
 
         if ($esCancelado) {
-            // Si fue cancelado, determinar el último estado real alcanzado
             $indiceActual = match (true) {
-                $ticket->iniciado_at !== null => 2, // en_progreso
-                $ticket->asignado_at !== null => 1, // asignado
-                default                       => 0, // abierto
+                $ticket->iniciado_at !== null => 2,
+                $ticket->asignado_at !== null => 1,
+                default                       => 0,
             };
         } else {
             $indiceActual = $indices[$ticket->estado] ?? 0;
@@ -51,158 +45,205 @@
     @endphp
 
     {{-- ── Cabecera ────────────────────────────────────────────────────── --}}
-    <div class="db-header mb-5 flex items-start justify-between flex-wrap gap-3">
-        <div style="min-width: 0; flex: 1;">
-            <h4 style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
-                <span style="color: var(--db-text-muted); font-weight: 500;">#{{ $ticket->id }}</span>
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="text-title-md2 font-bold text-black dark:text-white flex items-center gap-2">
+                <span class="font-mono text-bodydark2">#{{ $ticket->id }}</span>
                 <span>{{ $ticket->titulo }}</span>
-            </h4>
-            <p>
-                Reportado por <strong style="color: var(--db-text);">{{ $ticket->solicitante->name }}</strong>
+            </h2>
+            <p class="text-sm text-bodydark2 mt-1">
+                Reportado por <strong class="text-black dark:text-white">{{ $ticket->solicitante?->name ?? 'Usuario Eliminado' }}</strong>
                 · {{ $ticket->created_at->diffForHumans() }}
             </p>
         </div>
-        <a href="{{ route('tickets.index') }}" class="db-btn ghost">
-            <i class="fas fa-arrow-left"></i> Volver al listado
+        
+        <a href="{{ route('tickets.index') }}" 
+           class="inline-flex items-center justify-center gap-2.5 rounded-md border border-stroke py-2 px-4 text-center font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition shadow-sm">
+            <i class="fas fa-arrow-left"></i> Volver al Listado
         </a>
     </div>
 
-    {{-- Flash --}}
+    {{-- Flash Alerts --}}
     @if (session('success'))
-        <div class="form-alert success">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        <div class="mb-6 flex w-full border-l-6 border-meta-3 bg-meta-3/10 px-7 py-4 shadow-md dark:bg-meta-3/20 dark:border-meta-3 rounded-sm">
+            <div class="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-meta-3 text-white shrink-0">
+                <i class="fas fa-check text-lg"></i>
+            </div>
+            <div class="w-full">
+                <h5 class="mb-1 font-bold text-meta-3">Operación exitosa</h5>
+                <p class="text-sm text-meta-3">{{ session('success') }}</p>
+            </div>
         </div>
     @endif
+
     @if (session('error') || $errors->any())
-        <div class="form-alert error">
-            <i class="fas fa-exclamation-circle"></i>
-            {{ session('error') ?? $errors->first() }}
+        <div class="mb-6 flex w-full border-l-6 border-meta-1 bg-meta-1/10 px-7 py-4 shadow-md dark:bg-meta-1/20 dark:border-meta-1 rounded-sm">
+            <div class="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-meta-1 text-white shrink-0">
+                <i class="fas fa-exclamation-circle text-lg"></i>
+            </div>
+            <div class="w-full">
+                <h5 class="mb-1 font-bold text-meta-1">Error</h5>
+                <p class="text-sm text-meta-1">{{ session('error') ?? $errors->first() }}</p>
+            </div>
         </div>
     @endif
 
-    {{-- ── Card del ciclo de vida (stepper + estado actual) ───────────── --}}
-    <div class="db-card" style="margin-bottom: 1.25rem;">
+    {{-- ── Card Ciclo de Vida (Stepper NATIVO TailAdmin) ───────────────────── --}}
+    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-6">
+        <div class="border-b border-stroke py-4 px-6 dark:border-strokedark flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-bold text-bodydark2 uppercase tracking-wider">Estado Actual:</span>
+                
+                @php
+                    $colorEstado = match($ticket->estado) {
+                        'resuelto' => 'bg-meta-3/10 text-meta-3',
+                        'en_progreso' => 'bg-meta-6/10 text-meta-6',
+                        'cerrado','cancelado' => 'bg-meta-1/10 text-meta-1',
+                        default => 'bg-primary/10 text-primary',
+                    };
+                    $colorPrio = match($ticket->prioridad) {
+                        'critica' => 'bg-meta-1/10 text-meta-1',
+                        'alta' => 'bg-meta-6/10 text-meta-6',
+                        default => 'bg-primary/10 text-primary',
+                    };
+                @endphp
 
-        {{-- Estado actual destacado --}}
-        <div class="db-current-state">
-            <div class="db-current-state-info">
-                <div class="db-current-state-label">Estado actual</div>
-                <span class="db-badge {{ $ticket->estado }}" style="font-size: 0.8rem; padding: 0.35rem 0.9rem;">
+                <span class="inline-flex rounded-full py-1 px-3 text-xs font-bold uppercase {{ $colorEstado }}">
                     {{ $ticket->label_estado }}
                 </span>
-                <span class="db-badge {{ $ticket->prioridad }}" style="font-size: 0.75rem; padding: 0.3rem 0.75rem;">
+                <span class="inline-flex rounded-full py-1 px-3 text-xs font-bold uppercase {{ $colorPrio }}">
                     Prioridad {{ $ticket->label_prioridad }}
                 </span>
             </div>
-            <div class="db-sub" style="display: flex; align-items: center; gap: 0.4rem;">
-                <i class="fas fa-tag"></i> {{ $ticket->label_categoria }}
+
+            <div class="text-xs text-bodydark2 font-mono flex items-center gap-1.5">
+                <i class="fas {{ $ticket->icono_categoria }}"></i> {{ $ticket->label_categoria }}
             </div>
         </div>
 
-        {{-- Banner si fue cancelado --}}
         @if ($esCancelado)
-            <div class="db-cancel-banner" style="margin-top: 1rem;">
-                <i class="fas fa-ban"></i>
+            <div class="m-6 p-4 rounded-sm bg-meta-1/10 border border-meta-1/30 text-meta-1 text-xs flex items-center gap-3">
+                <i class="fas fa-ban text-base shrink-0"></i>
                 <div>
-                    <strong>Ticket cancelado</strong> · {{ $ticket->updated_at->translatedFormat('d \\d\\e F, Y H:i') }}
+                    <strong class="font-bold">Ticket Cancelado</strong> · {{ $ticket->updated_at->translatedFormat('d \\d\\e F, Y H:i') }}
                 </div>
             </div>
         @endif
 
-        {{-- Stepper --}}
-        <div class="db-stepper">
-            @foreach ($flujo as $i => $step)
-                @php
-                    if ($esCancelado) {
-                        $clase = $i <= $indiceActual ? 'completed' : 'cancelled';
-                    } else {
-                        $clase = match (true) {
-                            $i <  $indiceActual => 'completed',
-                            $i === $indiceActual => 'current',
-                            default              => 'pending',
-                        };
-                    }
-                @endphp
+        {{-- Stepper TailAdmin --}}
+        <div class="p-6 overflow-x-auto">
+            <div class="flex items-center justify-between min-w-[600px] relative">
+                @foreach ($flujo as $i => $step)
+                    @php
+                        if ($esCancelado) {
+                            $isDone = $i <= $indiceActual;
+                            $isCurrent = false;
+                            $isCancelled = $i > $indiceActual;
+                        } else {
+                            $isDone = $i < $indiceActual;
+                            $isCurrent = $i === $indiceActual;
+                            $isCancelled = false;
+                        }
+                    @endphp
 
-                <div class="db-step {{ $clase }}">
-                    <div class="db-step-circle">
-                        @if ($clase === 'completed')
-                            <i class="fas fa-check"></i>
-                        @elseif ($clase === 'cancelled')
-                            <i class="fas fa-times"></i>
-                        @elseif ($clase === 'current')
-                            <i class="fas fa-circle" style="font-size: 0.6rem;"></i>
-                        @else
-                            {{ $i + 1 }}
-                        @endif
-                    </div>
-                    <div class="db-step-label">{{ $step['label'] }}</div>
-                    <div class="db-step-date">
-                        {{ $step['date']?->format('d/m H:i') ?? '—' }}
-                    </div>
-                </div>
+                    <div class="flex flex-col items-center relative z-10">
+                        {{-- Círculo Indicador --}}
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition border-2 
+                            {{ $isDone ? 'bg-primary border-primary text-white' : '' }}
+                            {{ $isCurrent ? 'bg-white dark:bg-boxdark border-primary text-primary shadow-md' : '' }}
+                            {{ !$isDone && !$isCurrent ? 'bg-gray border-stroke dark:border-strokedark text-bodydark2 dark:bg-meta-4' : '' }}">
+                            
+                            @if ($isDone)
+                                <i class="fas fa-check"></i>
+                            @elseif ($isCurrent)
+                                <i class="fas fa-circle text-[8px] animate-pulse"></i>
+                            @else
+                                {{ $i + 1 }}
+                            @endif
+                        </div>
 
-                @if (! $loop->last)
-                    <div class="db-step-connector {{ $i < $indiceActual ? 'completed' : '' }}"></div>
-                @endif
-            @endforeach
+                        {{-- Textos del Paso --}}
+                        <span class="text-xs font-bold uppercase mt-2 {{ $isDone || $isCurrent ? 'text-black dark:text-white' : 'text-bodydark2' }}">
+                            {{ $step['label'] }}
+                        </span>
+                        <span class="text-[10px] font-mono text-bodydark2">
+                            {{ $step['date']?->format('d/m H:i') ?? '—' }}
+                        </span>
+                    </div>
+
+                    {{-- Conector entre Pasos --}}
+                    @if (! $loop->last)
+                        <div class="flex-1 h-0.5 mx-2 -mt-7 transition {{ $i < $indiceActual ? 'bg-primary' : 'bg-stroke dark:bg-strokedark' }}"></div>
+                    @endif
+                @endforeach
+            </div>
         </div>
     </div>
 
-    {{-- ── Contenido: dos columnas ──────────────────────────────────────── --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    {{-- ── Contenido Principal & Lateral ─────────────────────────────────── --}}
+    <div class="grid grid-cols-12 gap-4 md:gap-6 2xl:gap-7.5">
 
-        {{-- ── Columna principal ─────────────────────────────────────── --}}
-        <div class="lg:col-span-2 space-y-4">
+        {{-- COLUMNA PRINCIPAL (8 cols) --}}
+        <div class="col-span-12 lg:col-span-8 space-y-6">
 
-            {{-- Descripción del problema --}}
-            <div class="db-card">
-                <div class="db-card-header"><span>Descripción del problema</span></div>
-                <div class="form-card-body">
-                    <p style="color: var(--db-text); font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap;">{{ $ticket->descripcion }}</p>
+            {{-- Descripción del Problema --}}
+            <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                <div class="border-b border-stroke py-4 px-6 dark:border-strokedark">
+                    <h3 class="font-bold text-black dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                        <i class="fas fa-align-left text-primary"></i> Descripción del Problema
+                    </h3>
+                </div>
+                <div class="p-6 text-sm text-black dark:text-white leading-relaxed whitespace-pre-wrap">
+                    {{ $ticket->descripcion }}
                 </div>
             </div>
 
-            {{-- Foto adjunta del solicitante --}}
+            {{-- Adjunto del Solicitante --}}
             @if ($ticket->foto_solicitud)
-                <div class="db-card">
-                    <div class="db-card-header"><span>Imagen adjunta por el solicitante</span></div>
-                    <div class="form-card-body">
+                <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                    <div class="border-b border-stroke py-4 px-6 dark:border-strokedark">
+                        <h3 class="font-bold text-black dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-paperclip text-primary"></i> Archivo Adjunto del Solicitante
+                        </h3>
+                    </div>
+                    <div class="p-6">
                         <a href="{{ $ticket->foto_solicitud_url }}" target="_blank" rel="noopener">
-                            <img src="{{ $ticket->foto_solicitud_url }}"
-                                 alt="Foto del ticket"
-                                 style="max-width: 100%; border-radius: 0.5rem; border: 1px solid var(--db-border);">
+                            <img src="{{ $ticket->foto_solicitud_url }}" alt="Foto del ticket"
+                                 class="max-w-full rounded border border-stroke dark:border-strokedark">
                         </a>
                     </div>
                 </div>
             @endif
 
-            {{-- Resolución (si ya fue resuelto) --}}
+            {{-- Resolución (si aplica) --}}
             @if ($ticket->notas_resolucion || $ticket->evidencia_resolucion)
-                <div class="db-card">
-                    <div class="db-card-header">
-                        <span><i class="fas fa-check-circle" style="color: #4ade80;"></i> Resolución</span>
+                <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                    <div class="border-b border-stroke py-4 px-6 dark:border-strokedark">
+                        <h3 class="font-bold text-meta-3 text-xs uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-check-circle"></i> Detalles de la Resolución
+                        </h3>
                     </div>
-                    <div class="form-card-body">
+                    <div class="p-6 space-y-4">
                         @if ($ticket->notas_resolucion)
-                            <p style="color: var(--db-text); font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap;">{{ $ticket->notas_resolucion }}</p>
+                            <p class="text-sm text-black dark:text-white leading-relaxed whitespace-pre-wrap">
+                                {{ $ticket->notas_resolucion }}
+                            </p>
                         @endif
 
                         @if ($ticket->evidencia_resolucion)
-                            <div style="margin-top: 1rem;">
+                            <div>
                                 <a href="{{ $ticket->evidencia_resolucion_url }}" target="_blank" rel="noopener">
-                                    <img src="{{ $ticket->evidencia_resolucion_url }}"
-                                         alt="Evidencia de resolución"
-                                         style="max-width: 100%; border-radius: 0.5rem; border: 1px solid var(--db-border);">
+                                    <img src="{{ $ticket->evidencia_resolucion_url }}" alt="Evidencia de resolución"
+                                         class="max-w-full rounded border border-stroke dark:border-strokedark">
                                 </a>
                             </div>
                         @endif
 
-                        @if ($ticket->resuelto_at && $ticket->asignado)
-                            <p class="db-sub" style="margin-top: 0.75rem;">
-                                Resuelto por <strong style="color: var(--db-text);">{{ $ticket->asignado->name }}</strong>
+                        @if ($ticket->resuelto_at)
+                            <div class="text-xs text-bodydark2 pt-3 border-t border-stroke dark:border-strokedark">
+                                Resuelto por <strong class="text-black dark:text-white">{{ $ticket->asignado?->name ?? 'Técnico Eliminado' }}</strong>
                                 el {{ $ticket->resuelto_at->translatedFormat('d \\d\\e F, Y H:i') }}
-                            </p>
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -210,140 +251,136 @@
 
         </div>
 
-        {{-- ── Columna lateral ───────────────────────────────────────── --}}
-        <div class="space-y-4">
+        {{-- COLUMNA LATERAL (4 cols) --}}
+        <div class="col-span-12 lg:col-span-4 space-y-6">
 
-            {{-- ===== ACCIONES DISPONIBLES ===== --}}
-            <div class="db-card">
-                <div class="db-card-header"><span><i class="fas fa-bolt"></i> Acciones</span></div>
-                <div class="form-card-body" style="padding: 1rem 1.25rem;">
-
+            {{-- ACCIONES DISPONIBLES --}}
+            <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                <div class="border-b border-stroke py-4 px-6 dark:border-strokedark">
+                    <h3 class="font-bold text-black dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                        <i class="fas fa-bolt text-primary"></i> Acciones Disponibles
+                    </h3>
+                </div>
+                
+                <div class="p-5 space-y-3">
                     @if (! $hayAcciones && ! $puedeEliminar)
-                        <p style="color: var(--db-text-muted); font-size: 0.8rem; text-align: center; padding: 0.5rem 0;">
-                            No hay acciones disponibles en este estado.
+                        <p class="text-xs text-bodydark2 text-center py-2 italic">
+                            No hay acciones disponibles en el estado actual.
                         </p>
                     @endif
 
-                    {{-- 1) INICIAR (técnico asignado) ──────────────────── --}}
+                    {{-- 1) INICIAR --}}
                     @if ($puedeIniciar)
-                        <form method="POST" action="{{ route('tickets.iniciar', $ticket) }}" style="margin-bottom: 0.75rem;">
+                        <form method="POST" action="{{ route('tickets.iniciar', $ticket) }}">
                             @csrf
-                            <button type="submit" class="db-btn solid w-full">
-                                <i class="fas fa-play"></i> Iniciar trabajo
+                            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded bg-primary py-2.5 px-4 text-xs font-bold uppercase text-white hover:bg-opacity-90 transition">
+                                <i class="fas fa-play text-[10px]"></i> Iniciar Trabajo
                             </button>
                         </form>
                     @endif
 
-                    {{-- 2) RESOLVER (técnico asignado, ticket en progreso) — inline form --}}
+                    {{-- 2) RESOLVER --}}
                     @if ($puedeResolver)
-                        <div x-data="{ open: false }" style="margin-bottom: 0.75rem;">
-                            <button type="button" @click="open = !open" class="db-btn solid w-full">
-                                <i class="fas fa-check"></i>
-                                <span x-text="open ? 'Cancelar' : 'Marcar como resuelto'"></span>
+                        <div x-data="{ open: false }">
+                            <button type="button" @click="open = !open" 
+                                    class="w-full inline-flex items-center justify-center gap-2 rounded bg-meta-3 py-2.5 px-4 text-xs font-bold uppercase text-white hover:bg-opacity-90 transition">
+                                <i class="fas fa-check text-[10px]"></i>
+                                <span x-text="open ? 'Cancelar' : 'Marcar como Resuelto'"></span>
                             </button>
 
-                            <div x-show="open" x-cloak x-collapse style="margin-top: 0.75rem;">
-                                <form method="POST" action="{{ route('tickets.resolver', $ticket) }}"
-                                      enctype="multipart/form-data">
+                            <div x-show="open" x-cloak class="mt-3 pt-3 border-t border-stroke dark:border-strokedark">
+                                <form method="POST" action="{{ route('tickets.resolver', $ticket) }}" enctype="multipart/form-data" class="space-y-3">
                                     @csrf
 
-                                    <div class="form-group" style="margin-bottom: 0.75rem;">
-                                        <label class="form-label">
-                                            Notas de resolución <span class="required">*</span>
+                                    <div>
+                                        <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                                            Notas de Resolución <span class="text-meta-1">*</span>
                                         </label>
-                                        <textarea name="notas_resolucion" rows="4" required minlength="10"
-                                                  placeholder="¿Qué hiciste para resolver el problema?"
-                                                  class="form-textarea">{{ old('notas_resolucion') }}</textarea>
+                                        <textarea name="notas_resolucion" rows="3" required minlength="10"
+                                                  placeholder="Describe la solución aplicada..."
+                                                  class="w-full rounded border border-stroke bg-transparent py-2 px-3 text-xs outline-none focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white">{{ old('notas_resolucion') }}</textarea>
                                     </div>
 
-                                    <div class="form-group" style="margin-bottom: 0.75rem;" x-data="{ nombre: '' }">
-                                        <label class="form-label">Evidencia (opcional)</label>
-                                        <label class="form-file-wrap" style="padding: 0.5rem 0.75rem;">
-                                            <div class="form-file-icon" style="width: 1.75rem; height: 1.75rem;">
-                                                <i class="fas fa-camera" style="font-size: 0.7rem;"></i>
-                                            </div>
-                                            <div>
-                                                <div class="form-file-text" x-text="nombre || 'Adjuntar imagen'"></div>
-                                                <div class="form-file-hint">JPG, PNG — máx. 5MB</div>
-                                            </div>
-                                            <input type="file" name="evidencia_resolucion" accept="image/*"
-                                                   @change="nombre = $event.target.files[0]?.name ?? ''">
-                                        </label>
+                                    <div>
+                                        <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">Evidencia (Opcional)</label>
+                                        <input type="file" name="evidencia_resolucion" accept="image/*"
+                                               class="w-full cursor-pointer rounded border border-stroke bg-transparent text-xs text-bodydark2 outline-none file:mr-2 file:border-0 file:bg-gray-2 file:py-1 file:px-2 file:text-xs dark:border-form-strokedark dark:file:bg-meta-4 dark:file:text-white">
                                     </div>
 
-                                    <button type="submit" class="db-btn solid w-full">
-                                        <i class="fas fa-check-double"></i> Confirmar resolución
+                                    <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 rounded bg-meta-3 py-2 px-4 text-xs font-bold uppercase text-white hover:bg-opacity-90 transition">
+                                        <i class="fas fa-check-double text-[10px]"></i> Confirmar Resolución
                                     </button>
                                 </form>
                             </div>
                         </div>
                     @endif
 
-                    {{-- 3) ASIGNAR / REASIGNAR (admin) ──────────────────── --}}
+                    {{-- 3) ASIGNAR / REASIGNAR --}}
                     @if ($puedeAsignar)
-                        <div style="margin-bottom: 0.75rem;">
-                            <div class="form-label" style="margin-bottom: 0.4rem;">
-                                {{ $ticket->asignado_a ? 'Reasignar técnico' : 'Asignar técnico' }}
-                            </div>
+                        <div>
+                            <label class="mb-1.5 block text-[10px] font-bold uppercase text-black dark:text-white">
+                                {{ $ticket->asignado_a ? 'Reasignar Técnico' : 'Asignar Técnico' }}
+                            </label>
                             <form method="POST" action="{{ route('tickets.asignar', $ticket) }}">
                                 @csrf
-                                <select name="tecnico_id"
-                                        onchange="if(this.value && this.value != '{{ $ticket->asignado_a }}') this.form.submit()"
-                                        class="form-select">
-                                    <option value="">— Elegir técnico —</option>
-                                    @foreach ($tecnicos as $tecnico)
-                                        <option value="{{ $tecnico->id }}" @selected($ticket->asignado_a == $tecnico->id)>
-                                            {{ $tecnico->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <div class="relative z-20">
+                                    <select name="tecnico_id"
+                                            onchange="if(this.value && this.value != '{{ $ticket->asignado_a }}') this.form.submit()"
+                                            class="w-full appearance-none rounded border border-stroke bg-transparent py-2 px-3 text-xs outline-none focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white cursor-pointer">
+                                        <option value="" class="bg-[#1c2434] text-gray-400">— Elegir técnico —</option>
+                                        @foreach ($tecnicos as $tecnico)
+                                            <option value="{{ $tecnico->id }}" @selected($ticket->asignado_a == $tecnico->id) class="bg-[#1c2434] text-white">
+                                                {{ $tecnico->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <span class="absolute top-1/2 right-3 -translate-y-1/2 z-30 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-[10px] text-bodydark2"></i>
+                                    </span>
+                                </div>
                             </form>
                         </div>
                     @endif
 
-                    {{-- 4) CERRAR (admin) ──────────────────────────────── --}}
+                    {{-- 4) CERRAR --}}
                     @if ($puedeCerrar)
                         <form method="POST" action="{{ route('tickets.cerrar', $ticket) }}"
-                              onsubmit="return confirm('¿Cerrar definitivamente el ticket #{{ $ticket->id }}?')"
-                              style="margin-bottom: 0.75rem;">
+                              onsubmit="return confirm('¿Cerrar definitivamente el ticket #{{ $ticket->id }}?')">
                             @csrf
-                            <button type="submit" class="db-btn outline w-full">
-                                <i class="fas fa-lock"></i> Cerrar ticket
+                            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded border border-stroke py-2.5 px-4 text-xs font-bold uppercase text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition">
+                                <i class="fas fa-lock text-[10px]"></i> Cerrar Ticket
                             </button>
                         </form>
                     @endif
 
-                    {{-- 5) EDITAR ──────────────────────────────────────── --}}
+                    {{-- 5) EDITAR --}}
                     @if ($puedeEditar)
-                        <a href="{{ route('tickets.edit', $ticket) }}" class="db-btn ghost w-full" style="margin-bottom: 0.75rem;">
-                            <i class="fas fa-pen"></i> Editar ticket
+                        <a href="{{ route('tickets.edit', $ticket) }}" 
+                           class="w-full inline-flex items-center justify-center gap-2 rounded border border-stroke py-2.5 px-4 text-xs font-bold uppercase text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition">
+                            <i class="fas fa-pen text-[10px]"></i> Editar Ticket
                         </a>
                     @endif
 
-                    {{-- 6) CANCELAR ────────────────────────────────────── --}}
+                    {{-- 6) CANCELAR --}}
                     @if ($puedeCancelarT)
                         <form method="POST" action="{{ route('tickets.cancelar', $ticket) }}"
-                              onsubmit="return confirm('¿Cancelar el ticket #{{ $ticket->id }}?')"
-                              style="margin-bottom: 0.75rem;">
+                              onsubmit="return confirm('¿Cancelar el ticket #{{ $ticket->id }}?')">
                             @csrf
-                            <button type="submit" class="db-btn ghost w-full">
-                                <i class="fas fa-ban"></i> Cancelar ticket
+                            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded border border-meta-1/30 text-meta-1 py-2.5 px-4 text-xs font-bold uppercase hover:bg-meta-1/10 transition">
+                                <i class="fas fa-ban text-[10px]"></i> Cancelar Ticket
                             </button>
                         </form>
                     @endif
 
-                    {{-- 7) ELIMINAR (super-admin — zona peligrosa) ──────── --}}
+                    {{-- 7) ELIMINAR --}}
                     @if ($puedeEliminar)
-                        <div class="db-danger-zone">
-                            <div class="db-danger-zone-label">
-                                <i class="fas fa-exclamation-triangle"></i> Zona peligrosa
-                            </div>
+                        <div class="pt-2 border-t border-stroke dark:border-strokedark">
                             <form method="POST" action="{{ route('tickets.destroy', $ticket) }}"
-                                  onsubmit="return confirm('¿Eliminar PERMANENTEMENTE el ticket #{{ $ticket->id }}? Esta acción no se puede deshacer.')">
+                                  onsubmit="return confirm('¿Eliminar PERMANENTEMENTE el ticket #{{ $ticket->id }}?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="db-btn danger-outline w-full">
-                                    <i class="fas fa-trash"></i> Eliminar ticket
+                                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded bg-meta-1/10 text-meta-1 py-2.5 px-4 text-xs font-bold uppercase hover:bg-meta-1/20 transition">
+                                    <i class="fas fa-trash-alt text-[10px]"></i> Eliminar Ticket
                                 </button>
                             </form>
                         </div>
@@ -352,60 +389,79 @@
                 </div>
             </div>
 
-            {{-- ===== PERSONAS ===== --}}
-            <div class="db-card">
-                <div class="db-card-header"><span>Personas</span></div>
-                <div class="form-card-body" style="padding: 1rem 1.25rem;">
-
-                    <div style="margin-bottom: 1rem;">
-                        <div class="form-label" style="margin-bottom: 0.4rem;">Solicitante</div>
-                        <div class="flex items-center gap-2">
-                            <div class="db-avatar">{{ substr($ticket->solicitante->name, 0, 1) }}</div>
-                            <div style="min-width: 0;">
-                                <div style="color: var(--db-text); font-size: 0.85rem; font-weight: 600;">{{ $ticket->solicitante->name }}</div>
-                                <div class="db-sub" style="overflow: hidden; text-overflow: ellipsis;">{{ $ticket->solicitante->email }}</div>
+            {{-- PERSONAS ENVOLUCRADAS --}}
+            <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                <div class="border-b border-stroke py-4 px-6 dark:border-strokedark">
+                    <h3 class="font-bold text-black dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                        <i class="fas fa-users text-primary"></i> Personas
+                    </h3>
+                </div>
+                <div class="p-5 space-y-4">
+                    {{-- Solicitante --}}
+                    <div>
+                        <span class="text-[10px] font-bold text-bodydark2 uppercase block mb-1">Solicitante</span>
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs shrink-0">
+                                {{ substr($ticket->solicitante?->name ?? 'U', 0, 1) }}
+                            </div>
+                            <div class="min-w-0">
+                                <span class="block text-xs font-bold text-black dark:text-white truncate">
+                                    {{ $ticket->solicitante?->name ?? 'Usuario Eliminado' }}
+                                </span>
+                                <span class="block text-[10px] text-bodydark2 font-mono truncate">
+                                    {{ $ticket->solicitante?->email ?? '—' }}
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <div>
-                        <div class="form-label" style="margin-bottom: 0.4rem;">Técnico asignado</div>
+                    {{-- Técnico Asignado --}}
+                    <div class="pt-3 border-t border-stroke dark:border-strokedark">
+                        <span class="text-[10px] font-bold text-bodydark2 uppercase block mb-1">Técnico Asignado</span>
                         @if ($ticket->asignado)
-                            <div class="flex items-center gap-2">
-                                <div class="db-avatar">{{ substr($ticket->asignado->name, 0, 1) }}</div>
-                                <div style="min-width: 0;">
-                                    <div style="color: var(--db-text); font-size: 0.85rem; font-weight: 600;">{{ $ticket->asignado->name }}</div>
-                                    <div class="db-sub" style="overflow: hidden; text-overflow: ellipsis;">{{ $ticket->asignado->email }}</div>
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-meta-3/20 text-meta-3 font-bold text-xs shrink-0">
+                                    {{ substr($ticket->asignado->name, 0, 1) }}
+                                </div>
+                                <div class="min-w-0">
+                                    <span class="block text-xs font-bold text-black dark:text-white truncate">{{ $ticket->asignado->name }}</span>
+                                    <span class="block text-[10px] text-bodydark2 font-mono truncate">{{ $ticket->asignado->email }}</span>
                                 </div>
                             </div>
                         @else
-                            <span class="db-badge cancelado">Sin asignar</span>
+                            <span class="inline-flex rounded-full bg-meta-1/10 py-1 px-2.5 text-[10px] font-medium text-meta-1">
+                                Sin Asignar
+                            </span>
                         @endif
                     </div>
                 </div>
             </div>
 
-            {{-- ===== UBICACIÓN ===== --}}
+            {{-- UBICACIÓN --}}
             @if ($ticket->empresa || $ticket->sede)
-                <div class="db-card">
-                    <div class="db-card-header"><span>Ubicación</span></div>
-                    <div class="form-card-body" style="padding: 1rem 1.25rem;">
+                <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                    <div class="border-b border-stroke py-4 px-6 dark:border-strokedark">
+                        <h3 class="font-bold text-black dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-building text-primary"></i> Ubicación
+                        </h3>
+                    </div>
+                    <div class="p-5 space-y-3 text-xs">
                         @if ($ticket->empresa)
-                            <div style="margin-bottom: 0.75rem;">
-                                <div class="form-label" style="margin-bottom: 0.3rem;">Empresa</div>
-                                <div style="color: var(--db-text); font-size: 0.85rem;">{{ $ticket->empresa->nombre }}</div>
+                            <div>
+                                <span class="text-[10px] font-bold text-bodydark2 uppercase block">Empresa</span>
+                                <span class="text-black dark:text-white font-medium">{{ $ticket->empresa->nombre }}</span>
                             </div>
                         @endif
 
                         @if ($ticket->sede)
-                            <div>
-                                <div class="form-label" style="margin-bottom: 0.3rem;">Sede</div>
-                                <div style="color: var(--db-text); font-size: 0.85rem;">{{ $ticket->sede->nombre }}</div>
+                            <div class="pt-2 border-t border-stroke dark:border-strokedark">
+                                <span class="text-[10px] font-bold text-bodydark2 uppercase block">Sede</span>
+                                <span class="text-black dark:text-white font-medium block">{{ $ticket->sede->nombre }}</span>
                                 @if ($ticket->sede->direccion)
-                                    <div class="db-sub">{{ $ticket->sede->direccion }}</div>
+                                    <span class="text-[10px] text-bodydark2 block">{{ $ticket->sede->direccion }}</span>
                                 @endif
                                 @if ($ticket->sede->ciudad)
-                                    <div class="db-sub">{{ $ticket->sede->ciudad }}</div>
+                                    <span class="text-[10px] text-bodydark2 block">{{ $ticket->sede->ciudad }}</span>
                                 @endif
                             </div>
                         @endif

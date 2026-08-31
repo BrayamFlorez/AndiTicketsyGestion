@@ -1,31 +1,40 @@
+{{-- resources/views/flujos/tipos-documento/create.blade.php --}}
 <x-app-layout>
     <x-slot name="title">Nuevo Tipo de Documento</x-slot>
 
-    @push('styles')
-        <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
-    @endpush
-
-    <div class="db-header mb-6 flex items-center justify-between flex-wrap gap-3">
+    {{-- Cabecera --}}
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h2 class="text-2xl font-black text-white uppercase tracking-tighter">Nuevo Tipo de Documento</h2>
-            <p class="text-xs text-gray-400 font-medium uppercase tracking-widest">
-                Agregar entrada al catálogo del módulo de flujos
+            <h2 class="text-title-md2 font-bold text-black dark:text-white flex items-center gap-2">
+                <i class="fas fa-file-alt text-primary"></i> Nuevo Tipo de Documento
+            </h2>
+            <p class="text-xs text-bodydark2 mt-1">
+                Agregar una nueva entrada al catálogo del módulo de flujos de trabajo
             </p>
         </div>
-        <a href="{{ route('flujos.tipos-documento.index') }}" class="db-btn ghost">
-            <i class="fas fa-arrow-left mr-2"></i> Volver
+
+        <a href="{{ route('flujos.tipos-documento.index') }}" 
+           class="inline-flex items-center justify-center gap-2 rounded border border-stroke py-2 px-4 text-center text-xs font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition shadow-sm">
+            <i class="fas fa-arrow-left text-[10px]"></i> Volver al Listado
         </a>
     </div>
 
-    <form action="{{ route('flujos.tipos-documento.store') }}" method="POST" class="db-card">
+    {{-- Formulario --}}
+    <form action="{{ route('flujos.tipos-documento.store') }}" method="POST" 
+          class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         @csrf
+
         @include('flujos.tipos-documento.partials._form', ['tipo' => $tipo, 'plantillas' => $plantillas])
 
-        <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-800">
-            <a href="{{ route('flujos.tipos-documento.index') }}" class="db-btn ghost">Cancelar</a>
-            <button type="submit" class="db-btn solid">
-                <i class="fas fa-save mr-2"></i> Guardar Tipo
+        {{-- Footer de Acciones --}}
+        <div class="flex items-center justify-end gap-2 bg-gray-2 dark:bg-meta-4/40 px-6 py-3 border-t border-stroke dark:border-strokedark">
+            <a href="{{ route('flujos.tipos-documento.index') }}" 
+               class="inline-flex items-center justify-center rounded border border-stroke py-1.5 px-4 text-center text-xs font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition">
+                Cancelar
+            </a>
+            <button type="submit" 
+                    class="inline-flex items-center gap-1.5 rounded bg-primary py-1.5 px-5 text-center text-xs font-bold uppercase tracking-wider text-white hover:bg-opacity-90 transition shadow-sm cursor-pointer">
+                <i class="fas fa-save text-[10px]"></i> Guardar Tipo
             </button>
         </div>
     </form>

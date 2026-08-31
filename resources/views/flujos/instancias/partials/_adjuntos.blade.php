@@ -4,17 +4,17 @@
     $stageRequiereAdjunto = $stepActual?->stage?->requiere_adjunto ?? false;
 
     // Helper local para íconos según mime (MOVIDO AQUÍ ARRIBA)
-    if (! function_exists('iconoAdjunto')) {
-        function iconoAdjunto(string $mime): string {
+    if (!function_exists('iconoAdjunto')) {
+        function iconoAdjunto(string $mime): string
+        {
             return match (true) {
-                str_contains($mime, 'pdf')      => 'fa-file-pdf',
-                str_contains($mime, 'word')     => 'fa-file-word',
-                str_contains($mime, 'excel'),
-                str_contains($mime, 'spreadsheet') => 'fa-file-excel',
-                str_contains($mime, 'image')    => 'fa-file-image',
-                str_contains($mime, 'zip')      => 'fa-file-archive',
-                str_contains($mime, 'text')     => 'fa-file-alt',
-                default                         => 'fa-file',
+                str_contains($mime, 'pdf') => 'fa-file-pdf',
+                str_contains($mime, 'word') => 'fa-file-word',
+                str_contains($mime, 'excel'), str_contains($mime, 'spreadsheet') => 'fa-file-excel',
+                str_contains($mime, 'image') => 'fa-file-image',
+                str_contains($mime, 'zip') => 'fa-file-archive',
+                str_contains($mime, 'text') => 'fa-file-alt',
+                default => 'fa-file',
             };
         }
     }
@@ -31,14 +31,16 @@
         {{-- Aviso de requiere_adjunto --}}
         @if ($stageRequiereAdjunto && $stepActual)
             @php
-                $miAdjuntoEnStep = $instancia->attachments
-                    ->where('workflow_instance_step_id', $stepActual->id)
-                    ->where('subido_por', auth()->id())
-                    ->count() > 0;
+                $miAdjuntoEnStep =
+                    $instancia->attachments
+                        ->where('workflow_instance_step_id', $stepActual->id)
+                        ->where('subido_por', auth()->id())
+                        ->count() > 0;
             @endphp
 
-            @if (! $miAdjuntoEnStep && $puede['adjuntar_step'])
-                <div class="mb-3 px-3 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 text-xs">
+            @if (!$miAdjuntoEnStep && $puede['adjuntar_step'])
+                <div
+                    class="mb-3 px-3 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 text-xs">
                     <i class="fas fa-info-circle mr-1"></i>
                     <strong>Esta etapa requiere adjunto</strong> — subí un archivo antes de aprobar.
                 </div>
@@ -53,13 +55,15 @@
                     <div class="flex items-center gap-1 mb-2">
                         <button type="button"
                             class="text-[10px] px-3 py-1 rounded font-bold uppercase tracking-wider transition-colors"
-                            :class="destino === 'instancia' ? 'bg-[#007acc] text-white' : 'bg-transparent text-gray-500 hover:text-white'"
+                            :class="destino === 'instancia' ? 'bg-[#007acc] text-white' :
+                                'bg-transparent text-gray-500 hover:text-white'"
                             @click="destino = 'instancia'">
                             <i class="fas fa-folder"></i> Al trámite
                         </button>
                         <button type="button"
                             class="text-[10px] px-3 py-1 rounded font-bold uppercase tracking-wider transition-colors"
-                            :class="destino === 'step' ? 'bg-[#007acc] text-white' : 'bg-transparent text-gray-500 hover:text-white'"
+                            :class="destino === 'step' ? 'bg-[#007acc] text-white' :
+                                'bg-transparent text-gray-500 hover:text-white'"
                             @click="destino = 'step'">
                             <i class="fas fa-tag"></i> A esta etapa
                         </button>
@@ -67,15 +71,21 @@
                 @endif
 
                 <form method="POST" action="{{ route('flujos.instancias.adjuntos.subir', $instancia) }}"
-                      enctype="multipart/form-data">
+                    enctype="multipart/form-data">
                     @csrf
                     <template x-if="destino === 'step'">
-                        <input type="hidden" name="workflow_instance_step_id" value="{{ $stepActual?->id }}">
+                        @if ($stepParaAdjuntar && $stepParaAdjuntar->estado !== \App\Models\WorkflowInstanceStep::ESTADO_EN_CURSO)
+                            <div class="mb-2 text-[10px] text-yellow-500 flex items-center gap-1">
+                                <i class="fas fa-unlock text-[9px]"></i>
+                                Adjuntarás a la etapa <strong>{{ $stepParaAdjuntar->stage?->nombre }}</strong> (ya
+                                cerrada, habilitado por ajuste global).
+                            </div>
+                        @endif
+                        <input type="hidden" name="workflow_instance_step_id" value="{{ $stepParaAdjuntar?->id }}">
                     </template>
 
                     <div class="flex gap-2">
-                        <input type="file" name="archivo" required
-                            class="form-input text-xs flex-1"
+                        <input type="file" name="archivo" required class="form-input text-xs flex-1"
                             accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.zip">
                         <button type="submit" class="db-btn solid text-xs">
                             <i class="fas fa-upload"></i>
@@ -104,7 +114,8 @@
 
                         <div class="space-y-1.5">
                             @foreach ($adjuntos as $adj)
-                                <div class="flex items-center gap-2 p-2 rounded bg-[#1a1a1b] border border-gray-800 text-xs">
+                                <div
+                                    class="flex items-center gap-2 p-2 rounded bg-[#1a1a1b] border border-gray-800 text-xs">
                                     <i class="fas {{ iconoAdjunto($adj->mime_type) }} text-[#007acc] flex-shrink-0"></i>
                                     <div class="flex-1 min-w-0">
                                         <a href="{{ route('flujos.instancias.adjuntos.descargar', [$instancia, $adj]) }}"
@@ -126,11 +137,12 @@
 
                                     @can('eliminarAdjunto', $adj)
                                         <form method="POST"
-                                              action="{{ route('flujos.instancias.adjuntos.eliminar', [$instancia, $adj]) }}"
-                                              onsubmit="return confirm('¿Eliminar {{ $adj->nombre_original }}?')">
+                                            action="{{ route('flujos.instancias.adjuntos.eliminar', [$instancia, $adj]) }}"
+                                            onsubmit="return confirm('¿Eliminar {{ $adj->nombre_original }}?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-gray-500 hover:text-red-400 transition-colors" title="Eliminar">
+                                            <button type="submit"
+                                                class="text-gray-500 hover:text-red-400 transition-colors" title="Eliminar">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </form>
@@ -144,4 +156,3 @@
         @endif
     </div>
 </div>
-

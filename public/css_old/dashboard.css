@@ -1,0 +1,148 @@
+/*
+ * dashboard.css — Integración limpia con Tema Oscuro Neutro
+ */
+:root {
+    --db-surface:      #1e1e1e;   /* Mismo color de superficie del sidebar */
+    --db-surface-hover:#252526;   /* Filas y hovers neutros */
+    --db-border:       #2d2d2d;   /* Bordes sutiles del sistema */
+    --db-accent:       #007acc;   /* Azul primario ANDITICKETS */
+    --db-text:         #cccccc;
+    --db-text-muted:   #858585;
+    --db-text-bright:  #ffffff;
+}
+
+/* ── Selector de Pestañas (Tabs) ────────────────────────────────────────── */
+.db-tab-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--db-text-muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.db-tab-btn:hover {
+    color: var(--db-text-bright);
+}
+.db-tab-btn.active {
+    color: var(--db-text-bright);
+    border-bottom-color: var(--db-accent);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* ── Tarjetas y Contenedores Neutros ────────────────────────────────────── */
+.db-card {
+    background-color: var(--db-surface);
+    border: 1px solid var(--db-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.db-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 0.85rem;
+    border-bottom: 1px solid var(--db-border);
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+/* ── KPIs Minimizados y Sobrios ─────────────────────────────────────────── */
+.db-kpi-item {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--db-border);
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.db-kpi-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--db-text-bright);
+}
+.db-kpi-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--db-text-muted);
+}
+
+/* ── Tabla Fina Estilo IDE ────────────────────────────────────────────────── */
+.db-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+}
+.db-table thead th {
+    padding: 0.5rem 0.85rem;
+    background-color: rgba(0, 0, 0, 0.3);
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: var(--db-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--db-border);
+    text-align: left;
+}
+.db-table tbody tr {
+    border-bottom: 1px solid var(--db-border);
+    transition: background-color 0.12s ease;
+}
+.db-table tbody tr:hover {
+    background-color: var(--db-surface-hover);
+}
+.db-table tbody tr:last-child {
+    border-bottom: none;
+}
+.db-table tbody td {
+    padding: 0.5rem 0.85rem;
+    color: var(--db-text);
+    vertical-align: middle;
+}
+
+/* ── Badges Discretos ───────────────────────────────────────────────────── */
+.db-badge {
+    display: inline-block;
+    padding: 0.15rem 0.45rem;
+    border-radius: 0.25rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--db-border);
+    color: var(--db-text);
+}
+.db-badge.en_progreso { color: #e5c07b; border-color: rgba(229, 192, 123, 0.3); }
+.db-badge.asignado    { color: #61afef; border-color: rgba(97, 175, 239, 0.3); }
+.db-badge.resuelto    { color: #98c379; border-color: rgba(152, 195, 121, 0.3); }
+.db-badge.critica     { color: #e06c75; border-color: rgba(224, 108, 117, 0.3); }
+.db-badge.cerrado     { color: #858585; }
+
+/* ── Botones ────────────────────────────────────────────────────────────── */
+.db-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 0.25rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid var(--db-border);
+    color: var(--db-text);
+    background: transparent;
+    transition: all 0.15s ease;
+}
+.db-btn:hover {
+    border-color: var(--db-accent);
+    color: var(--db-text-bright);
+    background: var(--db-accent);
+}

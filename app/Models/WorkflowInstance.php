@@ -20,6 +20,7 @@ class WorkflowInstance extends Model
 
     protected $fillable = [
         'codigo',
+        'referencia_externa',
         'workflow_template_id',
         'document_type_id',
         'titulo',
@@ -50,7 +51,8 @@ class WorkflowInstance extends Model
 
     public function iniciador(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'iniciado_por');
+        // Cambiar 'user_id' por 'iniciado_por'
+        return $this->belongsTo(User::class, 'iniciado_por')->withTrashed();
     }
 
     public function etapaActual(): BelongsTo
@@ -98,19 +100,19 @@ class WorkflowInstance extends Model
         return $query->abiertas()
             ->whereHas('steps', function ($q) use ($user, $idsRolesUsuario) {
                 $q->where('estado', WorkflowInstanceStep::ESTADO_EN_CURSO)
-                  ->whereHas('assignments', function ($aq) use ($user, $idsRolesUsuario) {
-                      $aq->where('estado', WorkflowStepAssignment::ESTADO_PENDIENTE)
-                         ->where(function ($sq) use ($user, $idsRolesUsuario) {
-                             $sq->where('user_id', $user->id)
-                                ->orWhere(function ($rq) use ($idsRolesUsuario) {
-                                    $rq->whereNull('user_id')
-                                       ->whereHas('stageActor', function ($actorQ) use ($idsRolesUsuario) {
-                                           $actorQ->where('actor_type', WorkflowStageActor::TIPO_ROL)
-                                                  ->whereIn('actor_id', $idsRolesUsuario);
-                                       });
-                                });
-                         });
-                  });
+                    ->whereHas('assignments', function ($aq) use ($user, $idsRolesUsuario) {
+                        $aq->where('estado', WorkflowStepAssignment::ESTADO_PENDIENTE)
+                            ->where(function ($sq) use ($user, $idsRolesUsuario) {
+                                $sq->where('user_id', $user->id)
+                                    ->orWhere(function ($rq) use ($idsRolesUsuario) {
+                                        $rq->whereNull('user_id')
+                                            ->whereHas('stageActor', function ($actorQ) use ($idsRolesUsuario) {
+                                                $actorQ->where('actor_type', WorkflowStageActor::TIPO_ROL)
+                                                    ->whereIn('actor_id', $idsRolesUsuario);
+                                            });
+                                    });
+                            });
+                    });
             });
     }
 
@@ -119,5 +121,10 @@ class WorkflowInstance extends Model
         return $this->hasOne(WorkflowInstanceStep::class)
             ->where('estado', WorkflowInstanceStep::ESTADO_EN_CURSO)
             ->latest('id');
+    }
+
+    public function history()
+    {
+        return $this->hasMany(WorkflowInstanceHistory::class)->latest('editado_en');
     }
 }

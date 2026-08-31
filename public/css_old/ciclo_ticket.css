@@ -1,0 +1,98 @@
+/*
+ * Stepper del ciclo de vida del ticket (Horizontal IDE Style)
+ */
+.db-stepper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    gap: 0;
+}
+
+.db-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 80px;
+    flex-shrink: 0;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.db-step-circle {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.75rem;
+    border: 2px solid var(--db-border);
+    background-color: var(--db-surface);
+    color: var(--db-text-muted);
+    transition: all 0.2s ease;
+}
+
+/* Estado: Completado (Azul VSCode o Verde discreto) */
+.db-step.completed .db-step-circle {
+    background-color: var(--db-accent);
+    border-color: var(--db-accent);
+    color: #ffffff;
+}
+
+/* Estado: Actual (Borde activo con leve resplandor) */
+.db-step.current .db-step-circle {
+    background-color: var(--db-surface);
+    border-color: var(--db-accent);
+    color: var(--db-accent);
+    box-shadow: 0 0 0 3px rgba(0, 122, 204, 0.2);
+}
+
+/* Estado: Cancelado */
+.db-step.cancelled .db-step-circle {
+    background-color: rgba(220, 38, 38, 0.15);
+    border-color: #f87171;
+    color: #f87171;
+}
+
+.db-step-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--db-text);
+    white-space: nowrap;
+}
+
+.db-step.pending .db-step-label { 
+    color: var(--db-text-muted); 
+}
+
+.db-step.cancelled .db-step-label { 
+    color: #f87171; 
+}
+
+.db-step-date {
+    font-size: 0.62rem;
+    color: var(--db-text-muted);
+    white-space: nowrap;
+    font-family: monospace;
+}
+
+/* Línea conectora entre los círculos */
+.db-step-connector {
+    flex: 1;
+    height: 2px;
+    background-color: var(--db-border);
+    margin-top: 1.1rem; /* Alinea exactamente al centro del círculo */
+    min-width: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.db-step-connector.completed {
+    background-color: var(--db-accent);
+}

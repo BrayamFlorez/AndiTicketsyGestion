@@ -24,6 +24,8 @@ return new class extends Migration
             $table->foreignId('iniciado_por')
                 ->constrained('users')
                 ->restrictOnDelete();
+            $table->string('referencia_externa', 50)->nullable()
+                ->comment('Índice opcional definido por el iniciador para búsqueda rápida (ej: OT-2026-042, PROY-ACME-Q3)');
 
             $table->enum('estado', [
                 'en_progreso',
@@ -45,6 +47,7 @@ return new class extends Migration
 
             $table->index(['estado', 'iniciado_por']);
             $table->index(['estado', 'etapa_actual_id']);
+            $table->index('referencia_externa');
         });
     }
 

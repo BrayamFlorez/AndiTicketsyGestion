@@ -2,105 +2,117 @@
 <x-app-layout>
     <x-slot name="title">{{ $empresa->nombre }}</x-slot>
 
-    @push('styles')
-        <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
-        <style>
-            .modal-backdrop {
-                background-color: rgba(0, 0, 0, 0.6);
-                backdrop-filter: blur(4px);
-            }
-        </style>
-    @endpush
-
-    {{-- Estado Alpine global para controlar la creación de una nueva sede aquí mismo --}}
+    {{-- Estado Alpine global para controlar la creación de una nueva sede --}}
     <div x-data="{ createOpen: false }">
 
         {{-- ── Cabecera ────────────────────────────────────────────────────── --}}
-        <div class="db-header mb-6 flex items-start justify-between flex-wrap gap-3">
+        <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h4 class="text-white text-xl font-bold flex items-center gap-2">
-                    <span style="color: var(--db-text-muted)"><i class="fas fa-building"></i></span>
-                    {{ $empresa->nombre }}
-                </h4>
-                <p class="text-gray-400 text-sm">Perfil corporativo y administración de sedes</p>
+                <h2 class="text-title-md2 font-bold text-black dark:text-white flex items-center gap-2">
+                    <i class="fas fa-building text-primary"></i> {{ $empresa->nombre }}
+                </h2>
+                <p class="text-xs text-bodydark2 mt-1">
+                    Perfil corporativo, fichas de contacto e inventario de sedes
+                </p>
             </div>
+            
             <div class="flex items-center gap-2">
-                <a href="{{ route('empresas.index') }}" class="db-btn ghost">
-                    <i class="fas fa-arrow-left"></i> Volver al listado
+                <a href="{{ route('empresas.index') }}" 
+                   class="inline-flex items-center justify-center gap-2 rounded border border-stroke py-2 px-4 text-center text-xs font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition shadow-sm">
+                    <i class="fas fa-arrow-left text-[10px]"></i> Volver
                 </a>
+                
                 @can('sedes.gestionar')
-                    <button @click="createOpen = true" class="db-btn solid">
-                        <i class="fas fa-plus"></i> Añadir sede
+                    <button @click="createOpen = true" 
+                            class="inline-flex items-center justify-center gap-2 rounded bg-primary py-2 px-4 text-center text-xs font-bold uppercase tracking-wider text-white hover:bg-opacity-90 transition shadow-sm cursor-pointer">
+                        <i class="fas fa-plus text-[10px]"></i> Añadir Sede
                     </button>
                 @endcan
             </div>
         </div>
 
         {{-- ── Contenido en Dos Columnas ───────────────────────────────────── --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-12 gap-4 md:gap-6 2xl:gap-7.5">
 
-            {{-- COLUMNA PRINCIPAL: LISTADO DETALLADO DE SEDES (GRILLA) --}}
-            <div class="lg:col-span-2 space-y-4">
-                <div class="flex items-center justify-between">
-                    <h5 class="text-[11px] font-black text-gray-400 uppercase tracking-[2px]">
+            {{-- COLUMNA PRINCIPAL: LISTADO DE SEDES (8 cols) --}}
+            <div class="col-span-12 lg:col-span-8 space-y-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-bold text-bodydark2 uppercase tracking-wider">
                         Sedes Registradas ({{ $empresa->sedes_count }})
-                    </h5>
+                    </h3>
                 </div>
 
                 @if($empresa->sedes->count() > 0)
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @foreach ($empresa->sedes as $sede)
-                            {{-- Alcance Alpine individual por sede para controlar su modal de edición --}}
+                            {{-- Scope Alpine individual por sede --}}
                             <div x-data="{ editOpen: false }" 
-                                 class="db-card flex flex-col justify-between transition-all hover:border-[var(--db-accent)] bg-[var(--db-surface)] p-4 border border-[var(--db-border)] rounded-xl shadow-lg relative">
+                                 class="rounded-sm border border-stroke bg-white p-5 shadow-default dark:border-strokedark dark:bg-boxdark flex flex-col justify-between transition hover:border-primary dark:hover:border-primary">
                                 
                                 <div>
-                                    {{-- Nombre y Estado de la sede --}}
+                                    {{-- Encabezado Sede --}}
                                     <div class="flex justify-between items-start gap-2 mb-3">
                                         <div>
-                                            <h3 class="font-bold text-base text-white tracking-tight">
-                                                <i class="fas fa-map-marker-alt text-[#007acc] mr-1.5"></i>{{ $sede->nombre }}
-                                            </h3>
-                                            <span class="text-xs text-gray-500 font-semibold"><i class="fas fa-city mr-1"></i>{{ $sede->ciudad ?? 'Sin ciudad' }}</span>
+                                            <h4 class="font-bold text-sm text-black dark:text-white flex items-center gap-1.5">
+                                                <i class="fas fa-map-marker-alt text-primary"></i> {{ $sede->nombre }}
+                                            </h4>
+                                            <span class="text-[11px] text-bodydark2 block mt-0.5">
+                                                <i class="fas fa-city mr-1"></i>{{ $sede->ciudad ?? 'Sin ciudad' }}
+                                            </span>
                                         </div>
                                         <div>
                                             @if ($sede->activo)
-                                                <span class="db-badge resuelto" style="font-size: 0.55rem; padding: 0.2rem 0.55rem;">Activa</span>
+                                                <span class="inline-flex rounded-full bg-meta-3/10 px-2.5 py-0.5 text-[9px] font-bold text-meta-3 uppercase">
+                                                    Activa
+                                                </span>
                                             @else
-                                                <span class="db-badge cerrado" style="font-size: 0.55rem; padding: 0.2rem 0.55rem;">Inactiva</span>
+                                                <span class="inline-flex rounded-full bg-meta-1/10 px-2.5 py-0.5 text-[9px] font-bold text-meta-1 uppercase">
+                                                    Inactiva
+                                                </span>
                                             @endif
                                         </div>
                                     </div>
 
                                     {{-- Dirección y Teléfono --}}
-                                    <div class="space-y-1.5 my-4 border-t border-b border-gray-800/50 py-3 text-xs text-gray-400">
-                                        <div class="truncate"><i class="fas fa-location-arrow w-4 text-gray-600"></i> {{ $sede->direccion ?? 'Sin dirección registrada' }}</div>
-                                        <div><i class="fas fa-phone-alt w-4 text-gray-600"></i> {{ $sede->telefono ?? 'Sin teléfono' }}</div>
+                                    <div class="space-y-1.5 my-3 border-y border-stroke dark:border-strokedark py-3 text-xs text-bodydark2">
+                                        <div class="truncate">
+                                            <i class="fas fa-location-arrow w-4 text-primary"></i> {{ $sede->direccion ?? 'Sin dirección' }}
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-phone-alt w-4 text-primary"></i> {{ $sede->telefono ?? 'Sin teléfono' }}
+                                        </div>
                                     </div>
                                 </div>
 
-                                {{-- Estadísticas de la sede e interactivos --}}
-                                <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-800/30">
-                                    <div class="flex items-center gap-3 text-[11px] font-bold text-gray-400">
-                                        <div><i class="fas fa-users text-gray-600 mr-1"></i>{{ $sede->usuarios_count }} <span class="font-normal text-gray-500">Uis</span></div>
+                                {{-- Métricas Rápidas & Acciones --}}
+                                <div class="flex justify-between items-center pt-2 border-t border-stroke dark:border-strokedark">
+                                    <div class="flex items-center gap-3 text-[11px] font-bold text-black dark:text-white">
                                         <div>
-                                            <i class="fas fa-ticket-alt text-gray-600 mr-1"></i>
-                                            <span class="{{ $sede->tickets_activos_count > 0 ? 'text-amber-500' : '' }}">{{ $sede->tickets_activos_count }} Activos</span>
+                                            <i class="fas fa-users text-bodydark2 mr-1"></i>{{ $sede->usuarios_count }} <span class="font-normal text-bodydark2">Uis</span>
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-ticket-alt text-bodydark2 mr-1"></i>
+                                            <span class="{{ $sede->tickets_activos_count > 0 ? 'text-meta-6' : 'text-bodydark2' }}">
+                                                {{ $sede->tickets_activos_count }} Activos
+                                            </span>
                                         </div>
                                     </div>
 
                                     @can('sedes.gestionar')
                                         <div class="flex items-center gap-1">
                                             {{-- Editar Sede --}}
-                                            <button @click="editOpen = true" class="p-1.5 text-gray-500 hover:text-white transition" title="Editar sede">
-                                                <i class="fas fa-pen text-xs"></i>
+                                            <button @click="editOpen = true" 
+                                                    class="flex h-7 w-7 items-center justify-center rounded border border-stroke text-bodydark2 hover:border-primary hover:text-primary dark:border-strokedark transition" 
+                                                    title="Editar sede">
+                                                <i class="fas fa-pen text-[10px]"></i>
                                             </button>
                                             
                                             {{-- Eliminar Sede --}}
-                                            <button type="button" class="p-1.5 text-gray-500 hover:text-red-400 transition" title="Eliminar sede"
+                                            <button type="button" 
+                                                    class="flex h-7 w-7 items-center justify-center rounded border border-stroke text-meta-1 hover:border-meta-1 dark:border-strokedark transition" 
+                                                    title="Eliminar sede"
                                                     onclick="confirmDeleteSede({{ $sede->id }}, '{{ $sede->nombre }}')">
-                                                <i class="fas fa-trash text-xs"></i>
+                                                <i class="fas fa-trash text-[10px]"></i>
                                             </button>
 
                                             {{-- Formulario oculto de eliminación --}}
@@ -110,7 +122,6 @@
                                             </form>
                                         </div>
 
-                                        {{-- Inyección automática de tu partial de edición --}}
                                         @include('sedes.partials.edit')
                                     @endcan
                                 </div>
@@ -119,81 +130,91 @@
                         @endforeach
                     </div>
                 @else
-                    <div class="db-card p-8 text-center bg-[var(--db-surface)] border border-[var(--db-border)] rounded-xl">
-                        <div class="db-empty py-4">
-                            <i class="fas fa-map-marked-alt text-gray-700 text-3xl mb-2"></i>
-                            <p class="text-sm text-gray-400">Esta empresa no tiene sedes registradas todavía.</p>
+                    <div class="rounded-sm border border-stroke bg-white p-8 text-center shadow-default dark:border-strokedark dark:bg-boxdark">
+                        <div class="flex flex-col items-center text-bodydark2">
+                            <i class="fas fa-map-marked-alt text-3xl mb-2"></i>
+                            <p class="text-xs">Esta empresa no tiene sedes registradas todavía.</p>
                             @can('sedes.gestionar')
-                                <button @click="createOpen = true" class="db-btn outline mt-2">Registrar primera sede</button>
+                                <button @click="createOpen = true" 
+                                        class="mt-3 inline-flex items-center gap-1.5 rounded border border-stroke py-1.5 px-4 text-xs font-bold uppercase text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition">
+                                    Registrar primera sede
+                                </button>
                             @endcan
                         </div>
                     </div>
                 @endif
             </div>
 
-            {{-- COLUMNA LATERAL: METADATOS Y CARD DE LA EMPRESA --}}
-            <div class="space-y-4">
-                <h5 class="text-[11px] font-black text-gray-400 uppercase tracking-[2px]">Ficha Informativa</h5>
+            {{-- COLUMNA LATERAL: METADATOS Y FICHA TÉCNICA (4 cols) --}}
+            <div class="col-span-12 lg:col-span-4 space-y-6">
                 
-                {{-- Datos Técnicos --}}
-                <div class="db-card bg-[var(--db-surface)] border border-[var(--db-border)] rounded-xl overflow-hidden">
-                    <div class="db-card-header bg-black/10">
-                        <span>Detalles de Contacto</span>
+                {{-- Ficha Informativa --}}
+                <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                    <div class="border-b border-stroke py-3.5 px-5 dark:border-strokedark">
+                        <h3 class="font-bold text-black dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-info-circle text-primary"></i> Datos de la Empresa
+                        </h3>
                     </div>
-                    <div class="form-card-body p-4 space-y-3 text-xs">
+                    <div class="p-5 space-y-3.5 text-xs">
                         <div>
-                            <div class="form-label text-[10px] text-gray-500">Número NIT</div>
-                            <div class="text-gray-200 font-mono mt-0.5 text-sm font-semibold">{{ $empresa->nit ?? 'No registrado' }}</div>
+                            <span class="block text-[10px] font-bold text-bodydark2 uppercase">Número NIT</span>
+                            <span class="text-black dark:text-white font-mono mt-0.5 text-sm font-semibold block">{{ $empresa->nit ?? 'No registrado' }}</span>
                         </div>
                         <div>
-                            <div class="form-label text-[10px] text-gray-500">Correo Principal</div>
-                            <div class="text-gray-200 mt-0.5 font-medium truncate">{{ $empresa->email ?? 'Sin correo de contacto' }}</div>
+                            <span class="block text-[10px] font-bold text-bodydark2 uppercase">Correo Principal</span>
+                            <span class="text-black dark:text-white mt-0.5 font-medium block truncate">{{ $empresa->email ?? 'Sin correo de contacto' }}</span>
                         </div>
                         <div>
-                            <div class="form-label text-[10px] text-gray-500">Teléfono Corporativo</div>
-                            <div class="text-gray-200 mt-0.5 font-medium">{{ $empresa->telefono ?? 'Sin teléfono registrado' }}</div>
+                            <span class="block text-[10px] font-bold text-bodydark2 uppercase">Teléfono Corporativo</span>
+                            <span class="text-black dark:text-white mt-0.5 font-medium block">{{ $empresa->telefono ?? 'Sin teléfono registrado' }}</span>
                         </div>
                         <div>
-                            <div class="form-label text-[10px] text-gray-500">Estado de Operación</div>
-                            <div class="mt-1">
+                            <span class="block text-[10px] font-bold text-bodydark2 uppercase mb-1">Estado Operativo</span>
+                            <div>
                                 @if($empresa->activo)
-                                    <span class="db-badge resuelto" style="font-size:0.6rem;">Empresa Activa</span>
+                                    <span class="inline-flex rounded-full bg-meta-3/10 px-2.5 py-0.5 text-[10px] font-bold text-meta-3 uppercase">
+                                        Empresa Activa
+                                    </span>
                                 @else
-                                    <span class="db-badge cerrado" style="font-size:0.6rem;">Bloqueada / Inactiva</span>
+                                    <span class="inline-flex rounded-full bg-meta-1/10 px-2.5 py-0.5 text-[10px] font-bold text-meta-1 uppercase">
+                                        Inactiva / Bloqueada
+                                    </span>
                                 @endif
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Métricas Globales de la Empresa --}}
-                <div class="db-card bg-[var(--db-surface)] border border-[var(--db-border)] rounded-xl overflow-hidden">
-                    <div class="db-card-header bg-black/10">
-                        <span>Carga Global Estimada</span>
+                {{-- Métricas Globales --}}
+                <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                    <div class="border-b border-stroke py-3.5 px-5 dark:border-strokedark">
+                        <h3 class="font-bold text-black dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-chart-pie text-primary"></i> Métricas Globales
+                        </h3>
                     </div>
-                    <div class="form-card-body p-4">
-                        <ul class="space-y-2 text-xs" style="list-style: none; padding: 0; margin: 0;">
-                            <li class="flex justify-between py-1.5 border-b border-gray-800/40">
-                                <span class="text-gray-400">Total de Sedes</span>
-                                <span class="text-white font-bold">{{ $empresa->sedes_count }}</span>
+                    <div class="p-5">
+                        <ul class="divide-y divide-stroke dark:divide-strokedark text-xs">
+                            <li class="flex justify-between py-2">
+                                <span class="text-bodydark2">Total de Sedes</span>
+                                <span class="text-black dark:text-white font-bold">{{ $empresa->sedes_count }}</span>
                             </li>
-                            <li class="flex justify-between py-1.5 border-b border-gray-800/40">
-                                <span class="text-gray-400">Usuarios Vinculados</span>
-                                <span class="text-white font-bold">{{ $empresa->usuarios_count }}</span>
+                            <li class="flex justify-between py-2">
+                                <span class="text-bodydark2">Usuarios Vinculados</span>
+                                <span class="text-black dark:text-white font-bold">{{ $empresa->usuarios_count }}</span>
                             </li>
-                            <li class="flex justify-between py-1.5">
-                                <span class="text-gray-400">Histórico de Tickets</span>
-                                <span class="text-[#007acc] font-bold">{{ $empresa->tickets_count }}</span>
+                            <li class="flex justify-between py-2">
+                                <span class="text-bodydark2">Histórico de Tickets</span>
+                                <span class="text-primary font-bold">{{ $empresa->tickets_count }}</span>
                             </li>
                         </ul>
                     </div>
                 </div>
+
             </div>
 
         </div>
 
-        {{-- Inyección automática de tu partial de Creación de Sede --}}
-        {{-- Le inyectamos '$empresa' como 'empresaDefecto' para bloquear el select --}}
+        {{-- Partial Creación de Sede --}}
         @can('sedes.gestionar')
             @include('sedes.partials.create', ['empresaDefecto' => $empresa])
         @endcan
@@ -202,19 +223,18 @@
 
     @push('scripts')
         <script>
-            // Alerta SweetAlert personalizada para eliminar sedes de forma segura
             function confirmDeleteSede(id, nombre) {
                 Swal.fire({
                     title: '¿Eliminar sede?',
                     text: `Estás a punto de eliminar permanentemente la sede "${nombre}".`,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#dc2626',
-                    cancelButtonColor: '#2d2d2d',
+                    confirmButtonColor: '#DC3545',
+                    cancelButtonColor: '#24303F',
                     confirmButtonText: '<i class="fas fa-trash"></i> Sí, eliminar',
                     cancelButtonText: 'Cancelar',
-                    background: '#1e1e1e',
-                    color: '#fff'
+                    background: '#1C2434',
+                    color: '#FFF'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         document.getElementById('delete-sede-form-' + id).submit();

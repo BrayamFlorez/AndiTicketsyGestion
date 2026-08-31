@@ -1,61 +1,69 @@
 {{-- resources/views/layouts/partials/navbar.blade.php --}}
-<nav
-    class="h-16 bg-[#1e1e1e] border-b border-gray-800 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40 shadow-sm">
-    <div class="flex items-center">
-        <button @click="sidebarOpen = !sidebarOpen"
-            class="p-2 rounded-md text-gray-400 hover:bg-[#2d2d2d] hover:text-white focus:outline-none transition-colors">
-            <i class="fas fa-bars text-lg"></i>
-        </button>
 
-        <div class="ml-4 hidden sm:block">
-            <h2 class="text-sm font-bold text-white uppercase tracking-widest">
-                @yield('page_title', 'Dashboard')
-            </h2>
-        </div>
-    </div>
+<header class="sticky top-0 z-999 flex w-full bg-white drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none">
+    <div class="flex flex-grow items-center justify-between px-4 py-4 shadow-2 md:px-6 2xl:px-11">
 
-    <div class="flex items-center space-x-6">
-        {{-- Buscador --}}
-        <div class="hidden md:flex items-center bg-[#2d2d2d] rounded-full px-4 py-1.5 border border-transparent focus-within:border-[#007acc] transition-all">
-            <i class="fas fa-search text-gray-400 text-xs"></i>
-            <input type="text" placeholder="Buscar diagnóstico..."
-                class="bg-transparent border-none text-xs text-white focus:ring-0 w-48 placeholder-gray-500">
-        </div>
-
-        {{-- Notificaciones --}}
-        @include('layouts.partials.navbar-notificaciones')
-
-        {{-- Perfil de Usuario --}}
-        <div class="relative" x-data="{ open: false }">
-            <button @click="open = !open" class="flex items-center space-x-3 focus:outline-none group">
-                <div class="flex flex-col text-right">
-                    <span class="text-xs font-bold text-gray-200 leading-none group-hover:text-[#007acc] transition">{{ Auth::user()->name }}</span>
-                    <span class="text-[10px] text-gray-400 font-medium">Usuario</span>
-                </div>
-                <div class="w-9 h-9 rounded-lg bg-[#121212] flex items-center justify-center border-2 border-[#007acc] text-white shadow-md">
-                    <i class="fas fa-user-md text-sm"></i>
-                </div>
+        {{-- Toggle Botón Movil + Título --}}
+        <div class="flex items-center gap-2 sm:gap-4 lg:hidden">
+            <button class="z-99999 block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
+                    @click.stop="sidebarToggle = !sidebarToggle">
+                <i class="fas fa-bars text-lg text-body dark:text-white"></i>
             </button>
+        </div>
 
-            {{-- Dropdown --}}
-            <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-100"
-                x-transition:enter-start="transform opacity-0 scale-95"
-                class="absolute right-0 mt-3 w-48 bg-[#1e1e1e] rounded-xl shadow-2xl border border-gray-800 py-2 z-50" x-cloak>
+        {{-- Título de la vista / Buscador --}}
+        <div class="hidden sm:block">
+            <h1 class="text-sm font-bold uppercase tracking-wider text-black dark:text-white">
+                @yield('page_title', 'Consola de Operaciones')
+            </h1>
+        </div>
 
-                <a href="{{ route('profile.edit') }}"
-                    class="block px-4 py-2 text-xs font-bold text-gray-300 hover:bg-[#2d2d2d] hover:text-[#007acc] transition">
-                    <i class="fas fa-user-cog mr-2"></i> {{ __('Perfil') }}
+        {{-- Área derecha del Navbar --}}
+        <div class="flex items-center gap-3 2xl:gap-7 ml-auto">
+            <ul class="flex items-center gap-2 2xl:gap-4">
+
+                {{-- Notificaciones Dropdown Component --}}
+                @include('layouts.partials.navbar-notificaciones')
+
+            </ul>
+
+            {{-- Perfil del Usuario --}}
+            <div class="relative" x-data="{ dropdownOpen: false }" @click.outside="dropdownOpen = false">
+                <a class="flex items-center gap-3.5" href="#" @click.prevent="dropdownOpen = !dropdownOpen">
+                    <span class="hidden text-right lg:block">
+                        <span class="block text-xs font-bold text-black dark:text-white">{{ Auth::user()->name }}</span>
+                        <span class="block text-[10px] text-bodydark2 font-medium">Usuario</span>
+                    </span>
+
+                    <div class="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xs">
+                        {{ substr(Auth::user()->name, 0, 1) }}
+                    </div>
+
+                    <i class="fas fa-chevron-down text-xs text-bodydark"></i>
                 </a>
 
-                <div class="border-t border-gray-800 my-1"></div>
+                {{-- Dropdown Menú --}}
+                <div x-show="dropdownOpen" x-cloak
+                     class="absolute right-0 mt-4 w-50 flex flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                    <ul class="flex flex-col gap-1 border-b border-stroke p-2.5 dark:border-strokedark">
+                        <li>
+                            <a href="{{ route('profile.edit') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-bodydark1 duration-300 ease-in-out hover:text-primary">
+                                <i class="fas fa-user-cog"></i> {{ __('Mi Perfil') }}
+                            </a>
+                        </li>
+                    </ul>
 
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button class="w-full text-left px-4 py-2 text-xs font-bold text-red-400 hover:bg-red-900/20 hover:text-red-300 transition">
-                        <i class="fas fa-power-off mr-2"></i> {{ __('Cerrar Sesión') }}
-                    </button>
-                </form>
+                    <form method="POST" action="{{ route('logout') }}" class="p-2.5">
+                        @csrf
+                        <button type="submit" 
+                                class="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-medium text-meta-1 duration-300 ease-in-out hover:text-meta-7">
+                            <i class="fas fa-power-off"></i> {{ __('Cerrar Sesión') }}
+                        </button>
+                    </form>
+                </div>
             </div>
+
         </div>
     </div>
-</nav>
+</header>

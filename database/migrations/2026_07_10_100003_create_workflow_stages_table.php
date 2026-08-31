@@ -17,6 +17,9 @@ return new class extends Migration
             $table->text('descripcion')->nullable();
             $table->unsignedInteger('orden');
 
+            $table->string('codigo_externo', 50)->nullable()
+                ->comment('Identificador definido por el cliente para búsqueda rápida (ej: APR-FIN, REV-TEC-01)');
+
             // Modo de evaluación de la etapa
             $table->enum('modo', [
                 'secuencial',           // Un solo actor, decisión única
@@ -43,6 +46,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['workflow_template_id', 'orden']);
+            $table->index('codigo_externo');
         });
     }
 

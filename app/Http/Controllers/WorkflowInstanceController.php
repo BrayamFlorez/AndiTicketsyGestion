@@ -25,6 +25,10 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Models\WorkflowTemplate;
+use App\Models\WorkflowInstanceHistory;
+use App\Notifications\Flujos\FlujoDatosEditadosNotification;
+use Illuminate\Support\Facades\DB;
+use App\Models\WorkflowStepComment;
 
 class WorkflowInstanceController extends Controller
 {
@@ -54,8 +58,12 @@ class WorkflowInstanceController extends Controller
         $tiposDocumento = DocumentType::orderBy('nombre')->get(['id', 'nombre']);
 
         return view('flujos.instancias.index', compact(
-            'instancias', 'tabActivo', 'tabsDisponibles',
-            'filtros', 'plantillas', 'tiposDocumento'
+            'instancias',
+            'tabActivo',
+            'tabsDisponibles',
+            'filtros',
+            'plantillas',
+            'tiposDocumento'
         ));
     }
 
@@ -65,25 +73,31 @@ class WorkflowInstanceController extends Controller
             ->with([
                 'template:id,nombre',
                 'iniciador:id,name',
-                'etapaActual:id,nombre',
+                'etapaActual:id,nombre,codigo_externo',
                 'documentType:id,nombre,icono',
                 'currentStep.stage:id,nombre,sla_horas',
+                'steps:id,workflow_instance_id,codigo_referencia',
             ])
             ->withCount('attachments')
             // ── Filtros comunes ──
             ->when($filtros['q'] ?? null, function ($q, $texto) {
                 $q->where(function ($sub) use ($texto) {
-                    $sub->where('codigo',      'like', "%{$texto}%")
-                        ->orWhere('titulo',      'like', "%{$texto}%")
-                        ->orWhere('descripcion', 'like', "%{$texto}%")
-                        ->orWhereHas('iniciador',   fn ($iq) => $iq->where('name', 'like', "%{$texto}%"))
-                        ->orWhereHas('attachments', fn ($aq) => $aq->where('nombre_original', 'like', "%{$texto}%"));
+                    $sub->where('codigo',             'like', "%{$texto}%")
+                        ->orWhere('referencia_externa', 'like', "%{$texto}%")   // ← nuevo
+                        ->orWhere('titulo',            'like', "%{$texto}%")
+                        ->orWhere('descripcion',       'like', "%{$texto}%")
+                        ->orWhereHas('iniciador',   fn($iq) => $iq->where('name', 'like', "%{$texto}%"))
+                        ->orWhereHas('attachments', fn($aq) => $aq->where('nombre_original', 'like', "%{$texto}%"))
+                        ->orWhereHas(
+                            'steps',
+                            fn($sq) => $sq->where('codigo_referencia', 'like', "%{$texto}%")
+                        );
                 });
             })
-            ->when($filtros['template_id']      ?? null, fn ($q, $v) => $q->where('workflow_template_id', $v))
-            ->when($filtros['document_type_id'] ?? null, fn ($q, $v) => $q->where('document_type_id', $v))
-            ->when($filtros['desde']            ?? null, fn ($q, $v) => $q->whereDate('iniciado_en', '>=', $v))
-            ->when($filtros['hasta']            ?? null, fn ($q, $v) => $q->whereDate('iniciado_en', '<=', $v));
+            ->when($filtros['template_id']      ?? null, fn($q, $v) => $q->where('workflow_template_id', $v))
+            ->when($filtros['document_type_id'] ?? null, fn($q, $v) => $q->where('document_type_id', $v))
+            ->when($filtros['desde']            ?? null, fn($q, $v) => $q->whereDate('iniciado_en', '>=', $v))
+            ->when($filtros['hasta']            ?? null, fn($q, $v) => $q->whereDate('iniciado_en', '<=', $v));
 
         $idsRolesUsuario = $user->roles->pluck('id');
 
@@ -92,24 +106,24 @@ class WorkflowInstanceController extends Controller
                 ->abiertas()
                 ->whereHas('steps', function ($q) use ($user, $idsRolesUsuario) {
                     $q->where('estado', WorkflowInstanceStep::ESTADO_EN_CURSO)
-                      ->whereHas('assignments', function ($aq) use ($user, $idsRolesUsuario) {
-                          $aq->where('estado', WorkflowStepAssignment::ESTADO_PENDIENTE)
-                             ->where(function ($sq) use ($user, $idsRolesUsuario) {
-                                 $sq->where('user_id', $user->id)
-                                    ->orWhere(function ($rq) use ($idsRolesUsuario) {
-                                        $rq->whereNull('user_id')
-                                           ->whereHas('stageActor', function ($actorQ) use ($idsRolesUsuario) {
-                                               $actorQ->where('actor_type', WorkflowStageActor::TIPO_ROL)
-                                                      ->whereIn('actor_id', $idsRolesUsuario);
-                                           });
-                                    });
-                             });
-                      });
+                        ->whereHas('assignments', function ($aq) use ($user, $idsRolesUsuario) {
+                            $aq->where('estado', WorkflowStepAssignment::ESTADO_PENDIENTE)
+                                ->where(function ($sq) use ($user, $idsRolesUsuario) {
+                                    $sq->where('user_id', $user->id)
+                                        ->orWhere(function ($rq) use ($idsRolesUsuario) {
+                                            $rq->whereNull('user_id')
+                                                ->whereHas('stageActor', function ($actorQ) use ($idsRolesUsuario) {
+                                                    $actorQ->where('actor_type', WorkflowStageActor::TIPO_ROL)
+                                                        ->whereIn('actor_id', $idsRolesUsuario);
+                                                });
+                                        });
+                                });
+                        });
                 }),
 
             'iniciados'    => $base->where('iniciado_por', $user->id)->abiertas(),
             'correcciones' => $base->where('iniciado_por', $user->id)
-                                   ->where('estado', WorkflowInstance::ESTADO_REQUIERE_CORRECCION),
+                ->where('estado', WorkflowInstance::ESTADO_REQUIERE_CORRECCION),
             'todos'        => $base->abiertas(),
             'cerrados'     => $base->whereIn('estado', [
                 WorkflowInstance::ESTADO_APROBADO,
@@ -121,11 +135,42 @@ class WorkflowInstanceController extends Controller
         };
     }
 
+    public function actualizarCodigoReferenciaStep(
+        Request $request,
+        WorkflowInstance $instancia,
+        WorkflowInstanceStep $step,
+    ): RedirectResponse {
+
+        abort_if(
+            $step->workflow_instance_id !== $instancia->id,
+            404,
+            'Paso fuera de contexto.'
+        );
+
+        $this->authorize('etiquetarStep', [$instancia, $step]);
+
+        $datos = $request->validate([
+            'codigo_referencia' => ['nullable', 'string', 'max:50', 'regex:/^[A-Za-z0-9\-_]+$/'],
+        ], [
+            'codigo_referencia.regex' => 'El código solo admite letras, números, guiones y guion bajo (sin espacios).',
+        ]);
+
+        $codigo = $datos['codigo_referencia'] ?? null;
+
+        $step->update([
+            'codigo_referencia' => $codigo ? strtoupper($codigo) : null,
+        ]);
+
+        return back()->with('exito', $codigo
+            ? "Código actualizado: {$step->fresh()->codigo_referencia}"
+            : 'Código eliminado.');
+    }
+
     public function create(): View
     {
         $tipos = DocumentType::activos()
             ->whereNotNull('workflow_template_id')
-            ->whereHas('template', fn ($q) => $q->activos())
+            ->whereHas('template', fn($q) => $q->activos())
             ->with(['template:id,nombre', 'template.stages:id,workflow_template_id,nombre,orden,modo'])
             ->orderBy('nombre')
             ->get();
@@ -139,11 +184,22 @@ class WorkflowInstanceController extends Controller
 
         $tipo = DocumentType::with('template')->findOrFail($datos['document_type_id']);
 
-        $instancia = $accion->ejecutar($tipo->template, $request->user(), [
-            'titulo'           => $datos['titulo'],
-            'descripcion'      => $datos['descripcion'] ?? null,
-            'document_type_id' => $tipo->id,
+        $datos = $request->validate([
+            'document_type_id'   => ['required', 'integer', 'exists:document_types,id'],
+            'titulo'             => ['required', 'string', 'max:200'],
+            'descripcion'        => ['nullable', 'string', 'max:2000'],
+            'referencia_externa' => ['nullable', 'string', 'max:50', 'regex:/^[A-Za-z0-9\-_\/]+$/'],
+        ], [
+            'referencia_externa.regex' => 'El código solo admite letras, números, guiones, guion bajo y barras.',
         ]);
+
+        $tipoDocumento = DocumentType::findOrFail($datos['document_type_id']);
+
+        $instancia = app(IniciarFlujoAction::class)->ejecutar(
+            $tipoDocumento->template,
+            $request->user(),
+            $datos,
+        );
 
         return redirect()
             ->route('flujos.instancias.show', $instancia)
@@ -159,22 +215,35 @@ class WorkflowInstanceController extends Controller
             'template:id,nombre',
             'documentType:id,nombre,icono',
             'iniciador:id,name,email',
-            'etapaActual:id,nombre',
-            'steps' => fn ($q) => $q->orderBy('id'),
+            'etapaActual:id,nombre,codigo_externo',
+            'history.editor:id,name',
+            'steps.comentariosAdicionales.user:id,name',
+            'steps' => fn($q) => $q->orderBy('id'),
             'steps.stage:id,nombre,orden,modo,politica_rechazo,requiere_adjunto',
-            'steps.assignments' => fn ($q) => $q->orderBy('id'),
+            'steps.assignments' => fn($q) => $q->orderBy('id'),
             'steps.assignments.stageActor',
             'steps.assignments.user:id,name,email',
             // Adjuntos POR ETAPA (van embebidos en la línea de tiempo)
-            'steps.attachments' => fn ($q) => $q->orderByDesc('created_at'),
+            'steps.attachments' => fn($q) => $q->orderByDesc('created_at'),
             'steps.attachments.uploader:id,name',
             // Adjuntos del EXPEDIENTE (trámite-level, workflow_instance_step_id IS NULL)
-            'attachments' => fn ($q) => $q->whereNull('workflow_instance_step_id')->orderByDesc('created_at'),
+            'attachments' => fn($q) => $q->whereNull('workflow_instance_step_id')->orderByDesc('created_at'),
             'attachments.uploader:id,name',
         ]);
 
         $stepActual = $instancia->steps
-            ->firstWhere('estado', WorkflowInstanceStep::ESTADO_EN_CURSO);
+        ->firstWhere('estado', WorkflowInstanceStep::ESTADO_EN_CURSO);
+
+        // Steps donde el usuario puede adjuntar (en curso o post-cierre con ajuste activo)
+        $stepsAdjuntables = $instancia->steps->filter(
+            fn ($step) => $user->can('adjuntarAStep', [$instancia, $step])
+        )->values();
+
+        // Step "destino por defecto" para el formulario:
+        //   1) el que está en curso si el usuario es actor
+        //   2) sino, el último cerrado donde es actor
+        $stepParaAdjuntar = $stepsAdjuntables->firstWhere('estado', WorkflowInstanceStep::ESTADO_EN_CURSO)
+            ?? $stepsAdjuntables->sortByDesc('cierre_en')->first();
 
         $misAsignacionesPendientes = $this->asignacionesActuables($stepActual, $user);
 
@@ -187,11 +256,16 @@ class WorkflowInstanceController extends Controller
             'cancelar'            => $user->can('cancelar', $instancia),
             'reabrir'             => $user->can('reabrir', $instancia),
             'adjuntar_expediente' => $user->can('subirAdjuntoInstancia', $instancia),
-            'adjuntar_step'       => $stepActual && $user->can('subirAdjuntoStep', [$instancia, $stepActual]),
+            'adjuntar_step'       => $stepParaAdjuntar !== null,
         ];
 
         return view('flujos.instancias.show', compact(
-            'instancia', 'stepActual', 'misAsignacionesPendientes', 'puede'
+            'instancia',
+            'stepActual',
+            'stepParaAdjuntar',
+            'stepsAdjuntables',
+            'misAsignacionesPendientes',
+            'puede'
         ));
     }
 
@@ -329,8 +403,8 @@ class WorkflowInstanceController extends Controller
 
                 $resuelto = $actor->resolverActor();
                 $assignment->label_resuelto = $actor->esRol()
-                    ? 'Rol: '.($resuelto?->name ?? '—')
-                    : 'Usuario: '.($resuelto?->name ?? '—');
+                    ? 'Rol: ' . ($resuelto?->name ?? '—')
+                    : 'Usuario: ' . ($resuelto?->name ?? '—');
             });
         });
     }
@@ -342,11 +416,16 @@ class WorkflowInstanceController extends Controller
     ): RedirectResponse {
 
         $stepId = $request->validated('workflow_instance_step_id');
-        $step = $stepId ? WorkflowInstanceStep::find($stepId) : null;
+
+        // Obtenemos la etapa asegurando que pertenezca a esta instancia
+        $step = $stepId
+            ? $instancia->steps()->find($stepId)
+            : null;
 
         // Autorización según destino
         if ($step) {
-            $this->authorize('subirAdjuntoStep', [$instancia, $step]);
+            // Usa la nueva habilidad de la Policy que permite subir evidencias aun cuando esté aprobada
+            $this->authorize('adjuntarAStep', [$instancia, $step]);
         } else {
             $this->authorize('subirAdjuntoInstancia', $instancia);
         }
@@ -404,5 +483,148 @@ class WorkflowInstanceController extends Controller
         $attachment->delete();
 
         return back()->with('exito', 'Adjunto eliminado.');
-    }    
+    }
+
+    public function actualizarCabecera(
+        Request $request,
+        WorkflowInstance $instancia,
+    ): RedirectResponse {
+
+        $this->authorize('editarCabecera', $instancia);
+
+        // La referencia_externa solo es editable en flujos abiertos
+        $cerrado = ! $instancia->estaAbierta();
+
+        $reglas = [
+            'titulo'      => ['required', 'string', 'max:200'],
+            'descripcion' => ['nullable', 'string', 'max:2000'],
+        ];
+
+        if (! $cerrado) {
+            $reglas['referencia_externa'] = [
+                'nullable',
+                'string',
+                'max:50',
+                'regex:/^[A-Za-z0-9\-_\/]+$/',
+            ];
+        }
+
+        $datos = $request->validate($reglas, [
+            'referencia_externa.regex' =>
+            'El código solo admite letras, números, guiones, guion bajo y barras.',
+        ]);
+
+        // Normalizar la referencia
+        if (isset($datos['referencia_externa'])) {
+            $datos['referencia_externa'] = $datos['referencia_externa']
+                ? strtoupper(trim($datos['referencia_externa']))
+                : null;
+        }
+
+        $cambios = [];
+        $editorId = $request->user()->id;
+
+        foreach ($datos as $campo => $valorNuevo) {
+            $valorAnterior = $instancia->{$campo};
+
+            // Solo registrar si realmente cambió (comparación estricta con null)
+            if ((string) $valorAnterior !== (string) $valorNuevo) {
+                $cambios[$campo] = [
+                    'anterior' => $valorAnterior,
+                    'nuevo'    => $valorNuevo,
+                ];
+            }
+        }
+
+        if (empty($cambios)) {
+            return back()->with('info', 'No detectamos cambios en la cabecera.');
+        }
+
+        DB::transaction(function () use ($instancia, $datos, $cambios, $editorId) {
+            $instancia->update($datos);
+
+            foreach ($cambios as $campo => $valores) {
+                WorkflowInstanceHistory::create([
+                    'workflow_instance_id' => $instancia->id,
+                    'editado_por'          => $editorId,
+                    'campo'                => $campo,
+                    'valor_anterior'       => $valores['anterior'],
+                    'valor_nuevo'          => $valores['nuevo'],
+                    'editado_en'           => now(),
+                ]);
+            }
+        });
+
+        // Notificar a los actores con asignación pendiente (silenciosa)
+        $this->notificarActoresDeCambio($instancia, $request->user(), array_keys($cambios));
+
+        $labels = collect($cambios)->keys()
+            ->map(fn($c) => WorkflowInstanceHistory::CAMPOS_EDITABLES[$c] ?? $c)
+            ->implode(', ');
+
+        return back()->with('exito', "Cabecera actualizada. Cambios: {$labels}.");
+    }
+
+    /**
+     * Notifica a los actores con asignación pendiente que el iniciador editó
+     * los datos de cabecera. Es informativo, no requiere acción.
+     */
+    private function notificarActoresDeCambio(
+        WorkflowInstance $instancia,
+        \App\Models\User $editor,
+        array $camposEditados,
+    ): void {
+
+        if (! $instancia->estaAbierta()) {
+            return;
+        }
+
+        $actores = \App\Models\User::query()
+            ->whereHas(
+                'workflowAssignmentsPendientes',
+                fn($q) => $q->whereHas(
+                    'step',
+                    fn($sq) => $sq->where('workflow_instance_id', $instancia->id)
+                        ->where('estado', \App\Models\WorkflowInstanceStep::ESTADO_EN_CURSO)
+                )
+            )
+            ->where('id', '!=', $editor->id)
+            ->get();
+
+        if ($actores->isEmpty()) {
+            return;
+        }
+
+        \Illuminate\Support\Facades\Notification::send(
+            $actores,
+            new FlujoDatosEditadosNotification($instancia, $editor, $camposEditados),
+        );
+    }
+
+    public function agregarComentarioStep(
+        Request $request,
+        WorkflowInstance $instancia,
+        WorkflowInstanceStep $step,
+    ): RedirectResponse {
+
+        abort_if(
+            $step->workflow_instance_id !== $instancia->id,
+            404,
+            'Paso fuera de contexto.'
+        );
+
+        $this->authorize('comentarStep', [$instancia, $step]);
+
+        $datos = $request->validate([
+            'comentario' => ['required', 'string', 'min:3', 'max:1000'],
+        ]);
+
+        WorkflowStepComment::create([
+            'workflow_instance_step_id' => $step->id,
+            'user_id'                   => $request->user()->id,
+            'comentario'                => trim($datos['comentario']),
+        ]);
+
+        return back()->with('exito', 'Comentario agregado al paso.');
+    }
 }

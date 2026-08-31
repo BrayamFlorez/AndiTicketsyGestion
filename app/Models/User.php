@@ -11,10 +11,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\WorkflowStepAssignment;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasRoles;
+    use SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -39,10 +42,6 @@ class User extends Authenticatable
         ];
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Relaciones — donde TRABAJA el usuario (empleo)
-    // ─────────────────────────────────────────────────────────────────────
-
     public function empresa(): BelongsTo
     {
         return $this->belongsTo(Empresa::class);
@@ -53,15 +52,6 @@ class User extends Authenticatable
         return $this->belongsTo(Sede::class);
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Relaciones — qué CUBRE el técnico (asignaciones de soporte)
-    // ─────────────────────────────────────────────────────────────────────
-
-    /**
-     * Empresas que el tecnico tiene asignadas (distinct).
-     * Si tiene varias filas para una misma empresa (una por sede),
-     * la empresa aparece UNA sola vez aqui gracias a distinct().
-     */
     public function empresasAsignadas(): BelongsToMany
     {
         return $this->belongsToMany(Empresa::class, 'empresa_user')
@@ -101,19 +91,6 @@ class User extends Authenticatable
         return $this->hasMany(Equipo::class, 'creado_por');
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Helpers de acceso por cobertura
-    // ─────────────────────────────────────────────────────────────────────
-
-    /**
-     * Sedes a las que el tecnico tiene acceso real.
-     * Regla:
-     *  - Si tiene fila (user, empresa, NULL) -> acceso a TODAS las sedes
-     *    de esa empresa.
-     *  - Si tiene fila (user, empresa, sede) -> acceso solo a esa sede.
-     *
-     * Devuelve un Builder para componer filtros adicionales.
-     */
     public function sedesAccesibles(): Builder
     {
         return Sede::query()->whereExists(function ($sub) {
@@ -122,14 +99,11 @@ class User extends Authenticatable
                 ->whereColumn('empresa_user.empresa_id', 'sedes.empresa_id')
                 ->where(function ($w) {
                     $w->whereNull('empresa_user.sede_id')
-                      ->orWhereColumn('empresa_user.sede_id', 'sedes.id');
+                        ->orWhereColumn('empresa_user.sede_id', 'sedes.id');
                 });
         });
     }
 
-    /**
-     * ¿Este técnico puede operar en esta empresa? (cubre al menos UNA sede de ella).
-     */
     public function puedeAccederEmpresa(Empresa $empresa): bool
     {
         return DB::table('empresa_user')
@@ -138,10 +112,6 @@ class User extends Authenticatable
             ->exists();
     }
 
-    /**
-     * ¿Este técnico puede operar en esta sede específicamente?
-     * Verdadero si tiene asignación a toda la empresa O a esta sede.
-     */
     public function puedeAccederSede(Sede $sede): bool
     {
         return DB::table('empresa_user')
@@ -149,15 +119,11 @@ class User extends Authenticatable
             ->where('empresa_id', $sede->empresa_id)
             ->where(function ($q) use ($sede) {
                 $q->whereNull('sede_id')
-                  ->orWhere('sede_id', $sede->id);
+                    ->orWhere('sede_id', $sede->id);
             })
             ->exists();
     }
 
-    /**
-     * ¿Tiene asignacion "global" a esta empresa (sede_id = NULL)?
-     * Util para diferenciar acceso amplio vs sede puntual.
-     */
     public function tieneAsignacionGlobalEmpresa(int $empresaId): bool
     {
         return DB::table('empresa_user')
@@ -167,18 +133,22 @@ class User extends Authenticatable
             ->exists();
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Helpers de rol
-    // ─────────────────────────────────────────────────────────────────────
-
-    public function esSuperAdmin(): bool   { return $this->hasRole('super-admin'); }
-    public function esAdmin(): bool        { return $this->hasRole('admin'); }
-    public function esTecnico(): bool      { return $this->hasRole('tecnico'); }
-    public function esUsuarioFinal(): bool { return $this->hasRole('usuario'); }
-
-    // ─────────────────────────────────────────────────────────────────────
-    // Scopes
-    // ─────────────────────────────────────────────────────────────────────
+    public function esSuperAdmin(): bool
+    {
+        return $this->hasRole('super-admin');
+    }
+    public function esAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+    public function esTecnico(): bool
+    {
+        return $this->hasRole('tecnico');
+    }
+    public function esUsuarioFinal(): bool
+    {
+        return $this->hasRole('usuario');
+    }
 
     public function scopeActivos($query)
     {
@@ -193,5 +163,58 @@ class User extends Authenticatable
     public function scopeDeEmpresa($query, int $empresaId)
     {
         return $query->where('empresa_id', $empresaId);
+    }
+
+    protected static function booted(): void
+    {
+        static::forceDeleting(function (User $usuario) {
+            $vinculos = [];
+
+            // 1. Archivos adjuntos en flujos
+            if (WorkflowAttachment::where('subido_por', $usuario->id)->exists()) {
+                $vinculos[] = 'archivos adjuntos subidos';
+            }
+
+            // 2. Tickets
+            $tieneTickets = Ticket::where('user_id', $usuario->id)
+                // Si en tickets usas otras columnas para el técnico o creador, descoméntalas:
+                // ->orWhere('tecnico_id', $usuario->id)
+                // ->orWhere('creado_por', $usuario->id)
+                ->exists();
+
+            if ($tieneTickets) {
+                $vinculos[] = 'tickets creados o asignados';
+            }
+
+            // 3. Actores y asignaciones de Flujos (Workflows)
+            $tieneFlujos = WorkflowStepAssignment::where('user_id', $usuario->id)->exists()
+                || WorkflowStageActor::where('user_id', $usuario->id)->exists();
+
+            if ($tieneFlujos) {
+                $vinculos[] = 'pasos o roles asignados en flujos de trabajo';
+            }
+
+            // 4. Mantenimientos preventivos
+            if (MantenimientoPreventivo::where('user_id', $usuario->id)->exists()) {
+                $vinculos[] = 'mantenimientos preventivos asociados';
+            }
+
+            // 5. Equipos a cargo
+            if (Equipo::where('user_id', $usuario->id)->exists()) {
+                $vinculos[] = 'equipos bajo su responsabilidad';
+            }
+
+            // Si se detectó alguna relación, frena el borrado y devuelve el motivo
+            if (!empty($vinculos)) {
+                $lista = implode(', ', $vinculos);
+                throw new \Exception("No se puede eliminar a {$usuario->name} porque tiene registros en: {$lista}.");
+            }
+        });
+    }
+
+    public function workflowAssignmentsPendientes()
+    {
+        return $this->hasMany(WorkflowStepAssignment::class, 'user_id')
+            ->where('estado', WorkflowStepAssignment::ESTADO_PENDIENTE);
     }
 }

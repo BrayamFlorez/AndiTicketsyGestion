@@ -14,7 +14,7 @@ class IniciarFlujoAction
     public function __construct(private IniciarEtapaAction $iniciarEtapa) {}
 
     /**
-     * @param  array{titulo:string, descripcion?:?string, document_type_id?:?int}  $datos
+     * @param  array{titulo:string, descripcion?:?string, ?string $referenciaExterna = null, document_type_id?:?int}  $datos
      */
     public function ejecutar(WorkflowTemplate $plantilla, User $iniciador, array $datos): WorkflowInstance
     {
@@ -34,8 +34,13 @@ class IniciarFlujoAction
 
         return DB::transaction(function () use ($plantilla, $primeraEtapa, $iniciador, $datos) {
 
+            $referenciaExterna = ! empty($datos['referencia_externa'])
+                ? strtoupper(trim($datos['referencia_externa']))
+                : null;
+
             $instance = WorkflowInstance::create([
                 'codigo'               => 'FLJ-TMP', // se reemplaza justo abajo (necesitamos el id)
+                'referencia_externa'   => $referenciaExterna,
                 'workflow_template_id' => $plantilla->id,
                 'document_type_id'     => $datos['document_type_id'] ?? null,
                 'titulo'               => $datos['titulo'],

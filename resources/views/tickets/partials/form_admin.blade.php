@@ -1,169 +1,227 @@
 {{-- resources/views/tickets/partials/form_admin.blade.php --}}
 
-<form
-    action="{{ route('tickets.store') }}"
-    method="POST"
-    enctype="multipart/form-data"
-    class="form-card"
-    x-data="ticketAdminForm({
-        sedesPorEmpresa: {{ Js::from($sedesPorEmpresa) }},
-        usuariosPorEmpresa: {{ Js::from($usuariosPorEmpresa) }},
-        tecnicos: {{ Js::from($tecnicos) }},
-        coberturas: {{ Js::from($coberturas) }},
-        empresaInicial: '{{ old('empresa_id') }}',
-        solicitanteInicial: '{{ old('solicitante_id') }}',
-        sedeInicial: '{{ old('sede_id') }}',
-        asignadoInicial: '{{ old('asignado_a') }}',
-    })"
->
+<form action="{{ route('tickets.store') }}"
+      method="POST"
+      enctype="multipart/form-data"
+      x-data="ticketAdminForm({
+          sedesPorEmpresa: {{ Js::from($sedesPorEmpresa) }},
+          usuariosPorEmpresa: {{ Js::from($usuariosPorEmpresa) }},
+          tecnicos: {{ Js::from($tecnicos) }},
+          coberturas: {{ Js::from($coberturas) }},
+          empresaInicial: '{{ old('empresa_id') }}',
+          solicitanteInicial: '{{ old('solicitante_id') }}',
+          sedeInicial: '{{ old('sede_id') }}',
+          asignadoInicial: '{{ old('asignado_a') }}',
+      })"
+      class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
     @csrf
 
-    <div class="form-card-header">
-        <h3>Contexto del ticket</h3>
-        <p>¿De quién es el ticket y a qué empresa pertenece?</p>
-    </div>
+    <div class="p-5 space-y-5">
 
-    <div class="form-card-body">
-
-        <div class="form-section">
-            <div class="form-grid form-grid-2">
-
-                <div class="form-group">
-                    <label class="form-label" for="empresa_id">Empresa <span class="required">*</span></label>
-                    <select id="empresa_id" name="empresa_id" required
-                            x-model="empresaSeleccionada"
-                            class="form-select @error('empresa_id') is-invalid @enderror">
-                        <option value="">— Selecciona empresa —</option>
-                        @foreach ($empresas as $empresa)
-                            <option value="{{ $empresa->id }}">{{ $empresa->nombre }}</option>
-                        @endforeach
-                    </select>
-                    @error('empresa_id')<p class="form-error">{{ $message }}</p>@enderror
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="solicitante_id">Solicitante <span class="required">*</span></label>
-                    <select id="solicitante_id" name="solicitante_id" required
-                            x-model="solicitanteSeleccionado"
-                            :disabled="!empresaSeleccionada"
-                            class="form-select @error('solicitante_id') is-invalid @enderror">
-                        <option value="">— Selecciona usuario —</option>
-                        <template x-for="usuario in usuariosFiltrados" :key="usuario.id">
-                            <option :value="usuario.id" x-text="usuario.name"></option>
-                        </template>
-                    </select>
-                    <p class="form-help">Solo se muestran usuarios de la empresa seleccionada.</p>
-                    @error('solicitante_id')<p class="form-error">{{ $message }}</p>@enderror
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="sede_id">Sede (opcional)</label>
-                    <select id="sede_id" name="sede_id"
-                            x-model="sedeSeleccionada"
-                            :disabled="!empresaSeleccionada"
-                            class="form-select @error('sede_id') is-invalid @enderror">
-                        <option value="">— Sin sede específica —</option>
-                        <template x-for="sede in sedesFiltradas" :key="sede.id">
-                            <option :value="sede.id" x-text="sede.nombre"></option>
-                        </template>
-                    </select>
-                    @error('sede_id')<p class="form-error">{{ $message }}</p>@enderror
-                </div>
-
-                {{-- ── Asignar técnico — filtrado dinámicamente por cobertura ── --}}
-                <div class="form-group">
-                    <label class="form-label" for="asignado_a">Asignar a técnico (opcional)</label>
-                    <select id="asignado_a" name="asignado_a"
-                            x-model="asignadoSeleccionado"
-                            :disabled="!empresaSeleccionada"
-                            class="form-select @error('asignado_a') is-invalid @enderror">
-                        <option value="">— No asignar ahora —</option>
-                        <template x-for="t in tecnicosDisponibles" :key="t.id">
-                            <option :value="t.id" x-text="t.name"></option>
-                        </template>
-                    </select>
-                    <p class="form-help" x-show="empresaSeleccionada && tecnicosDisponibles.length === 0" x-cloak
-                       style="color: #fbbf24;">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        Ningún técnico tiene cobertura para esta empresa/sede.
-                    </p>
-                    <p class="form-help" x-show="empresaSeleccionada && tecnicosDisponibles.length > 0" x-cloak>
-                        Si asignas un técnico, el ticket nace con estado "Asignado".
-                    </p>
-                    @error('asignado_a')<p class="form-error">{{ $message }}</p>@enderror
-                </div>
-
-            </div>
-        </div>
-
-        {{-- ── Detalle del ticket ──────────────────────────────────────── --}}
-        <div class="form-section">
-            <div class="form-section-title">Detalle del ticket</div>
-
-            <div class="form-group" style="margin-bottom: 1rem">
-                <label class="form-label" for="titulo">Título <span class="required">*</span></label>
-                <input type="text" id="titulo" name="titulo" maxlength="150" required
-                       value="{{ old('titulo') }}"
-                       placeholder="Ej: Falla en impresora de recepción"
-                       class="form-input @error('titulo') is-invalid @enderror">
-                @error('titulo')<p class="form-error">{{ $message }}</p>@enderror
+        {{-- SECCIÓN 1: Contexto y Asignación --}}
+        <div>
+            <div class="mb-3 pb-2 border-b border-stroke dark:border-strokedark flex items-center justify-between">
+                <h3 class="font-bold text-black dark:text-white uppercase tracking-wider text-xs flex items-center gap-1.5">
+                    <i class="fas fa-building text-primary"></i> Contexto y Asignación
+                </h3>
+                <span class="text-[10px] text-bodydark2">Campos marcados con (*) son obligatorios</span>
             </div>
 
-            <div class="form-grid form-grid-2" style="margin-bottom: 1rem">
-                <div class="form-group">
-                    <label class="form-label" for="categoria">Categoría <span class="required">*</span></label>
-                    <select id="categoria" name="categoria" required class="form-select @error('categoria') is-invalid @enderror">
-                        <option value="">— Selecciona —</option>
-                        @foreach (\App\Models\Ticket::CATEGORIAS as $key => $label)
-                            <option value="{{ $key }}" @selected(old('categoria') === $key)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    @error('categoria')<p class="form-error">{{ $message }}</p>@enderror
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="prioridad">Prioridad <span class="required">*</span></label>
-                    <select id="prioridad" name="prioridad" required class="form-select @error('prioridad') is-invalid @enderror">
-                        @foreach (\App\Models\Ticket::PRIORIDADES as $key => $label)
-                            <option value="{{ $key }}" @selected(old('prioridad', 'media') === $key)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    @error('prioridad')<p class="form-error">{{ $message }}</p>@enderror
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="descripcion">Descripción <span class="required">*</span></label>
-                <textarea id="descripcion" name="descripcion" rows="5" required
-                          placeholder="Describe el problema con todo el detalle disponible."
-                          class="form-textarea @error('descripcion') is-invalid @enderror">{{ old('descripcion') }}</textarea>
-                @error('descripcion')<p class="form-error">{{ $message }}</p>@enderror
-            </div>
-        </div>
-
-        {{-- ── Foto adjunta ────────────────────────────────────────────── --}}
-        <div class="form-section">
-            <div class="form-group" x-data="{ nombre: '' }">
-                <label class="form-label">Foto adjunta (opcional)</label>
-                <label class="form-file-wrap @error('foto_solicitud') is-invalid @enderror">
-                    <div class="form-file-icon"><i class="fas fa-image"></i></div>
-                    <div>
-                        <div class="form-file-text" x-text="nombre || 'Seleccionar imagen'"></div>
-                        <div class="form-file-hint">JPG, PNG — máx. 5MB</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {{-- Empresa --}}
+                <div>
+                    <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                        Empresa <span class="text-meta-1">*</span>
+                    </label>
+                    <div class="relative z-20">
+                        <select id="empresa_id" name="empresa_id" required
+                                x-model="empresaSeleccionada"
+                                class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white @error('empresa_id') border-meta-1 @enderror">
+                            <option value="" class="text-body dark:text-bodydark">— Seleccionar —</option>
+                            @foreach ($empresas as $empresa)
+                                <option value="{{ $empresa->id }}" class="text-body dark:text-bodydark">{{ $empresa->nombre }}</option>
+                            @endforeach
+                        </select>
+                        <span class="absolute top-1/2 right-2.5 -translate-y-1/2 z-30 pointer-events-none">
+                            <i class="fas fa-chevron-down text-[10px] text-bodydark2"></i>
+                        </span>
                     </div>
-                    <input type="file" name="foto_solicitud" accept="image/*"
-                           @change="nombre = $event.target.files[0]?.name ?? ''">
-                </label>
-                @error('foto_solicitud')<p class="form-error">{{ $message }}</p>@enderror
+                    @error('empresa_id')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+                </div>
+
+                {{-- Solicitante --}}
+                <div>
+                    <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                        Solicitante <span class="text-meta-1">*</span>
+                    </label>
+                    <div class="relative z-20">
+                        <select id="solicitante_id" name="solicitante_id" required
+                                x-model="solicitanteSeleccionado"
+                                :disabled="!empresaSeleccionada"
+                                class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white disabled:bg-whiten disabled:cursor-not-allowed dark:disabled:bg-meta-4 @error('solicitante_id') border-meta-1 @enderror">
+                            <option value="" class="text-body dark:text-bodydark">— Seleccionar —</option>
+                            <template x-for="usuario in usuariosFiltrados" :key="usuario.id">
+                                <option :value="usuario.id" x-text="usuario.name" class="text-body dark:text-bodydark"></option>
+                            </template>
+                        </select>
+                        <span class="absolute top-1/2 right-2.5 -translate-y-1/2 z-30 pointer-events-none">
+                            <i class="fas fa-chevron-down text-[10px] text-bodydark2"></i>
+                        </span>
+                    </div>
+                    @error('solicitante_id')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+                </div>
+
+                {{-- Sede --}}
+                <div>
+                    <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                        Sede (Opcional)
+                    </label>
+                    <div class="relative z-20">
+                        <select id="sede_id" name="sede_id"
+                                x-model="sedeSeleccionada"
+                                :disabled="!empresaSeleccionada"
+                                class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white disabled:bg-whiten disabled:cursor-not-allowed dark:disabled:bg-meta-4 @error('sede_id') border-meta-1 @enderror">
+                            <option value="" class="text-body dark:text-bodydark">— Sin sede —</option>
+                            <template x-for="sede in sedesFiltradas" :key="sede.id">
+                                <option :value="sede.id" x-text="sede.nombre" class="text-body dark:text-bodydark"></option>
+                            </template>
+                        </select>
+                        <span class="absolute top-1/2 right-2.5 -translate-y-1/2 z-30 pointer-events-none">
+                            <i class="fas fa-chevron-down text-[10px] text-bodydark2"></i>
+                        </span>
+                    </div>
+                    @error('sede_id')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+                </div>
+
+                {{-- Asignar Técnico --}}
+                <div>
+                    <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                        Asignar Técnico
+                    </label>
+                    <div class="relative z-20">
+                        <select id="asignado_a" name="asignado_a"
+                                x-model="asignadoSeleccionado"
+                                :disabled="!empresaSeleccionada"
+                                class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white disabled:bg-whiten disabled:cursor-not-allowed dark:disabled:bg-meta-4 @error('asignado_a') border-meta-1 @enderror">
+                            <option value="" class="text-body dark:text-bodydark">— Pendiente —</option>
+                            <template x-for="t in tecnicosDisponibles" :key="t.id">
+                                <option :value="t.id" x-text="t.name" class="text-body dark:text-bodydark"></option>
+                            </template>
+                        </select>
+                        <span class="absolute top-1/2 right-2.5 -translate-y-1/2 z-30 pointer-events-none">
+                            <i class="fas fa-chevron-down text-[10px] text-bodydark2"></i>
+                        </span>
+                    </div>
+                    @error('asignado_a')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+                </div>
+            </div>
+
+            <p class="mt-1 text-[10px] text-meta-6 font-medium" x-show="empresaSeleccionada && tecnicosDisponibles.length === 0" x-cloak>
+                <i class="fas fa-exclamation-triangle mr-1"></i> Ningún técnico tiene cobertura para esta sede/empresa.
+            </p>
+        </div>
+
+        {{-- SECCIÓN 2: Detalles del Ticket --}}
+        <div>
+            <div class="mb-3 pb-2 border-b border-stroke dark:border-strokedark">
+                <h3 class="font-bold text-black dark:text-white uppercase tracking-wider text-xs flex items-center gap-1.5">
+                    <i class="fas fa-align-left text-primary"></i> Información de la Solicitud
+                </h3>
+            </div>
+
+            <div class="space-y-3">
+                {{-- Título, Categoría y Prioridad en la misma fila para pantallas medianas --}}
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                    <div class="md:col-span-6">
+                        <label for="titulo" class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                            Título del Requerimiento <span class="text-meta-1">*</span>
+                        </label>
+                        <input type="text" id="titulo" name="titulo" maxlength="150" required
+                               value="{{ old('titulo') }}"
+                               placeholder="Ej: Falla en impresora o red local"
+                               class="w-full rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white @error('titulo') border-meta-1 @enderror">
+                        @error('titulo')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                            Categoría <span class="text-meta-1">*</span>
+                        </label>
+                        <div class="relative z-20">
+                            <select id="categoria" name="categoria" required 
+                                    class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white @error('categoria') border-meta-1 @enderror">
+                                <option value="" class="text-body dark:text-bodydark">— Seleccionar —</option>
+                                @foreach (\App\Models\Ticket::CATEGORIAS as $key => $label)
+                                    <option value="{{ $key }}" @selected(old('categoria') === $key) class="text-body dark:text-bodydark">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            <span class="absolute top-1/2 right-2.5 -translate-y-1/2 z-30 pointer-events-none">
+                                <i class="fas fa-chevron-down text-[10px] text-bodydark2"></i>
+                            </span>
+                        </div>
+                        @error('categoria')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                            Prioridad <span class="text-meta-1">*</span>
+                        </label>
+                        <div class="relative z-20">
+                            <select id="prioridad" name="prioridad" required 
+                                    class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white @error('prioridad') border-meta-1 @enderror">
+                                @foreach (\App\Models\Ticket::PRIORIDADES as $key => $label)
+                                    <option value="{{ $key }}" @selected(old('prioridad', 'media') === $key) class="text-body dark:text-bodydark">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            <span class="absolute top-1/2 right-2.5 -translate-y-1/2 z-30 pointer-events-none">
+                                <i class="fas fa-chevron-down text-[10px] text-bodydark2"></i>
+                            </span>
+                        </div>
+                        @error('prioridad')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+
+                {{-- Descripción --}}
+                <div>
+                    <label for="descripcion" class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                        Descripción Detallada <span class="text-meta-1">*</span>
+                    </label>
+                    <textarea id="descripcion" name="descripcion" rows="3" required
+                              placeholder="Describe las observaciones o detalles del problema..."
+                              class="w-full rounded border border-stroke bg-transparent py-2 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white @error('descripcion') border-meta-1 @enderror">{{ old('descripcion') }}</textarea>
+                    @error('descripcion')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+                </div>
+            </div>
+        </div>
+
+        {{-- SECCIÓN 3: Adjunto --}}
+        <div>
+            <div class="mb-2 pb-2 border-b border-stroke dark:border-strokedark">
+                <h3 class="font-bold text-black dark:text-white uppercase tracking-wider text-xs flex items-center gap-1.5">
+                    <i class="fas fa-paperclip text-primary"></i> Evidencia (Opcional)
+                </h3>
+            </div>
+
+            <div x-data="{ nombre: '' }">
+                <input type="file" name="foto_solicitud" id="foto_solicitud" accept="image/*"
+                       @change="nombre = $event.target.files[0]?.name ?? ''"
+                       class="w-full cursor-pointer rounded border border-stroke bg-transparent text-xs text-bodydark2 outline-none transition file:mr-4 file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-stroke file:bg-gray-2 file:py-1.5 file:px-3 file:text-xs file:font-semibold file:text-black hover:file:bg-primary hover:file:text-white dark:border-form-strokedark dark:file:border-form-strokedark dark:file:bg-meta-4 dark:file:text-white @error('foto_solicitud') border-meta-1 @enderror">
+                <p class="mt-1 text-[10px] text-bodydark2">JPG, PNG, WEBP — Máximo 5MB</p>
+                @error('foto_solicitud')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
             </div>
         </div>
 
     </div>
 
-    <div class="form-card-footer">
-        <a href="{{ route('dashboard') }}" class="db-btn ghost lg">Cancelar</a>
-        <button type="submit" class="db-btn solid lg">
-            <i class="fas fa-check"></i> Crear ticket
+    {{-- Pie de Acciones Compacto --}}
+    <div class="flex items-center justify-end gap-2 bg-gray-2 dark:bg-meta-4/40 px-5 py-3 border-t border-stroke dark:border-strokedark">
+        <a href="{{ route('dashboard') }}" 
+           class="inline-flex items-center justify-center rounded border border-stroke py-1.5 px-4 text-center text-xs font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition">
+            Cancelar
+        </a>
+        <button type="submit" 
+                class="inline-flex items-center justify-center gap-1.5 rounded bg-primary py-1.5 px-5 text-center text-xs font-bold uppercase tracking-wider text-white hover:bg-opacity-90 transition shadow-sm">
+            <i class="fas fa-check text-[10px]"></i> Crear Ticket
         </button>
     </div>
 
@@ -199,15 +257,6 @@
                 return this.usuariosPorEmpresa[this.empresaSeleccionada] ?? [];
             },
 
-            /**
-             * Tecnicos cuya cobertura (en empresa_user) coincide con
-             * la empresa+sede actualmente seleccionada.
-             *
-             * Regla:
-             *  - empresa debe coincidir
-             *  - si hay sede seleccionada: la cobertura debe ser NULL o la sede
-             *  - si no hay sede: cualquier cobertura de la empresa sirve
-             */
             get tecnicosDisponibles() {
                 if (!this.empresaSeleccionada) return [];
 
@@ -228,14 +277,12 @@
             },
 
             init() {
-                // Al cambiar empresa, limpiar selecciones dependientes
                 this.$watch('empresaSeleccionada', () => {
                     this.solicitanteSeleccionado = '';
                     this.sedeSeleccionada = '';
                     this.asignadoSeleccionado = '';
                 });
 
-                // Al cambiar sede, revalidar que el tecnico siga teniendo cobertura
                 this.$watch('sedeSeleccionada', () => {
                     if (this.asignadoSeleccionado) {
                         const sigueDisponible = this.tecnicosDisponibles

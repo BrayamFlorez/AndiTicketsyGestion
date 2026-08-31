@@ -1,76 +1,92 @@
+{{-- resources/views/flujos/instancias/create.blade.php --}}
 <x-app-layout>
     <x-slot name="title">Nuevo Flujo</x-slot>
 
-    @push('styles')
-        <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
-    @endpush
-
-    <div class="db-header mb-6 flex items-center justify-between flex-wrap gap-3">
+    {{-- ── Cabecera y Acción Principal ────────────────────────────────── --}}
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h2 class="text-2xl font-black text-white uppercase tracking-tighter">Iniciar Nuevo Flujo</h2>
-            <p class="text-xs text-gray-400 font-medium uppercase tracking-widest">
-                Selecciona el tipo de documento y completa los datos del trámite
+            <h2 class="text-title-md2 font-bold text-black dark:text-white flex items-center gap-2">
+                <i class="fas fa-play-circle text-primary"></i> Iniciar Nuevo Flujo
+            </h2>
+            <p class="text-xs text-bodydark2 mt-1">
+                Selecciona el tipo de documento y completa la información inicial del trámite
             </p>
         </div>
-        <a href="{{ route('flujos.instancias.index') }}" class="db-btn ghost">
-            <i class="fas fa-arrow-left mr-2"></i> Volver
+
+        <a href="{{ route('flujos.instancias.index') }}" 
+           class="inline-flex items-center justify-center gap-2 rounded border border-stroke py-2 px-4 text-center text-xs font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition shadow-sm">
+            <i class="fas fa-arrow-left text-[10px]"></i> Volver al Listado
         </a>
     </div>
 
     @if ($tipos->isEmpty())
-        <div class="db-card">
-            <div class="db-empty py-12 text-center px-6">
-                <i class="fas fa-folder-open text-5xl mb-4 text-gray-700"></i>
-                <p class="text-gray-400 mb-2">No hay tipos de documento configurados con una plantilla activa.</p>
-                <p class="text-xs text-gray-600">Un administrador debe crear al menos un tipo de documento y asociarle una plantilla de flujo activa.</p>
+        {{-- Sin Tipos de Documento Configurados --}}
+        <div class="rounded-sm border border-stroke bg-white p-12 text-center shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div class="flex flex-col items-center text-bodydark2">
+                <i class="fas fa-folder-open text-4xl mb-3"></i>
+                <p class="text-sm font-bold text-black dark:text-white mb-1">
+                    No hay tipos de documento configurados con una plantilla activa.
+                </p>
+                <p class="text-xs max-w-md">
+                    Un administrador debe crear al menos un tipo de documento y asociarle una plantilla de flujo de trabajo activa.
+                </p>
             </div>
         </div>
     @else
-        <form action="{{ route('flujos.instancias.store') }}" method="POST" class="db-card"
+        <form action="{{ route('flujos.instancias.store') }}" method="POST" 
+              class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
               x-data="iniciarFlujo({{ Js::from($tipos->map(fn ($t) => [
-                    'id'       => $t->id,
-                    'nombre'   => $t->nombre,
-                    'icono'    => $t->icono,
+                    'id'        => $t->id,
+                    'nombre'    => $t->nombre,
+                    'icono'     => $t->icono,
                     'plantilla' => $t->template->nombre,
-                    'etapas'   => $t->template->stages->sortBy('orden')->pluck('nombre')->values(),
-              ])) }})">
+                    'etapas'    => $t->template->stages->sortBy('orden')->pluck('nombre')->values(),
+                ])) }})">
             @csrf
 
+            {{-- Errores de Validación --}}
             @if ($errors->any())
-                <div class="mx-6 mt-6 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm">
-                    <div class="font-bold mb-2"><i class="fas fa-exclamation-triangle mr-1"></i> Revisa los campos:</div>
-                    <ul class="list-disc list-inside space-y-1 text-xs">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                <div class="mx-6 mt-6 flex w-full border-l-6 border-meta-1 bg-meta-1/10 px-6 py-4 shadow-md dark:bg-meta-1/20 dark:border-meta-1 rounded-sm">
+                    <div class="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-meta-1 text-white shrink-0">
+                        <i class="fas fa-exclamation-triangle text-sm"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1 text-xs font-bold text-meta-1 uppercase tracking-wider">Revisa los siguientes campos:</h5>
+                        <ul class="list-disc list-inside space-y-0.5 text-xs text-meta-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             @endif
 
-            <div class="form-card-body" style="padding: 1.5rem;">
+            <div class="p-6 space-y-6">
 
-                {{-- Tipo de documento --}}
-                <div class="form-group">
-                    <label class="form-label">Tipo de Documento <span class="text-red-400">*</span></label>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-2">
+                {{-- SECCIÓN 1: Selección de Tipo de Documento --}}
+                <div>
+                    <div class="mb-3 pb-2 border-b border-stroke dark:border-strokedark">
+                        <h3 class="font-bold text-black dark:text-white uppercase tracking-wider text-xs flex items-center gap-1.5">
+                            <i class="fas fa-file-alt text-primary"></i> Tipo de Documento <span class="text-meta-1">*</span>
+                        </h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         @foreach ($tipos as $tipo)
                             <label class="cursor-pointer">
                                 <input type="radio" name="document_type_id" value="{{ $tipo->id }}"
-                                    class="peer sr-only" x-model.number="tipoElegido"
-                                    @checked(old('document_type_id') == $tipo->id) required>
-                                <div class="p-4 rounded-lg border-2 border-gray-800 bg-[#1a1a1b] transition-all
-                                            peer-checked:border-[#007acc] peer-checked:bg-[#007acc]/10 hover:border-gray-700">
-                                    <div class="flex items-start gap-3">
-                                        <div class="w-10 h-10 rounded-lg bg-[#007acc]/10 flex items-center justify-center text-[#007acc] flex-shrink-0">
-                                            <i class="fas {{ $tipo->icono ?: 'fa-file-alt' }}"></i>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-bold text-white">{{ $tipo->nombre }}</p>
-                                            <p class="text-[10px] text-gray-500 mt-0.5 uppercase tracking-wider">
-                                                {{ $tipo->template->nombre }}
-                                            </p>
-                                        </div>
+                                       class="peer sr-only" x-model.number="tipoElegido"
+                                       @checked(old('document_type_id') == $tipo->id) required>
+                                
+                                <div class="p-4 rounded border-2 border-stroke bg-gray-2 dark:border-strokedark dark:bg-meta-4/30 transition peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50 flex items-start gap-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded bg-primary/10 text-primary shrink-0">
+                                        <i class="fas {{ $tipo->icono ?: 'fa-file-alt' }} text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <h4 class="text-xs font-bold text-black dark:text-white truncate">{{ $tipo->nombre }}</h4>
+                                        <p class="text-[10px] text-bodydark2 uppercase tracking-wider mt-0.5 truncate">
+                                            {{ $tipo->template->nombre }}
+                                        </p>
                                     </div>
                                 </div>
                             </label>
@@ -78,45 +94,91 @@
                     </div>
                 </div>
 
-                {{-- Preview de etapas del tipo elegido --}}
-                <div class="mt-4 rounded-lg bg-[#232324] border border-gray-800 p-4" x-show="tipoElegido" style="display: none;">
-                    <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">
-                        <i class="fas fa-stream mr-1"></i> Etapas que recorrerá el flujo:
+                {{-- Preview de Etapas del Tipo Seleccionado --}}
+                <div x-show="tipoElegido" x-cloak class="rounded border border-stroke bg-gray-2 p-4 dark:border-strokedark dark:bg-meta-4/30">
+                    <p class="text-[10px] font-bold text-bodydark2 uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <i class="fas fa-stream text-primary"></i> Etapas que recorrerá el flujo:
                     </p>
                     <div class="flex flex-wrap items-center gap-2">
                         <template x-for="(etapa, idx) in etapasPreview()" :key="idx">
                             <div class="flex items-center gap-2">
-                                <span class="px-3 py-1 rounded-full bg-[#1a1a1b] border border-gray-800 text-xs text-gray-300">
-                                    <span class="text-[#007acc] font-bold" x-text="`${idx + 1}.`"></span>
+                                <span class="inline-flex items-center rounded border border-stroke bg-white px-2.5 py-1 text-xs font-medium text-black dark:border-strokedark dark:bg-boxdark dark:text-white">
+                                    <span class="text-primary font-bold mr-1" x-text="`${idx + 1}.`"></span>
                                     <span x-text="etapa"></span>
                                 </span>
-                                <i class="fas fa-arrow-right text-gray-700 text-xs" x-show="idx < etapasPreview().length - 1"></i>
+                                <i class="fas fa-arrow-right text-bodydark2 text-[10px]" x-show="idx < etapasPreview().length - 1"></i>
                             </div>
                         </template>
                     </div>
                 </div>
 
-                {{-- Título --}}
-                <div class="form-group mt-6">
-                    <label class="form-label" for="titulo">Título del Trámite <span class="text-red-400">*</span></label>
-                    <input type="text" id="titulo" name="titulo" class="form-input"
-                        value="{{ old('titulo') }}" required maxlength="200"
-                        placeholder="Ej: Cotización cliente ACME — Servicios recurrentes 2026">
-                </div>
+                                {{-- SECCIÓN 2: Información del Trámite --}}
+                <div>
+                    <div class="mb-3 pb-2 border-b border-stroke dark:border-strokedark">
+                        <h3 class="font-bold text-black dark:text-white uppercase tracking-wider text-xs flex items-center gap-1.5">
+                            <i class="fas fa-align-left text-primary"></i> Información del Trámite
+                        </h3>
+                    </div>
 
-                {{-- Descripción --}}
-                <div class="form-group mt-4">
-                    <label class="form-label" for="descripcion">Descripción</label>
-                    <textarea id="descripcion" name="descripcion" rows="4" class="form-input"
-                        maxlength="2000" placeholder="Contexto, monto, condiciones, referencias...">{{ old('descripcion') }}</textarea>
+                    <div class="space-y-4">
+
+                        {{-- Referencia externa (índice personal del iniciador) --}}
+                        <div>
+                            <label for="referencia_externa" class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white flex items-center gap-1.5">
+                                <i class="fas fa-hashtag text-primary text-[9px]"></i>
+                                Código de Referencia
+                                <span class="font-normal normal-case text-bodydark2">(opcional)</span>
+                            </label>
+                            <input type="text" id="referencia_externa" name="referencia_externa"
+                                   maxlength="50"
+                                   value="{{ old('referencia_externa') }}"
+                                   placeholder="Ej: OT-2026-042 · PROY-ACME-Q3 · REF-INTERNO-15"
+                                   style="text-transform: uppercase;"
+                                   class="w-full rounded border border-stroke bg-transparent py-1.5 px-3 font-mono text-xs outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white @error('referencia_externa') border-meta-1 @enderror">
+                            <p class="mt-1 text-[10px] text-bodydark2">
+                                <i class="fas fa-info-circle"></i>
+                                Tu identificador para encontrar este trámite después.
+                                Solo letras, números, guiones y barras. Sin espacios.
+                            </p>
+                            @error('referencia_externa')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+                        </div>
+
+                        {{-- Título --}}
+                        <div>
+                            <label for="titulo" class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                                Título del Trámite <span class="text-meta-1">*</span>
+                            </label>
+                            <input type="text" id="titulo" name="titulo" required maxlength="200"
+                                   value="{{ old('titulo') }}"
+                                   placeholder="Ej: Cotización Cliente ACME — Servicios Recurrentes 2026"
+                                   class="w-full rounded border border-stroke bg-transparent py-1.5 px-3 text-xs outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white @error('titulo') border-meta-1 @enderror">
+                            @error('titulo')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+                        </div>
+
+                        {{-- Descripción --}}
+                        <div>
+                            <label for="descripcion" class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                                Descripción Detallada (Opcional)
+                            </label>
+                            <textarea id="descripcion" name="descripcion" rows="4" maxlength="2000"
+                                      placeholder="Agrega observaciones, contexto, referencias o montos iniciales..."
+                                      class="w-full rounded border border-stroke bg-transparent py-2 px-3 text-xs outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white @error('descripcion') border-meta-1 @enderror">{{ old('descripcion') }}</textarea>
+                            @error('descripcion')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
                 </div>
 
             </div>
 
-            <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-800">
-                <a href="{{ route('flujos.instancias.index') }}" class="db-btn ghost">Cancelar</a>
-                <button type="submit" class="db-btn solid">
-                    <i class="fas fa-play-circle mr-2"></i> Iniciar Flujo
+            {{-- Footer del Formulario --}}
+            <div class="flex items-center justify-end gap-2 bg-gray-2 dark:bg-meta-4/40 px-6 py-3 border-t border-stroke dark:border-strokedark">
+                <a href="{{ route('flujos.instancias.index') }}" 
+                   class="inline-flex items-center justify-center rounded border border-stroke py-1.5 px-4 text-center text-xs font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition">
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="inline-flex items-center gap-1.5 rounded bg-primary py-1.5 px-5 text-center text-xs font-bold uppercase tracking-wider text-white hover:bg-opacity-90 transition shadow-sm cursor-pointer">
+                    <i class="fas fa-play-circle text-[10px]"></i> Iniciar Flujo
                 </button>
             </div>
         </form>

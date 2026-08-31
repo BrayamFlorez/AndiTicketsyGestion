@@ -60,6 +60,7 @@ class GuardarPlantillaAction
                 'workflow_template_id' => $plantilla->id,
                 'nombre'               => $etapaData['nombre'],
                 'descripcion'          => $etapaData['descripcion'] ?? null,
+                'codigo_externo'       => $etapaData['codigo_externo'] ?? null,   // ← nuevo
                 'orden'                => (int) $etapaData['orden'],
                 'modo'                 => $etapaData['modo'],
                 'politica_rechazo'     => $etapaData['politica_rechazo'],

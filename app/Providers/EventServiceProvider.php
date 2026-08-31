@@ -22,6 +22,24 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\Flujos\FlujoCerrado::class => [
             \App\Listeners\Flujos\NotificarFlujoCerrado::class,
         ],
+        \App\Events\Tickets\TicketCreado::class => [
+            \App\Listeners\Tickets\NotificarTicketCreado::class,
+        ],
+        \App\Events\Tickets\TicketAsignado::class => [
+            \App\Listeners\Tickets\NotificarTicketAsignado::class,
+        ],
+        \App\Events\Tickets\TicketIniciado::class => [
+            \App\Listeners\Tickets\NotificarTicketIniciado::class,
+        ],
+        \App\Events\Tickets\TicketResuelto::class => [
+            \App\Listeners\Tickets\NotificarTicketResuelto::class,
+        ],
+        \App\Events\Tickets\TicketCerrado::class => [
+            \App\Listeners\Tickets\NotificarTicketCerrado::class,
+        ],
+        \App\Events\Tickets\TicketCancelado::class => [
+            \App\Listeners\Tickets\NotificarTicketCancelado::class,
+        ],
     ];
 
     /**

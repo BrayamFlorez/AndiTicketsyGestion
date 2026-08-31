@@ -2,24 +2,34 @@
 <x-app-layout>
     <x-slot name="title">Editar equipo</x-slot>
 
-    @push('styles')
-        <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
-    @endpush
-
-    <div class="db-header mb-6 flex items-center justify-between flex-wrap gap-3">
+    {{-- Cabecera --}}
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h4>Editar equipo: {{ $equipo->nombre }}</h4>
-            <p>
-                <span class="db-badge {{ $equipo->color_estado }}">{{ $equipo->label_estado }}</span>
-                · {{ $equipo->label_categoria }}
+            <h2 class="text-title-md2 font-bold text-black dark:text-white flex items-center gap-2">
+                <i class="fas fa-edit text-primary"></i> Editar Equipo: {{ $equipo->nombre }}
+            </h2>
+            <div class="flex items-center gap-2 mt-1">
+                @php
+                    $colorEst = match($equipo->estado) {
+                        'activo' => 'bg-meta-3/10 text-meta-3',
+                        'mantenimiento' => 'bg-meta-6/10 text-meta-6',
+                        'dado_de_baja' => 'bg-meta-1/10 text-meta-1',
+                        default => 'bg-primary/10 text-primary',
+                    };
+                @endphp
+                <span class="inline-flex rounded-full py-0.5 px-2.5 text-[10px] font-bold uppercase {{ $colorEst }}">
+                    {{ $equipo->label_estado }}
+                </span>
+                <span class="text-xs text-bodydark2">· {{ $equipo->label_categoria }}</span>
                 @if ($equipo->numero_serie)
-                    · S/N <code style="color: var(--db-text)">{{ $equipo->numero_serie }}</code>
+                    <span class="text-xs text-bodydark2">· S/N: <code class="font-mono text-black dark:text-white">{{ $equipo->numero_serie }}</code></span>
                 @endif
-            </p>
+            </div>
         </div>
-        <a href="{{ route('equipos.index') }}" class="db-btn ghost">
-            <i class="fas fa-arrow-left"></i> Volver
+        
+        <a href="{{ route('equipos.index') }}" 
+           class="inline-flex items-center justify-center gap-2 rounded border border-stroke py-2 px-4 text-center text-xs font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition shadow-sm">
+            <i class="fas fa-arrow-left text-[10px]"></i> Volver
         </a>
     </div>
 

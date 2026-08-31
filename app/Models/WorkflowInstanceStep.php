@@ -21,6 +21,7 @@ class WorkflowInstanceStep extends Model
     protected $fillable = [
         'workflow_instance_id',
         'workflow_stage_id',
+        'codigo_referencia',   
         'revision',
         'estado',
         'inicio_en',
@@ -56,5 +57,10 @@ class WorkflowInstanceStep extends Model
     public function estaEnCurso(): bool
     {
         return $this->estado === self::ESTADO_EN_CURSO;
+    }
+
+    public function comentariosAdicionales()
+    {
+        return $this->hasMany(\App\Models\WorkflowStepComment::class)->latest();
     }
 }

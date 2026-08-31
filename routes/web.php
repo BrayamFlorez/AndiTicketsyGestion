@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 // ── Controladores ────────────────────────────────────────────────────────
 use App\Http\Controllers\ArchivoPrivadoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentAuditLogController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\EquipoController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkflowInstanceController;
 use App\Http\Controllers\WorkflowTemplateController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\AuditoriaController;   
 
 /*
 |--------------------------------------------------------------------------
@@ -181,6 +183,11 @@ Route::middleware(['auth'])->group(function () {
         '/configuracion/ajustes/{setting}',
         [SettingsController::class, 'update']
     )->name('configuracion.ajustes.update');
+    // ── Auditoría documental (módulo independiente, de solo lectura) ──
+    Route::prefix('auditoria')->name('auditoria.')->middleware('can:auditoria.ver')->group(function () {
+        Route::get('/', [DocumentAuditLogController::class, 'index'])->name('index');
+        Route::get('/documentos/{instancia}', [DocumentAuditLogController::class, 'show'])->name('show');
+    });
 
     // ── Mantenimiento Preventivo ──
     Route::controller(MantenimientoPreventivoController::class)->name('mpreventivo.')->group(function () {

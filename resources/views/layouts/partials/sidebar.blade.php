@@ -289,6 +289,14 @@
                                             </a>
                                         </li>
                                     @endcan
+                                    @can('auditoria.ver')
+                                        <li>
+                                            <a href="{{ route('auditoria.index') }}"
+                                                class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('roles.*') ? 'text-white' : '' }}">
+                                                Auditoria
+                                            </a>
+                                        </li>
+                                    @endcan
                                 </ul>
                             </div>
                         </li>

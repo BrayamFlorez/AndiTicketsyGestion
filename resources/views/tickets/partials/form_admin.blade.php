@@ -1,5 +1,10 @@
 {{-- resources/views/tickets/partials/form_admin.blade.php --}}
 
+@php
+    // Desde la ficha de un equipo/impresora llegan empresa, sede y equipo ya elegidos
+    $vinculoInicial ??= null;
+@endphp
+
 <form action="{{ route('tickets.store') }}"
       method="POST"
       enctype="multipart/form-data"
@@ -8,10 +13,13 @@
           usuariosPorEmpresa: {{ Js::from($usuariosPorEmpresa) }},
           tecnicos: {{ Js::from($tecnicos) }},
           coberturas: {{ Js::from($coberturas) }},
-          empresaInicial: '{{ old('empresa_id') }}',
-          solicitanteInicial: '{{ old('solicitante_id') }}',
-          sedeInicial: '{{ old('sede_id') }}',
+          activosPorEmpresa: {{ Js::from($activosPorEmpresa ?? []) }},
+          empresaInicial: {{ Js::from((string) old('empresa_id', $vinculoInicial['empresa_id'] ?? '')) }},
+          solicitanteInicial: {{ Js::from((string) old('solicitante_id', auth()->id())) }},
+          solicitantePorDefecto: {{ Js::from((string) auth()->id()) }},
+          sedeInicial: {{ Js::from((string) old('sede_id', $vinculoInicial['sede_id'] ?? '')) }},
           asignadoInicial: '{{ old('asignado_a') }}',
+          vinculoInicial: {{ Js::from((string) old('vinculo', $vinculoInicial['valor'] ?? '')) }},
       })"
       class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
     @csrf
@@ -60,8 +68,10 @@
                                 :disabled="!empresaSeleccionada"
                                 class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white disabled:bg-whiten disabled:cursor-not-allowed dark:disabled:bg-meta-4 @error('solicitante_id') border-meta-1 @enderror">
                             <option value="" class="text-body dark:text-bodydark">— Seleccionar —</option>
+                            {{-- Por defecto, quien crea el ticket --}}
+                            <option value="{{ auth()->id() }}" :selected="solicitanteSeleccionado == '{{ auth()->id() }}'" class="text-body dark:text-bodydark">{{ auth()->user()->name }} (yo)</option>
                             <template x-for="usuario in usuariosFiltrados" :key="usuario.id">
-                                <option :value="usuario.id" x-text="usuario.name" class="text-body dark:text-bodydark"></option>
+                                <option :value="usuario.id" x-text="usuario.name" :selected="usuario.id == solicitanteSeleccionado" class="text-body dark:text-bodydark"></option>
                             </template>
                         </select>
                         <span class="absolute top-1/2 right-2.5 -translate-y-1/2 z-30 pointer-events-none">
@@ -83,7 +93,7 @@
                                 class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white disabled:bg-whiten disabled:cursor-not-allowed dark:disabled:bg-meta-4 @error('sede_id') border-meta-1 @enderror">
                             <option value="" class="text-body dark:text-bodydark">— Sin sede —</option>
                             <template x-for="sede in sedesFiltradas" :key="sede.id">
-                                <option :value="sede.id" x-text="sede.nombre" class="text-body dark:text-bodydark"></option>
+                                <option :value="sede.id" x-text="sede.nombre" :selected="sede.id == sedeSeleccionada" class="text-body dark:text-bodydark"></option>
                             </template>
                         </select>
                         <span class="absolute top-1/2 right-2.5 -translate-y-1/2 z-30 pointer-events-none">
@@ -105,7 +115,7 @@
                                 class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white disabled:bg-whiten disabled:cursor-not-allowed dark:disabled:bg-meta-4 @error('asignado_a') border-meta-1 @enderror">
                             <option value="" class="text-body dark:text-bodydark">— Pendiente —</option>
                             <template x-for="t in tecnicosDisponibles" :key="t.id">
-                                <option :value="t.id" x-text="t.name" class="text-body dark:text-bodydark"></option>
+                                <option :value="t.id" x-text="t.name" :selected="t.id == asignadoSeleccionado" class="text-body dark:text-bodydark"></option>
                             </template>
                         </select>
                         <span class="absolute top-1/2 right-2.5 -translate-y-1/2 z-30 pointer-events-none">
@@ -119,6 +129,42 @@
             <p class="mt-1 text-[10px] text-meta-6 font-medium" x-show="empresaSeleccionada && tecnicosDisponibles.length === 0" x-cloak>
                 <i class="fas fa-exclamation-triangle mr-1"></i> Ningún técnico tiene cobertura para esta sede/empresa.
             </p>
+
+            {{-- Equipo o impresora vinculada (el ticket queda en su historial) --}}
+            <div class="mt-3">
+                <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">
+                    <i class="fas fa-desktop text-primary mr-0.5"></i> Equipo vinculado (Opcional)
+                </label>
+                <div class="relative z-20">
+                    <select id="vinculo" name="vinculo"
+                            x-model="vinculo"
+                            :disabled="!empresaSeleccionada"
+                            class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white disabled:bg-whiten disabled:cursor-not-allowed dark:disabled:bg-meta-4 @error('vinculo') border-meta-1 @enderror">
+                        <option value="" class="text-body dark:text-bodydark">— Ninguno —</option>
+                        <template x-if="equiposFiltrados.length">
+                            <optgroup label="Equipos">
+                                <template x-for="a in equiposFiltrados" :key="a.valor">
+                                    <option :value="a.valor" :selected="a.valor === vinculo" x-text="a.nombre + (a.detalle ? ' — ' + a.detalle : '')" class="text-body dark:text-bodydark"></option>
+                                </template>
+                            </optgroup>
+                        </template>
+                        <template x-if="impresorasFiltradas.length">
+                            <optgroup label="Impresoras">
+                                <template x-for="a in impresorasFiltradas" :key="a.valor">
+                                    <option :value="a.valor" :selected="a.valor === vinculo" x-text="a.nombre + (a.detalle ? ' — ' + a.detalle : '')" class="text-body dark:text-bodydark"></option>
+                                </template>
+                            </optgroup>
+                        </template>
+                    </select>
+                    <span class="absolute top-1/2 right-2.5 -translate-y-1/2 z-30 pointer-events-none">
+                        <i class="fas fa-chevron-down text-[10px] text-bodydark2"></i>
+                    </span>
+                </div>
+                <p class="mt-0.5 text-[10px] text-bodydark2" x-show="empresaSeleccionada" x-cloak>
+                    Se listan los equipos e impresoras de la empresa<span x-show="sedeSeleccionada"> en la sede elegida</span>. Al elegir uno, el ticket toma su sede.
+                </p>
+                @error('vinculo')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+            </div>
         </div>
 
         {{-- SECCIÓN 2: Detalles del Ticket --}}
@@ -152,7 +198,7 @@
                                     class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-medium outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white @error('categoria') border-meta-1 @enderror">
                                 <option value="" class="text-body dark:text-bodydark">— Seleccionar —</option>
                                 @foreach (\App\Models\Ticket::CATEGORIAS as $key => $label)
-                                    <option value="{{ $key }}" @selected(old('categoria') === $key) class="text-body dark:text-bodydark">{{ $label }}</option>
+                                    <option value="{{ $key }}" @selected(old('categoria', $vinculoInicial['categoria'] ?? null) === $key) class="text-body dark:text-bodydark">{{ $label }}</option>
                                 @endforeach
                             </select>
                             <span class="absolute top-1/2 right-2.5 -translate-y-1/2 z-30 pointer-events-none">
@@ -234,28 +280,46 @@
         usuariosPorEmpresa,
         tecnicos,
         coberturas,
+        activosPorEmpresa,
         empresaInicial,
         solicitanteInicial,
+        solicitantePorDefecto,
         sedeInicial,
         asignadoInicial,
+        vinculoInicial,
     }) {
         return {
             sedesPorEmpresa,
             usuariosPorEmpresa,
             tecnicos,
             coberturas,
+            activosPorEmpresa,
+            solicitantePorDefecto,
 
             empresaSeleccionada:    empresaInicial    || '',
             solicitanteSeleccionado: solicitanteInicial || '',
             sedeSeleccionada:       sedeInicial       || '',
             asignadoSeleccionado:   asignadoInicial   || '',
+            vinculo:                vinculoInicial    || '',
 
             get sedesFiltradas() {
                 return this.sedesPorEmpresa[this.empresaSeleccionada] ?? [];
             },
             get usuariosFiltrados() {
-                return this.usuariosPorEmpresa[this.empresaSeleccionada] ?? [];
+                // Quien crea ya aparece como "(yo)"
+                return (this.usuariosPorEmpresa[this.empresaSeleccionada] ?? [])
+                    .filter(u => String(u.id) !== String(this.solicitantePorDefecto));
             },
+
+            // Equipos e impresoras de la empresa (y de la sede elegida, o sin sede)
+            get activosFiltrados() {
+                const lista = this.activosPorEmpresa[this.empresaSeleccionada] ?? [];
+                if (!this.sedeSeleccionada) return lista;
+                const sedeId = parseInt(this.sedeSeleccionada);
+                return lista.filter(a => a.sede_id === null || parseInt(a.sede_id) === sedeId);
+            },
+            get equiposFiltrados()    { return this.activosFiltrados.filter(a => a.tipo === 'equipo'); },
+            get impresorasFiltradas() { return this.activosFiltrados.filter(a => a.tipo === 'impresora'); },
 
             get tecnicosDisponibles() {
                 if (!this.empresaSeleccionada) return [];
@@ -278,9 +342,18 @@
 
             init() {
                 this.$watch('empresaSeleccionada', () => {
-                    this.solicitanteSeleccionado = '';
+                    this.solicitanteSeleccionado = this.solicitantePorDefecto;
                     this.sedeSeleccionada = '';
                     this.asignadoSeleccionado = '';
+                    this.vinculo = '';
+                });
+
+                // El ticket toma la sede del equipo elegido
+                this.$watch('vinculo', (valor) => {
+                    const activo = this.activosFiltrados.find(a => a.valor === valor);
+                    if (activo && activo.sede_id && String(activo.sede_id) !== String(this.sedeSeleccionada)) {
+                        this.sedeSeleccionada = String(activo.sede_id);
+                    }
                 });
 
                 this.$watch('sedeSeleccionada', () => {
@@ -291,9 +364,13 @@
                             this.asignadoSeleccionado = '';
                         }
                     }
+                    // El equipo elegido debe seguir en la lista de la sede
+                    if (this.vinculo && !this.activosFiltrados.some(a => a.valor === this.vinculo)) {
+                        this.vinculo = '';
+                    }
                 });
             },
         };
     }
 </script>
-@endpush
+@endpush

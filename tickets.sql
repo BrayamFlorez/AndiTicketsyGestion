@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 31-08-2026 a las 22:09:33
+-- Tiempo de generación: 18-09-2026 a las 16:48:09
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -40,18 +40,25 @@ CREATE TABLE `cache` (
 INSERT INTO `cache` (`key`, `value`, `expiration`) VALUES
 ('anditickets-cache-admin@admin.com|127.0.0.1', 'i:1;', 1784838958),
 ('anditickets-cache-admin@admin.com|127.0.0.1:timer', 'i:1784838958;', 1784838958),
-('anditickets-cache-sidebar.flujos.pendientes.user.1', 'i:0;', 1788206864),
-('anditickets-cache-sidebar.flujos.pendientes.user.2', 'i:4;', 1788206825),
+('anditickets-cache-admin@insucoma.co|127.0.0.1', 'i:2;', 1789591665),
+('anditickets-cache-admin@insucoma.co|127.0.0.1:timer', 'i:1789591665;', 1789591665),
+('anditickets-cache-admin@intec.co|127.0.0.1', 'i:2;', 1789593704),
+('anditickets-cache-admin@intec.co|127.0.0.1:timer', 'i:1789593704;', 1789593704),
+('anditickets-cache-prueba@gmail.com|127.0.0.1', 'i:2;', 1789592116),
+('anditickets-cache-prueba@gmail.com|127.0.0.1:timer', 'i:1789592116;', 1789592116),
+('anditickets-cache-settings.all', 'a:2:{s:26:\"flujos.edicion_post_cierre\";a:8:{s:2:\"id\";i:1;s:5:\"clave\";s:26:\"flujos.edicion_post_cierre\";s:5:\"valor\";s:4:\"true\";s:4:\"tipo\";s:4:\"bool\";s:9:\"categoria\";s:6:\"flujos\";s:11:\"descripcion\";s:224:\"Permite a los actores de una etapa agregar adjuntos y comentarios adicionales después de que la etapa fue aprobada o rechazada. Los datos originales (firma, comentario del actor, adjuntos previos) siempre quedan inmutables.\";s:10:\"created_at\";s:27:\"2026-08-31T09:23:09.000000Z\";s:10:\"updated_at\";s:27:\"2026-08-31T20:06:55.000000Z\";}s:29:\"flujos.mostrar_codigo_interno\";a:8:{s:2:\"id\";i:2;s:5:\"clave\";s:29:\"flujos.mostrar_codigo_interno\";s:5:\"valor\";s:5:\"false\";s:4:\"tipo\";s:4:\"bool\";s:9:\"categoria\";s:6:\"flujos\";s:11:\"descripcion\";s:72:\"Muestra u oculta el codigo interno de los flujos en las tablas de flujos\";s:10:\"created_at\";N;s:10:\"updated_at\";s:27:\"2026-09-05T01:50:02.000000Z\";}}', 1789599942),
+('anditickets-cache-sidebar.flujos.pendientes.user.1', 'i:0;', 1788990661),
+('anditickets-cache-sidebar.flujos.pendientes.user.2', 'i:4;', 1789683013),
 ('anditickets-cache-sidebar.flujos.pendientes.user.4', 'i:4;', 1785536261),
-('anditickets-cache-sidebar.flujos.pendientes.user.6', 'i:1;', 1786401717),
-('anditickets-cache-sidebar.flujos.pendientes.user.7', 'i:0;', 1788205363),
-('anditickets-cache-spatie.permission.cache', 'a:3:{s:5:\"alias\";a:4:{s:1:\"a\";s:2:\"id\";s:1:\"b\";s:4:\"name\";s:1:\"c\";s:10:\"guard_name\";s:1:\"r\";s:5:\"roles\";}s:11:\"permissions\";a:40:{i:0;a:4:{s:1:\"a\";i:1;s:1:\"b\";s:17:\"tickets.ver-todos\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:5:{i:0;i:1;i:1;i:2;i:2;i:5;i:3;i:6;i:4;i:7;}}i:1;a:4:{s:1:\"a\";i:2;s:1:\"b\";s:21:\"tickets.ver-asignados\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}}i:2;a:4:{s:1:\"a\";i:3;s:1:\"b\";s:19:\"tickets.ver-propios\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:9:{i:0;i:1;i:1;i:2;i:2;i:8;i:3;i:9;i:4;i:10;i:5;i:11;i:6;i:12;i:7;i:13;i:8;i:14;}}i:3;a:4:{s:1:\"a\";i:4;s:1:\"b\";s:13:\"tickets.crear\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:13:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:5;i:4;i:6;i:5;i:7;i:6;i:8;i:7;i:9;i:8;i:10;i:9;i:11;i:10;i:12;i:11;i:13;i:12;i:14;}}i:4;a:4:{s:1:\"a\";i:5;s:1:\"b\";s:15:\"tickets.asignar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:4:{i:0;i:1;i:1;i:2;i:2;i:5;i:3;i:6;}}i:5;a:4:{s:1:\"a\";i:6;s:1:\"b\";s:15:\"tickets.iniciar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:5:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:5;i:4;i:6;}}i:6;a:4:{s:1:\"a\";i:7;s:1:\"b\";s:16:\"tickets.resolver\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:5:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:5;i:4;i:6;}}i:7;a:4:{s:1:\"a\";i:8;s:1:\"b\";s:14:\"tickets.cerrar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:4:{i:0;i:1;i:1;i:2;i:2;i:5;i:3;i:6;}}i:8;a:4:{s:1:\"a\";i:9;s:1:\"b\";s:16:\"tickets.cancelar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:9;a:4:{s:1:\"a\";i:10;s:1:\"b\";s:16:\"tickets.eliminar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:10;a:4:{s:1:\"a\";i:11;s:1:\"b\";s:12:\"usuarios.ver\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:6:{i:0;i:1;i:1;i:2;i:2;i:5;i:3;i:6;i:4;i:7;i:5;i:11;}}i:11;a:4:{s:1:\"a\";i:12;s:1:\"b\";s:14:\"usuarios.crear\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:12;a:4:{s:1:\"a\";i:13;s:1:\"b\";s:15:\"usuarios.editar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:13;a:4:{s:1:\"a\";i:14;s:1:\"b\";s:17:\"usuarios.eliminar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:14;a:4:{s:1:\"a\";i:15;s:1:\"b\";s:24:\"usuarios.asignar-empresa\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:2:{i:0;i:1;i:1;i:2;}}i:15;a:4:{s:1:\"a\";i:16;s:1:\"b\";s:18:\"empresas.gestionar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:16;a:4:{s:1:\"a\";i:17;s:1:\"b\";s:15:\"sedes.gestionar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:17;a:4:{s:1:\"a\";i:18;s:1:\"b\";s:14:\"equipos.editar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:2:{i:0;i:1;i:1;i:2;}}i:18;a:4:{s:1:\"a\";i:19;s:1:\"b\";s:11:\"equipos.ver\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:4:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:9;}}i:19;a:4:{s:1:\"a\";i:20;s:1:\"b\";s:13:\"auditoria.ver\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:2:{i:0;i:1;i:1;i:5;}}i:20;a:4:{s:1:\"a\";i:21;s:1:\"b\";s:15:\"roles.gestionar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:21;a:3:{s:1:\"a\";i:22;s:1:\"b\";s:15:\" tickets.editar\";s:1:\"c\";s:3:\"web\";}i:22;a:4:{s:1:\"a\";i:23;s:1:\"b\";s:13:\"equipos.crear\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:23;a:4:{s:1:\"a\";i:24;s:1:\"b\";s:16:\"equipos.eliminar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:24;a:4:{s:1:\"a\";i:25;s:1:\"b\";s:17:\"mpreventivo.crear\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:25;a:4:{s:1:\"a\";i:26;s:1:\"b\";s:18:\"mpreventivo.editar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:26;a:4:{s:1:\"a\";i:27;s:1:\"b\";s:15:\"mpreventivo.ver\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:27;a:4:{s:1:\"a\";i:28;s:1:\"b\";s:20:\"mpreventivo.eliminar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:28;a:4:{s:1:\"a\";i:29;s:1:\"b\";s:27:\"flujos.plantillas.gestionar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:29;a:4:{s:1:\"a\";i:30;s:1:\"b\";s:32:\"flujos.tipos-documento.gestionar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:30;a:4:{s:1:\"a\";i:31;s:1:\"b\";s:14:\"flujos.iniciar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:13:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:5;i:4;i:6;i:5;i:7;i:6;i:8;i:7;i:9;i:8;i:10;i:9;i:11;i:10;i:12;i:11;i:13;i:12;i:14;}}i:31;a:4:{s:1:\"a\";i:32;s:1:\"b\";s:16:\"flujos.ver-todos\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:5:{i:0;i:1;i:1;i:2;i:2;i:5;i:3;i:7;i:4;i:8;}}i:32;a:4:{s:1:\"a\";i:33;s:1:\"b\";s:23:\"flujos.ver-participando\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:11:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:6;i:4;i:8;i:5;i:9;i:6;i:10;i:7;i:11;i:8;i:12;i:9;i:13;i:10;i:14;}}i:33;a:4:{s:1:\"a\";i:34;s:1:\"b\";s:26:\"flujos.cancelar-cualquiera\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:34;a:4:{s:1:\"a\";i:35;s:1:\"b\";s:22:\"flujos.corregir-propio\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:13:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:5;i:4;i:6;i:5;i:7;i:6;i:8;i:7;i:9;i:8;i:10;i:9;i:11;i:10;i:12;i:11;i:13;i:12;i:14;}}i:35;a:4:{s:1:\"a\";i:36;s:1:\"b\";s:14:\"flujos.reabrir\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:36;a:4:{s:1:\"a\";i:37;s:1:\"b\";s:22:\"flujos.desistir-propio\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:13:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:5;i:4;i:6;i:5;i:7;i:6;i:8;i:7;i:9;i:8;i:10;i:9;i:11;i:10;i:12;i:11;i:13;i:12;i:14;}}i:37;a:4:{s:1:\"a\";i:38;s:1:\"b\";s:17:\"equipos.gestionar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:2;i:1;i:5;i:2;i:6;}}i:38;a:4:{s:1:\"a\";i:39;s:1:\"b\";s:14:\"tickets.editar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:39;a:3:{s:1:\"a\";i:40;s:1:\"b\";s:22:\"flujos.editar-cabecera\";s:1:\"c\";s:3:\"web\";}}s:5:\"roles\";a:13:{i:0;a:3:{s:1:\"a\";i:1;s:1:\"b\";s:11:\"super-admin\";s:1:\"c\";s:3:\"web\";}i:1;a:3:{s:1:\"a\";i:2;s:1:\"b\";s:5:\"admin\";s:1:\"c\";s:3:\"web\";}i:2;a:3:{s:1:\"a\";i:5;s:1:\"b\";s:7:\"gerente\";s:1:\"c\";s:3:\"web\";}i:3;a:3:{s:1:\"a\";i:6;s:1:\"b\";s:13:\"lider-tecnico\";s:1:\"c\";s:3:\"web\";}i:4;a:3:{s:1:\"a\";i:7;s:1:\"b\";s:12:\"lider-ventas\";s:1:\"c\";s:3:\"web\";}i:5;a:3:{s:1:\"a\";i:3;s:1:\"b\";s:7:\"tecnico\";s:1:\"c\";s:3:\"web\";}i:6;a:3:{s:1:\"a\";i:8;s:1:\"b\";s:13:\"asesor-ventas\";s:1:\"c\";s:3:\"web\";}i:7;a:3:{s:1:\"a\";i:9;s:1:\"b\";s:15:\"auxiliar-bodega\";s:1:\"c\";s:3:\"web\";}i:8;a:3:{s:1:\"a\";i:10;s:1:\"b\";s:23:\"auxiliar-administrativo\";s:1:\"c\";s:3:\"web\";}i:9;a:3:{s:1:\"a\";i:11;s:1:\"b\";s:14:\"talento-humano\";s:1:\"c\";s:3:\"web\";}i:10;a:3:{s:1:\"a\";i:12;s:1:\"b\";s:16:\"auxiliar-cartera\";s:1:\"c\";s:3:\"web\";}i:11;a:3:{s:1:\"a\";i:13;s:1:\"b\";s:21:\"auxiliar-contabilidad\";s:1:\"c\";s:3:\"web\";}i:12;a:3:{s:1:\"a\";i:14;s:1:\"b\";s:9:\"recepcion\";s:1:\"c\";s:3:\"web\";}}}', 1788290492),
+('anditickets-cache-sidebar.flujos.pendientes.user.6', 'i:1;', 1788573107),
+('anditickets-cache-sidebar.flujos.pendientes.user.7', 'i:0;', 1788573055),
+('anditickets-cache-spatie.permission.cache', 'a:3:{s:5:\"alias\";a:4:{s:1:\"a\";s:2:\"id\";s:1:\"b\";s:4:\"name\";s:1:\"c\";s:10:\"guard_name\";s:1:\"r\";s:5:\"roles\";}s:11:\"permissions\";a:46:{i:0;a:4:{s:1:\"a\";i:1;s:1:\"b\";s:17:\"tickets.ver-todos\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:5:{i:0;i:1;i:1;i:2;i:2;i:5;i:3;i:6;i:4;i:7;}}i:1;a:4:{s:1:\"a\";i:2;s:1:\"b\";s:21:\"tickets.ver-asignados\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}}i:2;a:4:{s:1:\"a\";i:3;s:1:\"b\";s:19:\"tickets.ver-propios\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:9:{i:0;i:1;i:1;i:2;i:2;i:8;i:3;i:9;i:4;i:10;i:5;i:11;i:6;i:12;i:7;i:13;i:8;i:14;}}i:3;a:4:{s:1:\"a\";i:4;s:1:\"b\";s:13:\"tickets.crear\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:13:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:5;i:4;i:6;i:5;i:7;i:6;i:8;i:7;i:9;i:8;i:10;i:9;i:11;i:10;i:12;i:11;i:13;i:12;i:14;}}i:4;a:4:{s:1:\"a\";i:5;s:1:\"b\";s:15:\"tickets.asignar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:4:{i:0;i:1;i:1;i:2;i:2;i:5;i:3;i:6;}}i:5;a:4:{s:1:\"a\";i:6;s:1:\"b\";s:15:\"tickets.iniciar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:5:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:5;i:4;i:6;}}i:6;a:4:{s:1:\"a\";i:7;s:1:\"b\";s:16:\"tickets.resolver\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:5:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:5;i:4;i:6;}}i:7;a:4:{s:1:\"a\";i:8;s:1:\"b\";s:14:\"tickets.cerrar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:4:{i:0;i:1;i:1;i:2;i:2;i:5;i:3;i:6;}}i:8;a:4:{s:1:\"a\";i:9;s:1:\"b\";s:16:\"tickets.cancelar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:9;a:4:{s:1:\"a\";i:10;s:1:\"b\";s:16:\"tickets.eliminar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:10;a:4:{s:1:\"a\";i:11;s:1:\"b\";s:12:\"usuarios.ver\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:6:{i:0;i:1;i:1;i:2;i:2;i:5;i:3;i:6;i:4;i:7;i:5;i:11;}}i:11;a:4:{s:1:\"a\";i:12;s:1:\"b\";s:14:\"usuarios.crear\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:12;a:4:{s:1:\"a\";i:13;s:1:\"b\";s:15:\"usuarios.editar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:13;a:4:{s:1:\"a\";i:14;s:1:\"b\";s:17:\"usuarios.eliminar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:14;a:4:{s:1:\"a\";i:15;s:1:\"b\";s:24:\"usuarios.asignar-empresa\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:2:{i:0;i:1;i:1;i:2;}}i:15;a:4:{s:1:\"a\";i:16;s:1:\"b\";s:18:\"empresas.gestionar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:16;a:4:{s:1:\"a\";i:17;s:1:\"b\";s:15:\"sedes.gestionar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:17;a:4:{s:1:\"a\";i:18;s:1:\"b\";s:14:\"equipos.editar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:2:{i:0;i:1;i:1;i:2;}}i:18;a:4:{s:1:\"a\";i:19;s:1:\"b\";s:11:\"equipos.ver\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:4:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:9;}}i:19;a:4:{s:1:\"a\";i:20;s:1:\"b\";s:13:\"auditoria.ver\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:2:{i:0;i:1;i:1;i:5;}}i:20;a:4:{s:1:\"a\";i:21;s:1:\"b\";s:15:\"roles.gestionar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:21;a:3:{s:1:\"a\";i:22;s:1:\"b\";s:15:\" tickets.editar\";s:1:\"c\";s:3:\"web\";}i:22;a:4:{s:1:\"a\";i:23;s:1:\"b\";s:13:\"equipos.crear\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:23;a:4:{s:1:\"a\";i:24;s:1:\"b\";s:16:\"equipos.eliminar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:24;a:4:{s:1:\"a\";i:25;s:1:\"b\";s:17:\"mpreventivo.crear\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:25;a:4:{s:1:\"a\";i:26;s:1:\"b\";s:18:\"mpreventivo.editar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:26;a:4:{s:1:\"a\";i:27;s:1:\"b\";s:15:\"mpreventivo.ver\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:27;a:4:{s:1:\"a\";i:28;s:1:\"b\";s:20:\"mpreventivo.eliminar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:28;a:4:{s:1:\"a\";i:29;s:1:\"b\";s:27:\"flujos.plantillas.gestionar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:29;a:4:{s:1:\"a\";i:30;s:1:\"b\";s:32:\"flujos.tipos-documento.gestionar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:30;a:4:{s:1:\"a\";i:31;s:1:\"b\";s:14:\"flujos.iniciar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:13:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:5;i:4;i:6;i:5;i:7;i:6;i:8;i:7;i:9;i:8;i:10;i:9;i:11;i:10;i:12;i:11;i:13;i:12;i:14;}}i:31;a:4:{s:1:\"a\";i:32;s:1:\"b\";s:16:\"flujos.ver-todos\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:5:{i:0;i:1;i:1;i:2;i:2;i:5;i:3;i:7;i:4;i:8;}}i:32;a:4:{s:1:\"a\";i:33;s:1:\"b\";s:23:\"flujos.ver-participando\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:11:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:6;i:4;i:8;i:5;i:9;i:6;i:10;i:7;i:11;i:8;i:12;i:9;i:13;i:10;i:14;}}i:33;a:4:{s:1:\"a\";i:34;s:1:\"b\";s:26:\"flujos.cancelar-cualquiera\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:34;a:4:{s:1:\"a\";i:35;s:1:\"b\";s:22:\"flujos.corregir-propio\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:13:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:5;i:4;i:6;i:5;i:7;i:6;i:8;i:7;i:9;i:8;i:10;i:9;i:11;i:10;i:12;i:11;i:13;i:12;i:14;}}i:35;a:4:{s:1:\"a\";i:36;s:1:\"b\";s:14:\"flujos.reabrir\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:1;i:1;i:2;i:2;i:5;}}i:36;a:4:{s:1:\"a\";i:37;s:1:\"b\";s:22:\"flujos.desistir-propio\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:13:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:5;i:4;i:6;i:5;i:7;i:6;i:8;i:7;i:9;i:8;i:10;i:9;i:11;i:10;i:12;i:11;i:13;i:12;i:14;}}i:37;a:4:{s:1:\"a\";i:38;s:1:\"b\";s:17:\"equipos.gestionar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:2;i:1;i:5;i:2;i:6;}}i:38;a:4:{s:1:\"a\";i:39;s:1:\"b\";s:14:\"tickets.editar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:39;a:3:{s:1:\"a\";i:40;s:1:\"b\";s:22:\"flujos.editar-cabecera\";s:1:\"c\";s:3:\"web\";}i:40;a:4:{s:1:\"a\";i:41;s:1:\"b\";s:14:\"impresoras.ver\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:41;a:4:{s:1:\"a\";i:42;s:1:\"b\";s:16:\"impresoras.crear\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:42;a:4:{s:1:\"a\";i:43;s:1:\"b\";s:17:\"impresoras.editar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:43;a:4:{s:1:\"a\";i:44;s:1:\"b\";s:19:\"impresoras.eliminar\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:44;a:4:{s:1:\"a\";i:45;s:1:\"b\";s:19:\"impresoras.mantener\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}i:45;a:4:{s:1:\"a\";i:46;s:1:\"b\";s:29:\"impresoras.gestionar-catalogo\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:2;}}}s:5:\"roles\";a:13:{i:0;a:3:{s:1:\"a\";i:1;s:1:\"b\";s:11:\"super-admin\";s:1:\"c\";s:3:\"web\";}i:1;a:3:{s:1:\"a\";i:2;s:1:\"b\";s:5:\"admin\";s:1:\"c\";s:3:\"web\";}i:2;a:3:{s:1:\"a\";i:5;s:1:\"b\";s:7:\"gerente\";s:1:\"c\";s:3:\"web\";}i:3;a:3:{s:1:\"a\";i:6;s:1:\"b\";s:13:\"lider-tecnico\";s:1:\"c\";s:3:\"web\";}i:4;a:3:{s:1:\"a\";i:7;s:1:\"b\";s:12:\"lider-ventas\";s:1:\"c\";s:3:\"web\";}i:5;a:3:{s:1:\"a\";i:3;s:1:\"b\";s:7:\"tecnico\";s:1:\"c\";s:3:\"web\";}i:6;a:3:{s:1:\"a\";i:8;s:1:\"b\";s:13:\"asesor-ventas\";s:1:\"c\";s:3:\"web\";}i:7;a:3:{s:1:\"a\";i:9;s:1:\"b\";s:15:\"auxiliar-bodega\";s:1:\"c\";s:3:\"web\";}i:8;a:3:{s:1:\"a\";i:10;s:1:\"b\";s:23:\"auxiliar-administrativo\";s:1:\"c\";s:3:\"web\";}i:9;a:3:{s:1:\"a\";i:11;s:1:\"b\";s:14:\"talento-humano\";s:1:\"c\";s:3:\"web\";}i:10;a:3:{s:1:\"a\";i:12;s:1:\"b\";s:16:\"auxiliar-cartera\";s:1:\"c\";s:3:\"web\";}i:11;a:3:{s:1:\"a\";i:13;s:1:\"b\";s:21:\"auxiliar-contabilidad\";s:1:\"c\";s:3:\"web\";}i:12;a:3:{s:1:\"a\";i:14;s:1:\"b\";s:9:\"recepcion\";s:1:\"c\";s:3:\"web\";}}}', 1789768702),
 ('anditickets-cache-tecnico@andi.co|127.0.0.1', 'i:1;', 1786401687),
 ('anditickets-cache-tecnico@andi.co|127.0.0.1:timer', 'i:1786401687;', 1786401687),
 ('anditickets-cache-tecnico@andi.com|127.0.0.1', 'i:3;', 1786401671),
 ('anditickets-cache-tecnico@andi.com|127.0.0.1:timer', 'i:1786401671;', 1786401671),
-('anditickets-cache-usuario@andi.com|127.0.0.1', 'i:1;', 1788187083),
-('anditickets-cache-usuario@andi.com|127.0.0.1:timer', 'i:1788187083;', 1788187083);
+('anditickets-cache-usuario@andi.com|127.0.0.1', 'i:1;', 1788572968),
+('anditickets-cache-usuario@andi.com|127.0.0.1:timer', 'i:1788572968;', 1788572968);
 
 -- --------------------------------------------------------
 
@@ -64,6 +71,66 @@ CREATE TABLE `cache_locks` (
   `owner` varchar(255) NOT NULL,
   `expiration` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `document_audit_logs`
+--
+
+CREATE TABLE `document_audit_logs` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `workflow_instance_id` bigint(20) UNSIGNED NOT NULL,
+  `workflow_attachment_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `accion` varchar(40) NOT NULL,
+  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `user_name` varchar(255) DEFAULT NULL,
+  `user_email` varchar(255) DEFAULT NULL,
+  `documento_codigo` varchar(255) DEFAULT NULL,
+  `documento_titulo` varchar(255) DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` text DEFAULT NULL,
+  `metodo_http` varchar(10) DEFAULT NULL,
+  `url` varchar(2048) DEFAULT NULL,
+  `contexto` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`contexto`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `document_audit_logs`
+--
+
+INSERT INTO `document_audit_logs` (`id`, `workflow_instance_id`, `workflow_attachment_id`, `accion`, `user_id`, `user_name`, `user_email`, `documento_codigo`, `documento_titulo`, `ip_address`, `user_agent`, `metodo_http`, `url`, `contexto`, `created_at`) VALUES
+(1, 18, NULL, 'creado', 1, 'Super Administrador', 'superadmin@andi.com', 'FLJ-2026-000018', 'ejemplo de prueba', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'POST', 'http://127.0.0.1:8000/flujos/instancias', '{\"plantilla\":\"aprobacion doble\",\"tipo_documento\":\"Cotizaci\\u00f3n\"}', '2026-09-01 02:14:18'),
+(2, 18, NULL, 'visualizado', 1, 'Super Administrador', 'superadmin@andi.com', 'FLJ-2026-000018', 'ejemplo de prueba', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'GET', 'http://127.0.0.1:8000/flujos/instancias/18', NULL, '2026-09-01 02:14:19'),
+(3, 18, 19, 'adjunto_subido', 1, 'Super Administrador', 'superadmin@andi.com', 'FLJ-2026-000018', 'ejemplo de prueba', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'POST', 'http://127.0.0.1:8000/flujos/instancias/18/adjuntos', '{\"archivo\":\"5.png\",\"mime_type\":\"image\\/png\",\"tamano_bytes\":133581,\"revision\":1}', '2026-09-01 02:14:53'),
+(4, 18, NULL, 'visualizado', 1, 'Super Administrador', 'superadmin@andi.com', 'FLJ-2026-000018', 'ejemplo de prueba', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'GET', 'http://127.0.0.1:8000/flujos/instancias/18', NULL, '2026-09-01 02:14:53'),
+(5, 18, 19, 'descargado', 1, 'Super Administrador', 'superadmin@andi.com', 'FLJ-2026-000018', 'ejemplo de prueba', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'GET', 'http://127.0.0.1:8000/flujos/instancias/18/adjuntos/19/descargar', '{\"archivo\":\"5.png\"}', '2026-09-01 02:15:04'),
+(6, 18, NULL, 'flujo_cancelado', 1, 'Super Administrador', 'superadmin@andi.com', 'FLJ-2026-000018', 'ejemplo de prueba', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'POST', 'http://127.0.0.1:8000/flujos/instancias/18/desistir', '{\"motivo\":\"Desistido por el iniciador.\"}', '2026-09-01 02:15:17'),
+(7, 17, NULL, 'visualizado', 1, 'Super Administrador', 'superadmin@andi.com', 'FLJ-2026-000017', 'fuerza', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'GET', 'http://127.0.0.1:8000/flujos/instancias/17', NULL, '2026-09-05 07:09:51'),
+(8, 17, NULL, 'visualizado', 1, 'Super Administrador', 'superadmin@andi.com', 'FLJ-2026-000017', 'fuerza', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'GET', 'http://127.0.0.1:8000/flujos/instancias/17', NULL, '2026-09-07 19:26:51'),
+(9, 17, NULL, 'visualizado', 1, 'Super Administrador', 'superadmin@andi.com', 'FLJ-2026-000017', 'fuerza', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'GET', 'http://127.0.0.1:8000/flujos/instancias/17', NULL, '2026-09-07 19:35:08'),
+(10, 17, NULL, 'visualizado', 1, 'Super Administrador', 'superadmin@andi.com', 'FLJ-2026-000017', 'fuerza', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'GET', 'http://127.0.0.1:8000/flujos/instancias/17', NULL, '2026-09-07 19:51:29'),
+(11, 17, NULL, 'visualizado', 1, 'Super Administrador', 'superadmin@andi.com', 'FLJ-2026-000017', 'fuerza', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'GET', 'http://127.0.0.1:8000/flujos/instancias/17', NULL, '2026-09-07 20:42:14'),
+(12, 12, NULL, 'visualizado', 2, 'Administrador', 'admin@andi.com', 'FLJ-2026-000012', 'prueba indice', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'GET', 'http://127.0.0.1:8000/flujos/instancias/12', NULL, '2026-09-17 03:07:02');
+
+--
+-- Disparadores `document_audit_logs`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_document_audit_logs_no_delete` BEFORE DELETE ON `document_audit_logs` FOR EACH ROW BEGIN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'document_audit_logs es inmutable: DELETE bloqueado a nivel de base de datos.';
+            END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trg_document_audit_logs_no_update` BEFORE UPDATE ON `document_audit_logs` FOR EACH ROW BEGIN
+                SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'document_audit_logs es inmutable: UPDATE bloqueado a nivel de base de datos.';
+            END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -132,13 +199,6 @@ CREATE TABLE `empresa_user` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Volcado de datos para la tabla `empresa_user`
---
-
-INSERT INTO `empresa_user` (`id`, `user_id`, `empresa_id`, `sede_id`, `asignado_at`, `created_at`, `updated_at`) VALUES
-(6, 6, 1, 2, '2026-08-06 03:18:50', '2026-08-06 03:18:50', '2026-08-06 03:18:50');
-
 -- --------------------------------------------------------
 
 --
@@ -169,7 +229,7 @@ CREATE TABLE `equipos` (
 --
 
 INSERT INTO `equipos` (`id`, `empresa_id`, `sede_id`, `responsable_id`, `creado_por`, `categoria`, `nombre`, `marca`, `modelo`, `numero_serie`, `ubicacion`, `estado`, `especificaciones`, `notas`, `created_at`, `updated_at`) VALUES
-(1, 1, NULL, 4, 2, 'computadora', 'hp omen', 'hp', 'dlx360', 'afasdasd2343addad', NULL, 'activo', '{\"procesador\":\"core i7\",\"ram_gb\":\"8\",\"almacenamiento_gb\":\"250\",\"tipo_disco\":\"HDD\",\"sistema_operativo\":\"windows 11\",\"tarjeta_grafica\":\"no\"}', NULL, '2026-06-26 21:14:58', '2026-06-27 03:21:28');
+(1, 1, 4, NULL, 2, 'computadora', 'hp omen', 'hp', 'dlx360', 'afasdasd2343addad', NULL, 'activo', '{\"procesador\":\"core i7\",\"ram_gb\":\"8\",\"almacenamiento_gb\":\"250\",\"tipo_disco\":\"HDD\",\"sistema_operativo\":\"windows 11\",\"tarjeta_grafica\":\"no\"}', NULL, '2026-06-26 21:14:58', '2026-09-16 02:16:20');
 
 -- --------------------------------------------------------
 
@@ -186,6 +246,164 @@ CREATE TABLE `failed_jobs` (
   `exception` longtext NOT NULL,
   `failed_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `impresoras`
+--
+
+CREATE TABLE `impresoras` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `codigo` varchar(30) NOT NULL COMMENT 'Autogenerado: IMP-2026-000042',
+  `codigo_interno` varchar(50) DEFAULT NULL COMMENT 'Nomenclatura de la organización: HP-CONTAB-01',
+  `modelo_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `empresa_id` bigint(20) UNSIGNED NOT NULL,
+  `sede_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `nombre_asignado` varchar(120) DEFAULT NULL COMMENT 'Ej: Impresora de recepción',
+  `ubicacion_fisica` varchar(200) DEFAULT NULL COMMENT 'Piso, oficina, área',
+  `ip_red` varchar(45) DEFAULT NULL,
+  `hostname` varchar(120) DEFAULT NULL,
+  `mac_address` varchar(17) DEFAULT NULL,
+  `panel_web_usuario` varchar(80) DEFAULT NULL,
+  `panel_web_password` text DEFAULT NULL COMMENT 'Cifrado con Crypt de Laravel',
+  `numero_serie` varchar(80) DEFAULT NULL,
+  `fecha_adquisicion` date DEFAULT NULL,
+  `contador_paginas_actual` int(10) UNSIGNED DEFAULT NULL COMMENT 'Última lectura del contador físico',
+  `contador_actualizado_en` timestamp NULL DEFAULT NULL,
+  `intervalo_mantenimiento_dias` smallint(5) UNSIGNED DEFAULT NULL COMMENT 'Días sugeridos entre mantenimientos preventivos',
+  `proximo_mantenimiento_sugerido` date DEFAULT NULL COMMENT 'Fecha calculada = último mantenimiento + intervalo',
+  `estado` enum('activa','en_mantenimiento','dada_de_baja') NOT NULL DEFAULT 'activa',
+  `observaciones` text DEFAULT NULL,
+  `creado_por` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `impresoras`
+--
+
+INSERT INTO `impresoras` (`id`, `codigo`, `codigo_interno`, `modelo_id`, `empresa_id`, `sede_id`, `nombre_asignado`, `ubicacion_fisica`, `ip_red`, `hostname`, `mac_address`, `panel_web_usuario`, `panel_web_password`, `numero_serie`, `fecha_adquisicion`, `contador_paginas_actual`, `contador_actualizado_en`, `intervalo_mantenimiento_dias`, `proximo_mantenimiento_sugerido`, `estado`, `observaciones`, `creado_por`, `created_at`, `updated_at`) VALUES
+(1, 'IMP-2026-000001', 'print test', 5, 1, NULL, 'test', 'piso 344', NULL, NULL, NULL, NULL, NULL, '1312dsds323312a', '2026-09-02', 33, '2026-09-17 03:39:50', NULL, NULL, 'activa', NULL, 2, '2026-09-15 01:19:36', '2026-09-17 03:39:50'),
+(2, 'IMP-2026-000002', 'print test', 11, 1, 4, 'test', 'piso 3', NULL, NULL, NULL, NULL, NULL, '152010001AIR46', '2026-09-17', NULL, NULL, NULL, NULL, 'activa', NULL, 2, '2026-09-18 03:05:53', '2026-09-18 03:05:53');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `impresora_alertas_enviadas`
+--
+
+CREATE TABLE `impresora_alertas_enviadas` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `impresora_id` bigint(20) UNSIGNED NOT NULL,
+  `tipo` enum('consumible_bajo','mantenimiento_proximo') NOT NULL,
+  `referencia_id` bigint(20) UNSIGNED DEFAULT NULL COMMENT 'ID del consumible o mantenimiento que disparó la alerta',
+  `enviada_en` timestamp NOT NULL DEFAULT current_timestamp(),
+  `resuelta_en` timestamp NULL DEFAULT NULL COMMENT 'Cuándo dejó de ser un problema (consumible reemplazado, mantto realizado)'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `impresora_consumibles`
+--
+
+CREATE TABLE `impresora_consumibles` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `impresora_id` bigint(20) UNSIGNED NOT NULL,
+  `tipo` enum('toner','cartucho','tanque_tinta','tambor','fusor','cabezal','kit_mantenimiento','otro') NOT NULL,
+  `color` enum('negro','cyan','magenta','amarillo','unico','no_aplica') NOT NULL DEFAULT 'no_aplica',
+  `etiqueta` varchar(80) DEFAULT NULL COMMENT 'Nombre libre. Ej: Tóner HP 83A',
+  `dias_estimados` smallint(5) UNSIGNED NOT NULL DEFAULT 30 COMMENT 'Duración esperada en días para ESTA impresora',
+  `fecha_instalacion` date DEFAULT NULL COMMENT 'Cuándo se instaló el consumible actual',
+  `fecha_reemplazo` date DEFAULT NULL COMMENT 'Solo si es un consumible archivado',
+  `duracion_real_dias` smallint(5) UNSIGNED DEFAULT NULL COMMENT 'Cuánto duró efectivamente (calculado al reemplazar)',
+  `activo` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'FALSE cuando fue reemplazado por otro',
+  `consumible_anterior_id` bigint(20) UNSIGNED DEFAULT NULL COMMENT 'Referencia al que reemplazó a este (para cadena)',
+  `observaciones` text DEFAULT NULL,
+  `registrado_por` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `impresora_consumibles`
+--
+
+INSERT INTO `impresora_consumibles` (`id`, `impresora_id`, `tipo`, `color`, `etiqueta`, `dias_estimados`, `fecha_instalacion`, `fecha_reemplazo`, `duracion_real_dias`, `activo`, `consumible_anterior_id`, `observaciones`, `registrado_por`, `created_at`, `updated_at`) VALUES
+(1, 1, 'tanque_tinta', 'amarillo', NULL, 30, '2026-09-14', NULL, NULL, 1, NULL, NULL, 2, '2026-09-15 01:34:21', '2026-09-15 01:34:21'),
+(3, 1, 'tanque_tinta', 'magenta', NULL, 30, '2026-09-14', NULL, NULL, 1, NULL, NULL, 2, '2026-09-15 01:34:46', '2026-09-15 01:34:46'),
+(4, 1, 'tanque_tinta', 'cyan', 'fsf23123', 30, '2026-09-16', NULL, NULL, 1, NULL, NULL, 2, '2026-09-17 03:40:54', '2026-09-17 03:40:54'),
+(5, 2, 'tanque_tinta', 'negro', NULL, 30, NULL, '2026-09-17', NULL, 0, NULL, NULL, 2, '2026-09-18 03:05:53', '2026-09-18 03:09:12'),
+(6, 2, 'tanque_tinta', 'cyan', NULL, 30, NULL, NULL, NULL, 1, NULL, NULL, 2, '2026-09-18 03:05:53', '2026-09-18 03:05:53'),
+(7, 2, 'tanque_tinta', 'magenta', NULL, 30, '2026-09-16', NULL, NULL, 1, NULL, NULL, 2, '2026-09-18 03:05:53', '2026-09-18 03:09:24'),
+(8, 2, 'tanque_tinta', 'amarillo', NULL, 30, NULL, NULL, NULL, 1, NULL, NULL, 2, '2026-09-18 03:05:53', '2026-09-18 03:05:53'),
+(9, 2, 'tanque_tinta', 'negro', NULL, 30, '2026-09-17', NULL, NULL, 1, 5, NULL, 2, '2026-09-18 03:09:12', '2026-09-18 03:09:12');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `impresora_mantenimientos`
+--
+
+CREATE TABLE `impresora_mantenimientos` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `impresora_id` bigint(20) UNSIGNED NOT NULL,
+  `tipo` enum('preventivo','correctivo','limpieza','cambio_consumible') NOT NULL,
+  `fecha_realizado` date NOT NULL,
+  `realizado_por` bigint(20) UNSIGNED DEFAULT NULL COMMENT 'User que hizo/registró el mantenimiento',
+  `proximo_programado` date DEFAULT NULL COMMENT 'Fecha propuesta para el próximo',
+  `contador_paginas` smallint(5) UNSIGNED DEFAULT NULL COMMENT 'Lectura del contador al momento del mantto',
+  `descripcion` text NOT NULL,
+  `observaciones` text DEFAULT NULL,
+  `registrado_por` bigint(20) UNSIGNED DEFAULT NULL COMMENT 'Quien lo cargó al sistema (puede diferir del que lo hizo)',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `impresora_mantenimientos`
+--
+
+INSERT INTO `impresora_mantenimientos` (`id`, `impresora_id`, `tipo`, `fecha_realizado`, `realizado_por`, `proximo_programado`, `contador_paginas`, `descripcion`, `observaciones`, `registrado_por`, `created_at`, `updated_at`) VALUES
+(1, 1, 'correctivo', '2026-09-16', 7, '2026-09-19', 33, 'asdasdasdasd', NULL, 2, '2026-09-17 03:39:50', '2026-09-17 03:39:50');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `impresora_modelos`
+--
+
+CREATE TABLE `impresora_modelos` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `marca` varchar(80) NOT NULL,
+  `modelo` varchar(120) NOT NULL,
+  `tipo_tecnologia` enum('laser','inyeccion','termica','matricial') NOT NULL DEFAULT 'laser',
+  `color` tinyint(1) NOT NULL DEFAULT 0,
+  `es_multifuncional` tinyint(1) NOT NULL DEFAULT 0,
+  `consumibles_sugeridos` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Ej: [{"tipo":"toner","color":"negro"},{"tipo":"toner","color":"cyan"}]' CHECK (json_valid(`consumibles_sugeridos`)),
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `impresora_modelos`
+--
+
+INSERT INTO `impresora_modelos` (`id`, `marca`, `modelo`, `tipo_tecnologia`, `color`, `es_multifuncional`, `consumibles_sugeridos`, `activo`, `created_at`, `updated_at`) VALUES
+(1, 'HP', 'LaserJet Pro M404dn', 'laser', 0, 0, '[{\"tipo\":\"toner\",\"color\":\"negro\"},{\"tipo\":\"tambor\",\"color\":null}]', 1, '2026-09-14 05:33:38', '2026-09-14 05:33:38'),
+(2, 'HP', 'LaserJet MFP M283fdw', 'laser', 1, 1, '[{\"tipo\":\"toner\",\"color\":\"negro\"},{\"tipo\":\"toner\",\"color\":\"cyan\"},{\"tipo\":\"toner\",\"color\":\"magenta\"},{\"tipo\":\"toner\",\"color\":\"amarillo\"},{\"tipo\":\"tambor\",\"color\":null}]', 1, '2026-09-14 05:33:38', '2026-09-14 05:33:38'),
+(3, 'HP', 'DeskJet 2775', 'inyeccion', 1, 1, '[{\"tipo\":\"cartucho\",\"color\":\"negro\"},{\"tipo\":\"cartucho\",\"color\":\"cyan\"},{\"tipo\":\"cartucho\",\"color\":\"magenta\"},{\"tipo\":\"cartucho\",\"color\":\"amarillo\"}]', 1, '2026-09-14 05:33:38', '2026-09-14 05:33:38'),
+(4, 'Epson', 'EcoTank L3250', 'inyeccion', 1, 1, '[{\"tipo\":\"cartucho\",\"color\":\"negro\"},{\"tipo\":\"cartucho\",\"color\":\"cyan\"},{\"tipo\":\"cartucho\",\"color\":\"magenta\"},{\"tipo\":\"cartucho\",\"color\":\"amarillo\"}]', 1, '2026-09-14 05:33:38', '2026-09-14 05:33:38'),
+(5, 'Epson', 'WorkForce Pro WF-C5790', 'inyeccion', 1, 1, '[{\"tipo\":\"cartucho\",\"color\":\"negro\"},{\"tipo\":\"cartucho\",\"color\":\"cyan\"},{\"tipo\":\"cartucho\",\"color\":\"magenta\"},{\"tipo\":\"cartucho\",\"color\":\"amarillo\"}]', 1, '2026-09-14 05:33:38', '2026-09-14 05:33:38'),
+(6, 'Canon', 'PIXMA G3110', 'inyeccion', 1, 1, '[{\"tipo\":\"cartucho\",\"color\":\"negro\"},{\"tipo\":\"cartucho\",\"color\":\"cyan\"},{\"tipo\":\"cartucho\",\"color\":\"magenta\"},{\"tipo\":\"cartucho\",\"color\":\"amarillo\"}]', 1, '2026-09-14 05:33:38', '2026-09-14 05:33:38'),
+(7, 'Canon', 'imageCLASS MF453dw', 'laser', 0, 1, '[{\"tipo\":\"toner\",\"color\":\"negro\"},{\"tipo\":\"tambor\",\"color\":null}]', 1, '2026-09-14 05:33:38', '2026-09-14 05:33:38'),
+(8, 'Brother', 'DCP-L2540DW', 'laser', 0, 1, '[{\"tipo\":\"toner\",\"color\":\"negro\"},{\"tipo\":\"tambor\",\"color\":null}]', 1, '2026-09-14 05:33:38', '2026-09-14 05:33:38'),
+(9, 'Brother', 'HL-L8360CDW', 'laser', 1, 0, '[{\"tipo\":\"toner\",\"color\":\"negro\"},{\"tipo\":\"toner\",\"color\":\"cyan\"},{\"tipo\":\"toner\",\"color\":\"magenta\"},{\"tipo\":\"toner\",\"color\":\"amarillo\"},{\"tipo\":\"tambor\",\"color\":null}]', 1, '2026-09-14 05:33:38', '2026-09-14 05:33:38'),
+(10, 'Ricoh', 'SP 3710DN', 'laser', 0, 0, '[{\"tipo\":\"toner\",\"color\":\"negro\"},{\"tipo\":\"tambor\",\"color\":null}]', 1, '2026-09-14 05:33:38', '2026-09-14 05:33:38'),
+(11, 'Epson', 'L3210', 'inyeccion', 1, 1, '[{\"tipo\":\"tanque_tinta\",\"color\":\"negro\"},{\"tipo\":\"tanque_tinta\",\"color\":\"cyan\"},{\"tipo\":\"tanque_tinta\",\"color\":\"magenta\"},{\"tipo\":\"tanque_tinta\",\"color\":\"amarillo\"}]', 1, '2026-09-18 03:05:13', '2026-09-18 03:05:13');
 
 -- --------------------------------------------------------
 
@@ -262,7 +480,8 @@ INSERT INTO `mantenimientos_preventivos` (`id`, `equipo_id`, `tecnico_id`, `fech
 (1, 1, 2, '2026-06-18', '2026-06-11 15:15:00', NULL, 'en_progreso', 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 'fdsdsdasdsa', 'dasdasdasdas', NULL, NULL, '2026-06-27 01:16:16', '2026-06-27 01:16:16'),
 (3, 1, 2, NULL, '2026-06-13 19:09:00', '2026-06-26 22:09:00', 'completado', 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 'sadasdADadsad', 'ADSasdDADadaS', NULL, NULL, '2026-06-27 03:09:40', '2026-06-27 03:09:40'),
 (4, 1, 2, NULL, '2026-06-13 19:09:00', '2026-06-26 22:09:00', 'completado', 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 'sadasdADadsad', 'ADSasdDADadaS', NULL, NULL, '2026-06-27 03:16:56', '2026-06-27 03:16:56'),
-(5, 1, 2, NULL, '2026-06-13 19:09:00', '2026-06-26 22:09:00', 'completado', 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 'sadasdADadsad', 'ADSasdDADadaS', NULL, NULL, '2026-06-27 03:17:27', '2026-06-27 03:17:27');
+(5, 1, 2, NULL, '2026-06-13 19:09:00', '2026-06-26 22:09:00', 'completado', 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 'sadasdADadsad', 'ADSasdDADadaS', NULL, NULL, '2026-06-27 03:17:27', '2026-06-27 03:17:27'),
+(6, 1, 2, NULL, '2026-09-14 15:49:00', '2026-09-15 15:49:00', 'completado', 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, NULL, NULL, NULL, 'mantenimientos/evidencias/NtpnFCQZvQpASafi5s8L8T9DFCN8c1uY4ZXAsgm3.png', '2026-09-16 01:49:44', '2026-09-16 01:49:44');
 
 -- --------------------------------------------------------
 
@@ -301,7 +520,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (19, '2026_07_10_100007_create_workflow_step_assignments_table', 13),
 (20, '2026_07_10_100008_create_workflow_attachments_table', 14),
 (21, '2026_07_13_230029_create_notifications_table', 15),
-(22, '2026_08_05_152638_add_deleted_at_to_users_table', 16);
+(22, '2026_08_05_152638_add_deleted_at_to_users_table', 16),
+(23, '2026_08_23_100000_create_document_audit_logs_table', 17),
+(24, '2026_08_23_100001_add_immutability_triggers_to_document_audit_logs_table', 18);
 
 -- --------------------------------------------------------
 
@@ -360,6 +581,7 @@ CREATE TABLE `notifications` (
 
 INSERT INTO `notifications` (`id`, `type`, `notifiable_type`, `notifiable_id`, `data`, `read_at`, `created_at`, `updated_at`) VALUES
 ('0284c6fb-41f1-4e2f-a22f-e3849205d551', 'App\\Notifications\\Flujos\\FlujoAprobadoNotification', 'App\\Models\\User', 4, '{\"tipo\":\"flujo_aprobado\",\"instance_id\":5,\"codigo\":\"FLJ-2026-000005\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/5\",\"mensaje\":\"Tu flujo FLJ-2026-000005 fue aprobado\",\"icono\":\"fa-check-circle\",\"color\":\"success\"}', '2026-07-23 21:18:14', '2026-07-14 08:56:36', '2026-07-23 21:18:14'),
+('04258ec8-1cb9-42ed-8f1f-708f357f2357', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 2, '{\"tipo\":\"asignacion_pendiente\",\"mensaje\":\"Super Administrador requiere tu aprobaci\\u00f3n: \\\"ejemplo de prueba\\\"\",\"instance_id\":18,\"codigo\":\"FLJ-2026-000018\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/18\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\",\"actor\":{\"name\":\"Super Administrador\",\"iniciales\":\"SA\",\"rol\":\"Iniciador\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"etapa\":\"aprobacion doble gerenia\"}', NULL, '2026-09-01 02:14:18', '2026-09-01 02:14:18'),
 ('079a5571-4b5b-4fb7-9d3c-207f8fcd3edc', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 5, '{\"tipo\":\"asignacion_pendiente\",\"instance_id\":8,\"codigo\":\"FLJ-2026-000008\",\"titulo\":\"cotizacion para cliene eis\",\"assignment_id\":15,\"etapa\":\"Solicitud de cotizacion a proveedores\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/8\",\"mensaje\":\"Tienes una decisi\\u00f3n pendiente en FLJ-2026-000008\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\"}', NULL, '2026-07-15 02:41:55', '2026-07-15 02:41:55'),
 ('08d9f8b7-100f-4b1d-b86a-ef962c675343', 'App\\Notifications\\Flujos\\FlujoAprobadoNotification', 'App\\Models\\User', 4, '{\"tipo\":\"flujo_aprobado\",\"instance_id\":7,\"codigo\":\"FLJ-2026-000007\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/7\",\"mensaje\":\"Tu flujo FLJ-2026-000007 fue aprobado\",\"icono\":\"fa-check-circle\",\"color\":\"success\"}', '2026-07-23 21:18:14', '2026-07-14 09:07:41', '2026-07-23 21:18:14'),
 ('0db88086-f800-4f0e-b9f2-efb628681142', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 4, '{\"tipo\":\"asignacion_pendiente\",\"instance_id\":8,\"codigo\":\"FLJ-2026-000008\",\"titulo\":\"cotizacion para cliene eis\",\"assignment_id\":14,\"etapa\":\"Crear solicitud de compras\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/8\",\"mensaje\":\"Tienes una decisi\\u00f3n pendiente en FLJ-2026-000008\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\"}', '2026-07-23 21:18:14', '2026-07-15 02:40:01', '2026-07-23 21:18:14'),
@@ -388,6 +610,7 @@ INSERT INTO `notifications` (`id`, `type`, `notifiable_type`, `notifiable_id`, `
 ('706b2210-7826-4e17-b91e-2c7d20c37dc3', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 4, '{\"tipo\":\"asignacion_pendiente\",\"mensaje\":\"Usuario Final Demo requiere tu aprobaci\\u00f3n: \\\"ejemplo de prueba\\\"\",\"instance_id\":10,\"codigo\":\"FLJ-2026-000010\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/10\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\",\"actor\":{\"name\":\"Usuario Final Demo\",\"iniciales\":\"UD\",\"rol\":\"Iniciador\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"etapa\":\"aprobacion doble gerenia\"}', '2026-07-23 21:51:51', '2026-07-23 21:18:35', '2026-07-23 21:51:51'),
 ('72ba062c-7ca8-4e15-976d-88344c93e87d', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 3, '{\"tipo\":\"asignacion_pendiente\",\"instance_id\":5,\"codigo\":\"FLJ-2026-000005\",\"titulo\":\"ejemplo de prueba\",\"assignment_id\":8,\"etapa\":\"Revisi\\u00f3n T\\u00e9cnica\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/5\",\"mensaje\":\"Ten\\u00e9s una decisi\\u00f3n pendiente en FLJ-2026-000005\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\"}', '2026-07-14 08:50:59', '2026-07-14 08:50:26', '2026-07-14 08:50:59'),
 ('74f290c7-73d3-4ab4-9faf-40feae50e205', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 4, '{\"tipo\":\"asignacion_pendiente\",\"mensaje\":\"Administrador requiere tu aprobaci\\u00f3n: \\\"prueba\\\"\",\"instance_id\":11,\"codigo\":\"FLJ-2026-000011\",\"titulo\":\"prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/11\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\",\"actor\":{\"name\":\"Administrador\",\"iniciales\":\"AD\",\"rol\":\"Iniciador\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"etapa\":\"aprobacion doble gerenia\"}', NULL, '2026-08-01 01:51:04', '2026-08-01 01:51:04'),
+('763efabf-1ad5-469a-8d5f-7d2fc674231d', 'App\\Notifications\\Flujos\\FlujoCanceladoNotification', 'App\\Models\\User', 1, '{\"tipo\":\"flujo_cancelado\",\"mensaje\":\"Super Administrador cancel\\u00f3 \\\"ejemplo de prueba\\\"\",\"instance_id\":18,\"codigo\":\"FLJ-2026-000018\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/18\",\"icono\":\"fa-ban\",\"color\":\"danger\",\"actor\":{\"name\":\"Super Administrador\",\"iniciales\":\"SA\",\"rol\":\"Cancel\\u00f3\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"motivo\":\"Desistido por el iniciador.\"}', '2026-09-01 02:38:37', '2026-09-01 02:15:17', '2026-09-01 02:38:37'),
 ('777740f9-6f68-4a59-bc6f-2088733ce7ea', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 2, '{\"tipo\":\"asignacion_pendiente\",\"mensaje\":\"Administrador requiere tu aprobaci\\u00f3n: \\\"prueba\\\"\",\"instance_id\":11,\"codigo\":\"FLJ-2026-000011\",\"titulo\":\"prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/11\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\",\"actor\":{\"name\":\"Administrador\",\"iniciales\":\"AD\",\"rol\":\"Iniciador\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"etapa\":\"aprobacion doble gerenia\"}', '2026-08-06 01:22:58', '2026-08-01 01:51:04', '2026-08-06 01:22:58'),
 ('7b5c5401-a8cd-408e-8ad9-949867ace37f', 'App\\Notifications\\Flujos\\FlujoAprobadoNotification', 'App\\Models\\User', 4, '{\"tipo\":\"flujo_aprobado\",\"instance_id\":7,\"codigo\":\"FLJ-2026-000007\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/7\",\"mensaje\":\"Tu flujo FLJ-2026-000007 fue aprobado\",\"icono\":\"fa-check-circle\",\"color\":\"success\"}', '2026-07-23 21:18:14', '2026-07-14 09:07:41', '2026-07-23 21:18:14'),
 ('7b8364c0-d6b5-4cfc-9898-7479834530b3', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 4, '{\"tipo\":\"asignacion_pendiente\",\"mensaje\":\"Usuario Final Demo requiere tu aprobaci\\u00f3n: \\\"ejemplo de prueba\\\"\",\"instance_id\":10,\"codigo\":\"FLJ-2026-000010\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/10\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\",\"actor\":{\"name\":\"Usuario Final Demo\",\"iniciales\":\"UD\",\"rol\":\"Iniciador\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"etapa\":\"aprobacion doble gerenia\"}', NULL, '2026-07-23 21:18:35', '2026-07-23 21:18:35'),
@@ -425,6 +648,8 @@ INSERT INTO `notifications` (`id`, `type`, `notifiable_type`, `notifiable_id`, `
 ('cf06a5de-2b69-4fb5-8457-ea0965cfe8bc', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 1, '{\"tipo\":\"asignacion_pendiente\",\"instance_id\":5,\"codigo\":\"FLJ-2026-000005\",\"titulo\":\"ejemplo de prueba\",\"assignment_id\":11,\"etapa\":\"Firma Final\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/5\",\"mensaje\":\"Tienes una decisi\\u00f3n pendiente en FLJ-2026-000005\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\"}', '2026-07-23 20:38:10', '2026-07-14 08:53:55', '2026-07-23 20:38:10'),
 ('d277a959-7591-4fb9-906a-8e10437fdde3', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 2, '{\"tipo\":\"asignacion_pendiente\",\"mensaje\":\"Administrador requiere tu aprobaci\\u00f3n: \\\"prueba\\\"\",\"instance_id\":11,\"codigo\":\"FLJ-2026-000011\",\"titulo\":\"prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/11\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\",\"actor\":{\"name\":\"Administrador\",\"iniciales\":\"AD\",\"rol\":\"Iniciador\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"etapa\":\"aprobacion doble gerenia\"}', '2026-08-06 01:22:58', '2026-08-01 01:51:04', '2026-08-06 01:22:58'),
 ('d3dec1c7-3279-4991-acbd-478317b7400d', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 3, '{\"tipo\":\"asignacion_pendiente\",\"instance_id\":5,\"codigo\":\"FLJ-2026-000005\",\"titulo\":\"ejemplo de prueba\",\"assignment_id\":5,\"etapa\":\"Revisi\\u00f3n T\\u00e9cnica\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/5\",\"mensaje\":\"Ten\\u00e9s una decisi\\u00f3n pendiente en FLJ-2026-000005\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\"}', '2026-07-14 08:48:54', '2026-07-14 08:34:33', '2026-07-14 08:48:54'),
+('dbdf059c-0a40-4681-8032-3c79763c6223', 'App\\Notifications\\Flujos\\FlujoCanceladoNotification', 'App\\Models\\User', 1, '{\"tipo\":\"flujo_cancelado\",\"mensaje\":\"Super Administrador cancel\\u00f3 \\\"ejemplo de prueba\\\"\",\"instance_id\":18,\"codigo\":\"FLJ-2026-000018\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/18\",\"icono\":\"fa-ban\",\"color\":\"danger\",\"actor\":{\"name\":\"Super Administrador\",\"iniciales\":\"SA\",\"rol\":\"Cancel\\u00f3\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"motivo\":\"Desistido por el iniciador.\"}', '2026-09-01 02:38:37', '2026-09-01 02:15:17', '2026-09-01 02:38:37'),
+('de634d49-7400-4aa5-8b2d-b233eef9593f', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 2, '{\"tipo\":\"asignacion_pendiente\",\"mensaje\":\"Super Administrador requiere tu aprobaci\\u00f3n: \\\"ejemplo de prueba\\\"\",\"instance_id\":18,\"codigo\":\"FLJ-2026-000018\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/18\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\",\"actor\":{\"name\":\"Super Administrador\",\"iniciales\":\"SA\",\"rol\":\"Iniciador\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"etapa\":\"aprobacion doble gerenia\"}', NULL, '2026-09-01 02:14:18', '2026-09-01 02:14:18'),
 ('deb81f93-28c9-4e23-a54e-8afd2b9daedd', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 2, '{\"tipo\":\"asignacion_pendiente\",\"mensaje\":\"Super Administrador requiere tu aprobaci\\u00f3n: \\\"prueba edicion\\\"\",\"instance_id\":16,\"codigo\":\"FLJ-2026-000016\",\"titulo\":\"prueba edicion\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/16\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\",\"actor\":{\"name\":\"Super Administrador\",\"iniciales\":\"SA\",\"rol\":\"Iniciador\"},\"tipo_documento\":\"prueba de indice\",\"tipo_icono\":\"fa-file-alt\",\"etapa\":\"primera etapa indice\"}', NULL, '2026-08-31 19:38:55', '2026-08-31 19:38:55'),
 ('e0c3be36-ade2-45df-b9bd-f1839d472c7f', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 4, '{\"tipo\":\"asignacion_pendiente\",\"mensaje\":\"Usuario Final Demo requiere tu aprobaci\\u00f3n: \\\"ejemplo de prueba\\\"\",\"instance_id\":13,\"codigo\":\"FLJ-2026-000013\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/13\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\",\"actor\":{\"name\":\"Usuario Final Demo\",\"iniciales\":\"UD\",\"rol\":\"Iniciador\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"etapa\":\"aprobacion doble gerenia\"}', NULL, '2026-08-01 03:06:34', '2026-08-01 03:06:34'),
 ('e296932d-85ed-4a72-9742-3c1d10ee2768', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 2, '{\"tipo\":\"asignacion_pendiente\",\"mensaje\":\"Usuario Final Demo requiere tu aprobaci\\u00f3n: \\\"ejemplo de prueba\\\"\",\"instance_id\":10,\"codigo\":\"FLJ-2026-000010\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/10\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\",\"actor\":{\"name\":\"Usuario Final Demo\",\"iniciales\":\"UD\",\"rol\":\"Iniciador\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"etapa\":\"aprobacion doble gerenia\"}', '2026-08-06 01:22:58', '2026-07-23 21:18:35', '2026-08-06 01:22:58'),
@@ -435,7 +660,8 @@ INSERT INTO `notifications` (`id`, `type`, `notifiable_type`, `notifiable_id`, `
 ('e985f1fd-ac25-49b8-a995-2053041ac443', 'App\\Notifications\\Flujos\\FlujoAprobadoNotification', 'App\\Models\\User', 4, '{\"tipo\":\"flujo_aprobado\",\"instance_id\":5,\"codigo\":\"FLJ-2026-000005\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/5\",\"mensaje\":\"Tu flujo FLJ-2026-000005 fue aprobado\",\"icono\":\"fa-check-circle\",\"color\":\"success\"}', '2026-07-23 21:18:14', '2026-07-14 08:56:36', '2026-07-23 21:18:14'),
 ('eb4bb5c4-5bb7-4225-a623-d43a67ab68e6', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 2, '{\"tipo\":\"asignacion_pendiente\",\"instance_id\":5,\"codigo\":\"FLJ-2026-000005\",\"titulo\":\"ejemplo de prueba\",\"assignment_id\":6,\"etapa\":\"Aprobaci\\u00f3n Financiera\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/5\",\"mensaje\":\"Ten\\u00e9s una decisi\\u00f3n pendiente en FLJ-2026-000005\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\"}', '2026-07-14 09:00:39', '2026-07-14 08:48:27', '2026-07-14 09:00:39'),
 ('f1a76dca-f7c4-4fb3-b2f6-02112531bc52', 'App\\Notifications\\Flujos\\FlujoAprobadoNotification', 'App\\Models\\User', 1, '{\"tipo\":\"flujo_aprobado\",\"mensaje\":\"Administrador firm\\u00f3 \\\"123123123d\\\" \\u2014 tr\\u00e1mite aprobado\",\"instance_id\":15,\"codigo\":\"FLJ-2026-000015\",\"titulo\":\"123123123d\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/15\",\"icono\":\"fa-check-circle\",\"color\":\"success\",\"actor\":{\"name\":\"Administrador\",\"iniciales\":\"AD\",\"rol\":\"Firma final\"},\"tipo_documento\":\"prueba de indice\",\"tipo_icono\":\"fa-file-alt\",\"firmantes\":[\"Administrador\"]}', '2026-09-01 01:02:16', '2026-09-01 00:45:54', '2026-09-01 01:02:16'),
-('f9bcc6e2-35fd-484b-829a-17b38490616b', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 2, '{\"tipo\":\"asignacion_pendiente\",\"mensaje\":\"Usuario Final Demo requiere tu aprobaci\\u00f3n: \\\"ejemplo de prueba\\\"\",\"instance_id\":13,\"codigo\":\"FLJ-2026-000013\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/13\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\",\"actor\":{\"name\":\"Usuario Final Demo\",\"iniciales\":\"UD\",\"rol\":\"Iniciador\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"etapa\":\"aprobacion doble gerenia\"}', '2026-08-06 01:22:58', '2026-08-01 03:06:34', '2026-08-06 01:22:58'),
+('f9bcc6e2-35fd-484b-829a-17b38490616b', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 2, '{\"tipo\":\"asignacion_pendiente\",\"mensaje\":\"Usuario Final Demo requiere tu aprobaci\\u00f3n: \\\"ejemplo de prueba\\\"\",\"instance_id\":13,\"codigo\":\"FLJ-2026-000013\",\"titulo\":\"ejemplo de prueba\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/13\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\",\"actor\":{\"name\":\"Usuario Final Demo\",\"iniciales\":\"UD\",\"rol\":\"Iniciador\"},\"tipo_documento\":\"Cotizaci\\u00f3n\",\"tipo_icono\":\"fa-ticket\",\"etapa\":\"aprobacion doble gerenia\"}', '2026-08-06 01:22:58', '2026-08-01 03:06:34', '2026-08-06 01:22:58');
+INSERT INTO `notifications` (`id`, `type`, `notifiable_type`, `notifiable_id`, `data`, `read_at`, `created_at`, `updated_at`) VALUES
 ('faf750ea-0508-4356-bfac-b36aa8b97729', 'App\\Notifications\\Flujos\\AsignacionPendienteNotification', 'App\\Models\\User', 3, '{\"tipo\":\"asignacion_pendiente\",\"instance_id\":8,\"codigo\":\"FLJ-2026-000008\",\"titulo\":\"cotizacion para cliene eis\",\"assignment_id\":17,\"etapa\":\"Solicitud de cotizacion a proveedores\",\"url\":\"http:\\/\\/127.0.0.1:8000\\/flujos\\/instancias\\/8\",\"mensaje\":\"Tienes una decisi\\u00f3n pendiente en FLJ-2026-000008\",\"icono\":\"fa-hand-paper\",\"color\":\"accent\"}', NULL, '2026-07-15 02:45:14', '2026-07-15 02:45:14');
 
 -- --------------------------------------------------------
@@ -508,7 +734,13 @@ INSERT INTO `permissions` (`id`, `name`, `guard_name`, `created_at`, `updated_at
 (37, 'flujos.desistir-propio', 'web', '2026-07-11 03:54:34', '2026-07-11 03:54:34'),
 (38, 'equipos.gestionar', 'web', '2026-08-05 20:20:45', '2026-08-05 20:20:45'),
 (39, 'tickets.editar', 'web', NULL, NULL),
-(40, 'flujos.editar-cabecera', 'web', NULL, NULL);
+(40, 'flujos.editar-cabecera', 'web', NULL, NULL),
+(41, 'impresoras.ver', 'web', '2026-09-14 00:40:32', '2026-09-14 00:40:32'),
+(42, 'impresoras.crear', 'web', '2026-09-14 00:40:32', '2026-09-14 00:40:32'),
+(43, 'impresoras.editar', 'web', '2026-09-14 00:40:32', '2026-09-14 00:40:32'),
+(44, 'impresoras.eliminar', 'web', '2026-09-14 00:40:32', '2026-09-14 00:40:32'),
+(45, 'impresoras.mantener', 'web', '2026-09-14 00:40:32', '2026-09-14 00:40:32'),
+(46, 'impresoras.gestionar-catalogo', 'web', '2026-09-14 00:40:32', '2026-09-14 00:40:32');
 
 -- --------------------------------------------------------
 
@@ -717,7 +949,13 @@ INSERT INTO `role_has_permissions` (`permission_id`, `role_id`) VALUES
 (38, 2),
 (38, 5),
 (38, 6),
-(39, 2);
+(39, 2),
+(41, 2),
+(42, 2),
+(43, 2),
+(44, 2),
+(45, 2),
+(46, 2);
 
 -- --------------------------------------------------------
 
@@ -742,8 +980,7 @@ CREATE TABLE `sedes` (
 --
 
 INSERT INTO `sedes` (`id`, `empresa_id`, `nombre`, `ciudad`, `direccion`, `telefono`, `activo`, `created_at`, `updated_at`) VALUES
-(2, 1, 'avenida 0', 'cucuta', 'avenida 0', '3202387718', 1, NULL, NULL),
-(3, 1, 'SERGIO ANDRES CAICEDO PEREZ', 'CUCUTA', 'Mz4 Casa 16 La Fortuna', '3202387718', 1, '2026-06-24 21:58:04', '2026-06-24 21:58:04');
+(4, 1, 'Avenida 1', 'Bozeman', 'Mz4 Casa 16 La Fortuna', '3202387718', 1, '2026-09-16 02:16:01', '2026-09-16 02:16:01');
 
 -- --------------------------------------------------------
 
@@ -765,8 +1002,8 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('iA6Suk3YEajJ2KzfulK39B162CRQxffFwk7za8Wa', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiazZWdEphaVNKOEM4eFhpd0tDRG9SQzJ0aE9FS1hwNE1MNW0xRVBociI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjI6e3M6MzoidXJsIjtzOjQzOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvY29uZmlndXJhY2lvbi9hanVzdGVzIjtzOjU6InJvdXRlIjtzOjI3OiJjb25maWd1cmFjaW9uLmFqdXN0ZXMuaW5kZXgiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1788206815),
-('ip2pauVBitQzZ44vVnPI72Ju0BtuUufrQjW60WxD', 2, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiZ2YxalB2MTl6T29uN0JBell2ZWtUQTBYSENReER3eFJqbnlGV1hwYyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDI6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9mbHVqb3MvaW5zdGFuY2lhcy8xNiI7czo1OiJyb3V0ZSI7czoyMjoiZmx1am9zLmluc3RhbmNpYXMuc2hvdyI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjI7fQ==', 1788206808);
+('FajSWgix6VfpcRppcys7tL9uNhhBAEF8jhyGQedf', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiR3pQQklaTWM1cURCVFZEWkw1aklCNmVJOHFTUG1hUTFwQ2RYamdKcCI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czozNDoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL2ltcHJlc29yYXMvMiI7fXM6OToiX3ByZXZpb3VzIjthOjI6e3M6MzoidXJsIjtzOjI3OiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvbG9naW4iO3M6NToicm91dGUiO3M6NToibG9naW4iO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1789742872),
+('mEShT6P65IDWyN5oEjUf6BbE4Bw5y5jozc7H5Ixv', 2, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoic3NpaDc1ZEswSzJqZVZJeDZxVnpHQ3dIYjdhakdibzJSYWEwcURVcyI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjI6e3M6MzoidXJsIjtzOjM0OiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvaW1wcmVzb3Jhcy8yIjtzOjU6InJvdXRlIjtzOjE1OiJpbXByZXNvcmFzLnNob3ciO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToyO30=', 1789682964);
 
 -- --------------------------------------------------------
 
@@ -790,7 +1027,8 @@ CREATE TABLE `settings` (
 --
 
 INSERT INTO `settings` (`id`, `clave`, `valor`, `tipo`, `categoria`, `descripcion`, `created_at`, `updated_at`) VALUES
-(1, 'flujos.edicion_post_cierre', 'true', 'bool', 'flujos', 'Permite a los actores de una etapa agregar adjuntos y comentarios adicionales después de que la etapa fue aprobada o rechazada. Los datos originales (firma, comentario del actor, adjuntos previos) siempre quedan inmutables.', '2026-08-31 14:23:09', '2026-09-01 01:06:55');
+(1, 'flujos.edicion_post_cierre', 'true', 'bool', 'flujos', 'Permite a los actores de una etapa agregar adjuntos y comentarios adicionales después de que la etapa fue aprobada o rechazada. Los datos originales (firma, comentario del actor, adjuntos previos) siempre quedan inmutables.', '2026-08-31 14:23:09', '2026-09-01 01:06:55'),
+(2, 'flujos.mostrar_codigo_interno', 'false', 'bool', 'flujos', 'Muestra u oculta el codigo interno de los flujos en las tablas de flujos', NULL, '2026-09-05 06:50:02');
 
 -- --------------------------------------------------------
 
@@ -825,10 +1063,10 @@ CREATE TABLE `tickets` (
 --
 
 INSERT INTO `tickets` (`id`, `solicitante_id`, `asignado_a`, `empresa_id`, `sede_id`, `titulo`, `categoria`, `prioridad`, `estado`, `descripcion`, `foto_solicitud`, `evidencia_resolucion`, `notas_resolucion`, `asignado_at`, `iniciado_at`, `resuelto_at`, `cerrado_at`, `created_at`, `updated_at`) VALUES
-(7, 4, 3, 1, 2, 'ejemplo de prueba', 'red', 'media', 'cerrado', 'asdasdasdasdasdasdasd', NULL, 'tickets/evidencias/TW9dxUSOIjbeJUN3OIz5Pf9hgfTLfwPQgSQW3bX9.jpg', 'probe y solucione', '2026-06-24 20:49:08', '2026-06-24 20:50:38', '2026-06-24 20:51:42', '2026-06-24 21:05:41', '2026-06-24 02:22:24', '2026-06-24 21:05:41'),
-(8, 4, 3, 1, 2, 'ejemplo de prueba', 'impresora', 'baja', 'asignado', 'sadasdasdasdasad', 'tickets/solicitudes/Lcd8QRWLgS7VGa9HSChnO6CStXAf7IZz5DrV5UI7.jpg', NULL, NULL, '2026-07-07 03:16:51', NULL, NULL, NULL, '2026-06-26 02:22:07', '2026-07-07 03:17:12'),
-(9, 4, 3, 1, 2, 'ejemplo usuario demo', 'software', 'alta', 'asignado', 'prubahashahsahsa', 'tickets/solicitudes/bXcxZIMJvs0kvBNi6FIwwHLssb0nvZEFYwGaIB1e.jpg', NULL, NULL, '2026-06-26 20:45:28', NULL, NULL, NULL, '2026-06-26 20:45:28', '2026-06-26 20:45:28'),
-(10, 1, 6, 1, 2, 'prueba de notificaciones', 'otro', 'media', 'en_progreso', 'probaremos si se notifica', NULL, NULL, NULL, '2026-08-06 01:07:58', '2026-08-06 01:09:46', NULL, NULL, '2026-08-06 01:07:58', '2026-08-06 01:09:46');
+(7, 4, 3, 1, 4, 'ejemplo de prueba', 'red', 'media', 'cerrado', 'asdasdasdasdasdasdasd', NULL, 'tickets/evidencias/TW9dxUSOIjbeJUN3OIz5Pf9hgfTLfwPQgSQW3bX9.jpg', 'probe y solucione', '2026-06-24 20:49:08', '2026-06-24 20:50:38', '2026-06-24 20:51:42', '2026-06-24 21:05:41', '2026-06-24 02:22:24', '2026-09-16 02:16:46'),
+(8, 4, 3, 1, 4, 'ejemplo de prueba', 'impresora', 'baja', 'asignado', 'sadasdasdasdasad', 'tickets/solicitudes/Lcd8QRWLgS7VGa9HSChnO6CStXAf7IZz5DrV5UI7.jpg', NULL, NULL, '2026-07-07 03:16:51', NULL, NULL, NULL, '2026-06-26 02:22:07', '2026-09-16 02:16:46'),
+(9, 4, 3, 1, 4, 'ejemplo usuario demo', 'software', 'alta', 'asignado', 'prubahashahsahsa', 'tickets/solicitudes/bXcxZIMJvs0kvBNi6FIwwHLssb0nvZEFYwGaIB1e.jpg', NULL, NULL, '2026-06-26 20:45:28', NULL, NULL, NULL, '2026-06-26 20:45:28', '2026-09-16 02:16:46'),
+(10, 1, 6, 1, 4, 'prueba de notificaciones', 'otro', 'media', 'en_progreso', 'probaremos si se notifica', NULL, NULL, NULL, '2026-08-06 01:07:58', '2026-08-06 01:09:46', NULL, NULL, '2026-08-06 01:07:58', '2026-09-16 02:16:46');
 
 -- --------------------------------------------------------
 
@@ -856,10 +1094,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `empresa_id`, `sede_id`, `activo`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'Super Administrador', 'superadmin@andi.com', NULL, '$2y$12$VHMb/s6STjsSSz/flVZ38uWCzw7pe714P5Eugl6IFeEYA6MyL7cDy', NULL, 1, NULL, 1, '2026-06-23 18:46:04', '2026-06-23 18:46:04', NULL),
-(2, 'Administrador', 'admin@andi.com', NULL, '$2y$12$DTL/HoxB3gtuXQ0K9fwlkeQbtdlqsfPwFwgj1Ih4t99fD7k.zDxzK', 'tL1QoTgvOzVDg8Ct41IKusnME0zUF9G3e1pRQ32lvVpEagcC68gIGbaQeDz1', NULL, NULL, 1, '2026-06-23 18:46:04', '2026-06-23 18:46:04', NULL),
+(1, 'Super Administrador', 'superadmin@andi.com', NULL, '$2y$12$VHMb/s6STjsSSz/flVZ38uWCzw7pe714P5Eugl6IFeEYA6MyL7cDy', 'A39GwnMvQW0X25idbLU08JUD6q4lf9Wux8JxYQtaW9h9UER95WyCnKJMYjxJ', 1, NULL, 1, '2026-06-23 18:46:04', '2026-06-23 18:46:04', NULL),
+(2, 'Administrador', 'admin@andi.com', NULL, '$2y$12$DTL/HoxB3gtuXQ0K9fwlkeQbtdlqsfPwFwgj1Ih4t99fD7k.zDxzK', 'HveAhKaLivb8VKiwrVehIvdMFemTjtHcdJvJkTabHovFb3UYOYeORzgrXUya', NULL, NULL, 1, '2026-06-23 18:46:04', '2026-06-23 18:46:04', NULL),
 (3, 'Técnico Demo', 'tecnico@andi.com', NULL, '$2y$12$lvaTl5webV88A7g6ycgfze7YgPb9WEo2unQyIwpPtIzCyHo6RCfrS', NULL, NULL, NULL, 1, '2026-06-23 18:46:04', '2026-08-05 20:31:45', '2026-08-05 20:31:45'),
-(4, 'Usuario Final Demo', 'usuario@andi.com', NULL, '$2y$12$Y9QzUYKoKGhchd8WYqHKP..Rq8rkyJUjFKai.qGjtV6kdEE5N4Czi', NULL, 1, 2, 1, '2026-06-23 18:46:04', '2026-08-05 20:30:36', '2026-08-05 20:30:36'),
+(4, 'Usuario Final Demo', 'usuario@andi.com', NULL, '$2y$12$DTL/HoxB3gtuXQ0K9fwlkeQbtdlqsfPwFwgj1Ih4t99fD7k.zDxzK', NULL, 1, NULL, 1, '2026-06-23 18:46:04', '2026-08-05 20:30:36', '2026-08-05 20:30:36'),
 (6, 'Jhonatan Suarez', 'suarez@gmail.com', NULL, '$2y$12$FNqu4k7KtcJt7PzgaflLku3mrPWE8auezy89wSRJgyp/GPkY3ek/2', NULL, NULL, NULL, 1, '2026-08-06 01:07:15', '2026-08-06 01:07:15', NULL),
 (7, 'Brayam Florez', 'brayamscf@gmail.com', NULL, '$2y$12$3hHU8CsR11sScKW58zC4aeXS/E5pn4ADwuauO4cFlLuJ4PiO.Tf6K', NULL, NULL, NULL, 1, '2026-08-06 01:55:03', '2026-08-06 01:55:03', NULL);
 
@@ -905,7 +1143,8 @@ INSERT INTO `workflow_attachments` (`id`, `workflow_instance_id`, `workflow_inst
 (15, 13, 21, 4, 1, 'INFORME.pdf', 'flujos/13/rev-1/21406913-9132-4a6f-b6a9-aed5e81a09ee.pdf', 'application/pdf', 284059, '2026-08-01 03:16:49', '2026-08-01 03:16:49'),
 (16, 16, 24, 2, 1, '3.png', 'flujos/16/rev-1/bd6e3480-75af-44cd-a390-a8663236b083.png', 'image/png', 125130, '2026-08-31 19:39:37', '2026-08-31 19:39:37'),
 (17, 15, 23, 2, 1, '3.png', 'flujos/15/rev-1/9527b730-6867-4566-86f1-0de1c2aa19be.png', 'image/png', 125130, '2026-09-01 00:45:46', '2026-09-01 00:45:46'),
-(18, 15, 23, 2, 1, '2.png', 'flujos/15/rev-1/04b00de4-b7ce-4314-bf2c-aea849571fe9.png', 'image/png', 116323, '2026-09-01 00:58:12', '2026-09-01 00:58:12');
+(18, 15, 23, 2, 1, '2.png', 'flujos/15/rev-1/04b00de4-b7ce-4314-bf2c-aea849571fe9.png', 'image/png', 116323, '2026-09-01 00:58:12', '2026-09-01 00:58:12'),
+(19, 18, NULL, 1, 1, '5.png', 'flujos/18/rev-1/33fddff0-6e11-4f84-8433-1d2a3821d4e9.png', 'image/png', 133581, '2026-09-01 02:14:53', '2026-09-01 02:14:53');
 
 -- --------------------------------------------------------
 
@@ -948,7 +1187,8 @@ INSERT INTO `workflow_instances` (`id`, `codigo`, `referencia_externa`, `workflo
 (14, 'FLJ-2026-000014', '12312312', 3, NULL, 'Cotización cliente ACME', 'Cotización de servicios recurrentes 2026.', 1, 'en_progreso', 6, 1, '2026-08-06 01:11:05', NULL, '2026-08-06 01:11:05', '2026-08-06 01:11:06'),
 (15, 'FLJ-2026-000015', '123123123', 7, 6, '123123123d', '1231231d', 1, 'aprobado', NULL, 1, '2026-08-29 03:29:07', '2026-09-01 00:45:51', '2026-08-29 03:29:07', '2026-09-01 00:45:51'),
 (16, 'FLJ-2026-000016', '12', 7, 6, 'prueba edicion', NULL, 1, 'aprobado', NULL, 1, '2026-08-31 19:38:53', '2026-08-31 19:39:44', '2026-08-31 19:38:53', '2026-08-31 19:39:44'),
-(17, 'FLJ-2026-000017', '12', 6, 5, 'fuerza', NULL, 1, 'en_progreso', 13, 1, '2026-09-01 01:04:58', NULL, '2026-09-01 01:04:58', '2026-09-01 01:05:00');
+(17, 'FLJ-2026-000017', '12', 6, 5, 'fuerza', NULL, 1, 'en_progreso', 13, 1, '2026-09-01 01:04:58', NULL, '2026-09-01 01:04:58', '2026-09-01 01:05:00'),
+(18, 'FLJ-2026-000018', '12', 6, 5, 'ejemplo de prueba', NULL, 1, 'cancelado', 13, 1, '2026-09-01 02:14:16', '2026-09-01 02:15:17', '2026-09-01 02:14:16', '2026-09-01 02:15:17');
 
 -- --------------------------------------------------------
 
@@ -1020,7 +1260,8 @@ INSERT INTO `workflow_instance_steps` (`id`, `workflow_instance_id`, `workflow_s
 (22, 14, 6, 1, NULL, 'en_curso', '2026-08-06 01:11:05', NULL, '2026-08-06 01:11:05', '2026-08-06 01:11:05'),
 (23, 15, 14, 1, NULL, 'aprobado', '2026-08-29 03:29:07', '2026-09-01 00:45:51', '2026-08-29 03:29:07', '2026-09-01 00:45:51'),
 (24, 16, 14, 1, NULL, 'aprobado', '2026-08-31 19:38:53', '2026-08-31 19:39:44', '2026-08-31 19:38:53', '2026-08-31 19:39:44'),
-(25, 17, 13, 1, NULL, 'en_curso', '2026-09-01 01:04:58', NULL, '2026-09-01 01:04:58', '2026-09-01 01:04:58');
+(25, 17, 13, 1, NULL, 'en_curso', '2026-09-01 01:04:58', NULL, '2026-09-01 01:04:58', '2026-09-01 01:04:58'),
+(26, 18, 13, 1, NULL, 'omitido', '2026-09-01 02:14:16', '2026-09-01 02:15:17', '2026-09-01 02:14:16', '2026-09-01 02:15:17');
 
 -- --------------------------------------------------------
 
@@ -1142,7 +1383,9 @@ INSERT INTO `workflow_step_assignments` (`id`, `workflow_instance_step_id`, `wor
 (29, 23, 17, 2, 'aprobado', 'OK', '2026-09-01 00:45:51', '2026-08-29 03:29:07', '2026-09-01 00:45:51'),
 (30, 24, 17, 2, 'aprobado', 'realizado', '2026-08-31 19:39:44', '2026-08-31 19:38:53', '2026-08-31 19:39:44'),
 (31, 25, 15, 4, 'pendiente', NULL, NULL, '2026-09-01 01:04:58', '2026-09-01 01:04:58'),
-(32, 25, 16, 2, 'pendiente', NULL, NULL, '2026-09-01 01:04:58', '2026-09-01 01:04:58');
+(32, 25, 16, 2, 'pendiente', NULL, NULL, '2026-09-01 01:04:58', '2026-09-01 01:04:58'),
+(33, 26, 15, 4, 'devuelto', '(Cancelado: Desistido por el iniciador.)', '2026-09-01 02:15:17', '2026-09-01 02:14:16', '2026-09-01 02:15:17'),
+(34, 26, 16, 2, 'devuelto', '(Cancelado: Desistido por el iniciador.)', '2026-09-01 02:15:17', '2026-09-01 02:14:17', '2026-09-01 02:15:17');
 
 -- --------------------------------------------------------
 
@@ -1191,7 +1434,7 @@ CREATE TABLE `workflow_templates` (
 INSERT INTO `workflow_templates` (`id`, `nombre`, `descripcion`, `version`, `activo`, `created_by`, `created_at`, `updated_at`) VALUES
 (3, 'Aprobación de Cotización', 'Flujo estándar para cotizaciones comerciales: revisión técnica, aprobación financiera paralela y firma ejecutiva.', 1, 1, 1, '2026-07-14 03:30:52', '2026-08-11 03:31:11'),
 (4, 'recepcion de facturas', 'almacenaje de facturas', 1, 1, 2, '2026-07-14 09:05:12', '2026-07-14 09:05:12'),
-(5, 'Cotización oficanon', 'para el maejo de cotizaciones en oficanon', 1, 1, 2, '2026-07-15 02:38:07', '2026-07-15 02:38:07'),
+(5, 'Cotización oficanon', 'para el maejo de cotizaciones en oficanon', 1, 1, 2, '2026-07-15 02:38:07', '2026-09-16 02:33:26'),
 (6, 'aprobacion doble', NULL, 1, 1, 2, '2026-07-15 02:51:03', '2026-07-15 02:51:03'),
 (7, 'orueba de index', NULL, 1, 1, 2, '2026-08-01 01:53:59', '2026-08-01 01:53:59');
 
@@ -1212,6 +1455,18 @@ ALTER TABLE `cache`
 ALTER TABLE `cache_locks`
   ADD PRIMARY KEY (`key`),
   ADD KEY `cache_locks_expiration_index` (`expiration`);
+
+--
+-- Indices de la tabla `document_audit_logs`
+--
+ALTER TABLE `document_audit_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_dal_instancia_fecha` (`workflow_instance_id`,`created_at`),
+  ADD KEY `idx_dal_adjunto` (`workflow_attachment_id`),
+  ADD KEY `idx_dal_accion` (`accion`),
+  ADD KEY `idx_dal_usuario` (`user_id`),
+  ADD KEY `idx_dal_codigo` (`documento_codigo`),
+  ADD KEY `idx_dal_ip` (`ip_address`);
 
 --
 -- Indices de la tabla `document_types`
@@ -1257,6 +1512,55 @@ ALTER TABLE `equipos`
 ALTER TABLE `failed_jobs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`);
+
+--
+-- Indices de la tabla `impresoras`
+--
+ALTER TABLE `impresoras`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `codigo` (`codigo`),
+  ADD KEY `idx_empresa_sede` (`empresa_id`,`sede_id`),
+  ADD KEY `idx_estado` (`estado`),
+  ADD KEY `idx_modelo` (`modelo_id`),
+  ADD KEY `fk_imp_sede` (`sede_id`),
+  ADD KEY `fk_imp_creador` (`creado_por`),
+  ADD KEY `idx_proximo_mantto` (`proximo_mantenimiento_sugerido`);
+
+--
+-- Indices de la tabla `impresora_alertas_enviadas`
+--
+ALTER TABLE `impresora_alertas_enviadas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_imp_tipo_ref` (`impresora_id`,`tipo`,`referencia_id`),
+  ADD KEY `idx_enviada` (`enviada_en`);
+
+--
+-- Indices de la tabla `impresora_consumibles`
+--
+ALTER TABLE `impresora_consumibles`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_imp_activo` (`impresora_id`,`activo`),
+  ADD KEY `idx_tipo_color` (`tipo`,`color`),
+  ADD KEY `fk_cons_anterior` (`consumible_anterior_id`),
+  ADD KEY `fk_cons_registrador` (`registrado_por`);
+
+--
+-- Indices de la tabla `impresora_mantenimientos`
+--
+ALTER TABLE `impresora_mantenimientos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_impresora_fecha` (`impresora_id`,`fecha_realizado`),
+  ADD KEY `idx_proximo` (`proximo_programado`),
+  ADD KEY `fk_mantto_realizador` (`realizado_por`),
+  ADD KEY `fk_mantto_registrador` (`registrado_por`);
+
+--
+-- Indices de la tabla `impresora_modelos`
+--
+ALTER TABLE `impresora_modelos`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_marca_modelo` (`marca`,`modelo`),
+  ADD KEY `idx_activo` (`activo`);
 
 --
 -- Indices de la tabla `jobs`
@@ -1463,6 +1767,12 @@ ALTER TABLE `workflow_templates`
 --
 
 --
+-- AUTO_INCREMENT de la tabla `document_audit_logs`
+--
+ALTER TABLE `document_audit_logs`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
 -- AUTO_INCREMENT de la tabla `document_types`
 --
 ALTER TABLE `document_types`
@@ -1493,6 +1803,36 @@ ALTER TABLE `failed_jobs`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `impresoras`
+--
+ALTER TABLE `impresoras`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `impresora_alertas_enviadas`
+--
+ALTER TABLE `impresora_alertas_enviadas`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `impresora_consumibles`
+--
+ALTER TABLE `impresora_consumibles`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT de la tabla `impresora_mantenimientos`
+--
+ALTER TABLE `impresora_mantenimientos`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `impresora_modelos`
+--
+ALTER TABLE `impresora_modelos`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
 -- AUTO_INCREMENT de la tabla `jobs`
 --
 ALTER TABLE `jobs`
@@ -1502,19 +1842,19 @@ ALTER TABLE `jobs`
 -- AUTO_INCREMENT de la tabla `mantenimientos_preventivos`
 --
 ALTER TABLE `mantenimientos_preventivos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT de la tabla `permissions`
 --
 ALTER TABLE `permissions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT de la tabla `roles`
@@ -1526,13 +1866,13 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `sedes`
 --
 ALTER TABLE `sedes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `settings`
 --
 ALTER TABLE `settings`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `tickets`
@@ -1550,13 +1890,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `workflow_attachments`
 --
 ALTER TABLE `workflow_attachments`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `workflow_instances`
 --
 ALTER TABLE `workflow_instances`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `workflow_instance_history`
@@ -1568,7 +1908,7 @@ ALTER TABLE `workflow_instance_history`
 -- AUTO_INCREMENT de la tabla `workflow_instance_steps`
 --
 ALTER TABLE `workflow_instance_steps`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT de la tabla `workflow_stages`
@@ -1586,7 +1926,7 @@ ALTER TABLE `workflow_stage_actors`
 -- AUTO_INCREMENT de la tabla `workflow_step_assignments`
 --
 ALTER TABLE `workflow_step_assignments`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT de la tabla `workflow_step_comments`
@@ -1626,6 +1966,37 @@ ALTER TABLE `equipos`
   ADD CONSTRAINT `equipos_empresa_id_foreign` FOREIGN KEY (`empresa_id`) REFERENCES `empresas` (`id`),
   ADD CONSTRAINT `equipos_responsable_id_foreign` FOREIGN KEY (`responsable_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `equipos_sede_id_foreign` FOREIGN KEY (`sede_id`) REFERENCES `sedes` (`id`) ON DELETE SET NULL;
+
+--
+-- Filtros para la tabla `impresoras`
+--
+ALTER TABLE `impresoras`
+  ADD CONSTRAINT `fk_imp_creador` FOREIGN KEY (`creado_por`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_imp_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `empresas` (`id`),
+  ADD CONSTRAINT `fk_imp_modelo` FOREIGN KEY (`modelo_id`) REFERENCES `impresora_modelos` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_imp_sede` FOREIGN KEY (`sede_id`) REFERENCES `sedes` (`id`) ON DELETE SET NULL;
+
+--
+-- Filtros para la tabla `impresora_alertas_enviadas`
+--
+ALTER TABLE `impresora_alertas_enviadas`
+  ADD CONSTRAINT `fk_alerta_impresora` FOREIGN KEY (`impresora_id`) REFERENCES `impresoras` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `impresora_consumibles`
+--
+ALTER TABLE `impresora_consumibles`
+  ADD CONSTRAINT `fk_cons_anterior` FOREIGN KEY (`consumible_anterior_id`) REFERENCES `impresora_consumibles` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_cons_impresora` FOREIGN KEY (`impresora_id`) REFERENCES `impresoras` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_cons_registrador` FOREIGN KEY (`registrado_por`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Filtros para la tabla `impresora_mantenimientos`
+--
+ALTER TABLE `impresora_mantenimientos`
+  ADD CONSTRAINT `fk_mantto_impresora` FOREIGN KEY (`impresora_id`) REFERENCES `impresoras` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_mantto_realizador` FOREIGN KEY (`realizado_por`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_mantto_registrador` FOREIGN KEY (`registrado_por`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `mantenimientos_preventivos`

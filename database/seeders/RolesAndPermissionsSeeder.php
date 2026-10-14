@@ -46,6 +46,16 @@ class RolesAndPermissionsSeeder extends Seeder
             'auditoria.ver',
             'roles.gestionar',
         ],
+
+        // Impresoras
+        'impresoras' => [
+            'impresoras.ver',
+            'impresoras.crear',
+            'impresoras.editar',
+            'impresoras.eliminar',
+            'impresoras.mantener',
+            'impresoras.gestionar-catalogo',
+        ],
     ];
 
     private array $rolePermissions = [

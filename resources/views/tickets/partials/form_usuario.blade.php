@@ -1,5 +1,11 @@
 {{-- resources/views/tickets/partials/form_usuario.blade.php --}}
 
+@php
+    $vinculoInicial ??= null;
+    $activos ??= collect();
+    $vinculoElegido = old('vinculo', $vinculoInicial['valor'] ?? '');
+@endphp
+
 <form action="{{ route('tickets.store') }}" method="POST" enctype="multipart/form-data" class="form-card">
     @csrf
 
@@ -43,7 +49,7 @@
                             class="form-select @error('categoria') is-invalid @enderror">
                         <option value="">— Selecciona —</option>
                         @foreach (\App\Models\Ticket::CATEGORIAS as $key => $label)
-                            <option value="{{ $key }}" @selected(old('categoria') === $key)>{{ $label }}</option>
+                            <option value="{{ $key }}" @selected(old('categoria', $vinculoInicial['categoria'] ?? null) === $key)>{{ $label }}</option>
                         @endforeach
                     </select>
                     @error('categoria')<p class="form-error">{{ $message }}</p>@enderror
@@ -65,6 +71,32 @@
 
             </div>
         </div>
+
+        {{-- Equipo o impresora con el problema (queda en su historial) --}}
+        @if ($activos->isNotEmpty())
+            <div class="form-section">
+                <div class="form-group">
+                    <label class="form-label" for="vinculo">Equipo relacionado (opcional)</label>
+                    <select id="vinculo" name="vinculo" class="form-select @error('vinculo') is-invalid @enderror">
+                        <option value="">— Ninguno —</option>
+                        @foreach (['equipo' => 'Equipos', 'impresora' => 'Impresoras'] as $tipo => $grupo)
+                            @php $delTipo = $activos->where('tipo', $tipo); @endphp
+                            @if ($delTipo->isNotEmpty())
+                                <optgroup label="{{ $grupo }}">
+                                    @foreach ($delTipo as $activo)
+                                        <option value="{{ $activo['valor'] }}" @selected($vinculoElegido === $activo['valor'])>
+                                            {{ $activo['nombre'] }}{{ $activo['detalle'] ? ' — ' . $activo['detalle'] : '' }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                        @endforeach
+                    </select>
+                    <p class="form-help">Si el problema es de un equipo o impresora puntual, selecciónelo.</p>
+                    @error('vinculo')<p class="form-error">{{ $message }}</p>@enderror
+                </div>
+            </div>
+        @endif
 
         {{-- Descripción --}}
         <div class="form-section">
@@ -114,4 +146,4 @@
         </button>
     </div>
 
-</form>
+</form>

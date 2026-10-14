@@ -13,14 +13,13 @@ class SedeController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | INDEX — Listado de sedes con filtros, conteos y carga ansiosa de empresa.
+    | INDEX 
     |--------------------------------------------------------------------------
     */
     public function index(Request $request): View
     {
         abort_unless($request->user()->can('sedes.gestionar'), 403);
 
-        // Iniciamos la query cargando la relación empresa para evitar el N+1
         $query = Sede::query()->with('empresa:id,nombre');
 
         $this->aplicarFiltros($query, $request);
@@ -28,6 +27,8 @@ class SedeController extends Controller
         $sedes = $query
             ->withCount([
                 'usuarios',
+                'equipos',
+                'impresoras', // ← Agregado para el conteo exacto de dependencias
                 'tickets as tickets_activos_count' => fn($q) => $q->whereNotIn('estado', ['cerrado', 'cancelado']),
             ])
             ->orderBy('nombre')
@@ -38,8 +39,7 @@ class SedeController extends Controller
             'sedes'    => $sedes,
             'filtros'  => $this->filtrosActivos($request),
             'totales'  => $this->resumen(),
-            // Necesitamos las empresas activas para los select de los modales y los filtros
-            'empresas' => Empresa::activas()->orderBy('nombre')->get(['id', 'nombre']),
+            'empresas' => Empresa::activas()->with('sedes:id,nombre,empresa_id')->orderBy('nombre')->get(['id', 'nombre']),
         ]);
     }
 
@@ -64,7 +64,6 @@ class SedeController extends Controller
 
         $sede = Sede::create($data);
 
-        // back() devuelve al usuario a la URL exacta desde donde envió el formulario
         return back()->with('success', "La sede {$sede->nombre} fue registrada correctamente.");
     }
 
@@ -95,23 +94,51 @@ class SedeController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | DESTROY
+    | DESTROY (CON MIGRACIÓN DE IMPRESORAS, EQUIPOS, USUARIOS Y TICKETS)
     |--------------------------------------------------------------------------
     */
     public function destroy(Request $request, Sede $sede): RedirectResponse
     {
         abort_unless($request->user()->can('sedes.gestionar'), 403);
 
-        // Protección contra errores de llave foránea (Integridad Referencial)
-        if ($sede->usuarios()->exists() || $sede->tickets()->exists()) {
-            return back()->with('error', 'No puedes eliminar esta sede porque tiene usuarios o tickets asociados. Te recomendamos desactivarla.');
+        $migrarA = $request->input('migrar_a_sede_id');
+        $nombreSede = $sede->nombre;
+
+        if ($migrarA) {
+            $sedeDestino = Sede::findOrFail($migrarA);
+            
+            // Reasignación masiva de dependencias a la nueva sede
+            if (method_exists($sede, 'usuarios')) {
+                $sede->usuarios()->update(['sede_id' => $sedeDestino->id]);
+            }
+            if (method_exists($sede, 'equipos')) {
+                $sede->equipos()->update(['sede_id' => $sedeDestino->id]);
+            }
+            if (method_exists($sede, 'impresoras')) {
+                $sede->impresoras()->update(['sede_id' => $sedeDestino->id]); // ← Reasignación de Impresoras
+            }
+            if (method_exists($sede, 'tickets')) {
+                $sede->tickets()->update(['sede_id' => $sedeDestino->id]);
+            }
+            
+            $mensaje = "La sede {$nombreSede} fue eliminada. Todo su hardware, impresoras y usuarios se migraron a '{$sedeDestino->nombre}'.";
+        } else {
+            // Verificación de integridad si no se especifica sede de migración
+            $tieneDependencias = 
+                (method_exists($sede, 'usuarios') && $sede->usuarios()->exists()) ||
+                (method_exists($sede, 'equipos') && $sede->equipos()->exists()) ||
+                (method_exists($sede, 'impresoras') && $sede->impresoras()->exists()) || // ← Validación Impresoras
+                (method_exists($sede, 'tickets') && $sede->tickets()->exists());
+
+            if ($tieneDependencias) {
+                return back()->with('error', 'La sede tiene registros asociados (equipos, impresoras, usuarios o tickets). Selecciona una sede de destino para migrar los datos antes de eliminarla.');
+            }
+            $mensaje = "La sede {$nombreSede} fue eliminada permanentemente.";
         }
 
-        $nombre = $sede->nombre;
         $sede->delete();
 
-        return redirect()->route('sedes.index')
-            ->with('success', "La sede {$nombre} fue eliminada permanentemente.");
+        return redirect()->route('sedes.index')->with('success', $mensaje);
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -139,9 +166,6 @@ class SedeController extends Controller
             ->toArray();
     }
 
-    /**
-     * Resumen ligero para mostrar en el encabezado de la vista.
-     */
     private function resumen(): array
     {
         return [

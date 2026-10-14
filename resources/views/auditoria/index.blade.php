@@ -1,17 +1,15 @@
+{{-- resources/views/auditoria/index.blade.php --}}
 <x-app-layout>
     <x-slot name="title">Registro de Auditoría</x-slot>
 
-    @push('styles')
-        <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
-    @endpush
-
-    <div class="db-header mb-6 flex items-center justify-between flex-wrap gap-3">
+    {{-- ── Cabecera ────────────────────────────────────────────────────── --}}
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h2 class="text-2xl font-black text-white uppercase tracking-tighter">
-                <i class="fas fa-shield-alt mr-2 text-[#007acc]"></i> Registro de Auditoría
+            <h2 class="text-title-md2 font-bold text-black dark:text-white flex items-center gap-2">
+                <i class="fas fa-shield-alt text-primary"></i> Registro de Auditoría
             </h2>
-            <p class="text-xs text-gray-400 font-medium uppercase tracking-widest">
+            <p class="text-xs text-bodydark2 mt-1">
+                Bitácora de eventos, trazabilidad y registro de actividad del sistema
             </p>
         </div>
     </div>
@@ -20,146 +18,197 @@
         $filtrosActivos = array_filter($filtros, fn ($v) => $v !== null && $v !== '');
     @endphp
 
-    {{-- Formulario de búsqueda + filtros --}}
-    <form method="GET" action="{{ route('auditoria.index') }}" class="db-card mb-4"
-        x-data="{ expandido: {{ !empty($filtrosActivos) ? 'true' : 'false' }} }">
-        <div class="form-card-body" style="padding: 1rem 1.25rem;">
+    {{-- ── Formulario de búsqueda + Filtros ────────────────────────── --}}
+    <div class="rounded-sm border border-stroke bg-white px-5 pt-5 pb-4 shadow-default dark:border-strokedark dark:bg-boxdark mb-6"
+         x-data="{ expandido: {{ !empty($filtrosActivos) ? 'true' : 'false' }} }">
+        <form method="GET" action="{{ route('auditoria.index') }}">
             <div class="flex items-center gap-2 flex-wrap">
+                {{-- Campo Búsqueda --}}
                 <div class="relative flex-1 min-w-[240px]">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
                     <input type="text" name="q" value="{{ $filtros['q'] ?? '' }}"
-                        placeholder="Código, título del documento, usuario o correo..." class="form-input"
-                        style="padding-left: 2.25rem;">
+                           placeholder="Buscar por código, título, usuario o correo..."
+                           class="w-full rounded border border-stroke bg-transparent py-1.5 pl-9 pr-3 text-xs outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 z-30 pointer-events-none">
+                        <i class="fas fa-search text-xs text-bodydark2"></i>
+                    </span>
                 </div>
-                <button type="button" class="db-btn ghost" @click="expandido = !expandido">
-                    <i class="fas fa-sliders-h mr-1"></i>
-                    <span x-text="expandido ? 'Menos' : 'Más filtros'"></span>
+
+                {{-- Toggle Filtros --}}
+                <button type="button" @click="expandido = !expandido"
+                        class="inline-flex items-center gap-1.5 rounded border border-stroke py-1.5 px-3 text-xs font-medium text-black hover:bg-gray dark:border-strokedark dark:text-white dark:hover:bg-meta-4 transition">
+                    <i class="fas fa-sliders-h text-[10px]"></i>
+                    <span x-text="expandido ? 'Menos filtros' : 'Más filtros'"></span>
                 </button>
-                <button type="submit" class="db-btn solid">
-                    <i class="fas fa-search"></i> Buscar
+
+                {{-- Botón Buscar --}}
+                <button type="submit"
+                        class="inline-flex items-center gap-1.5 rounded bg-primary py-1.5 px-4 text-xs font-bold uppercase tracking-wider text-white hover:bg-opacity-90 transition shadow-sm cursor-pointer">
+                    <i class="fas fa-search text-[10px]"></i> Buscar
                 </button>
+
+                {{-- Limpiar Filtros --}}
                 @if (!empty($filtrosActivos))
-                    <a href="{{ route('auditoria.index') }}" class="db-btn ghost" title="Limpiar filtros">
-                        <i class="fas fa-times"></i>
+                    <a href="{{ route('auditoria.index') }}"
+                       class="inline-flex h-8 w-8 items-center justify-center rounded border border-stroke text-bodydark2 hover:border-meta-1 hover:text-meta-1 dark:border-strokedark transition"
+                       title="Limpiar filtros">
+                        <i class="fas fa-times text-xs"></i>
                     </a>
                 @endif
             </div>
 
-            <div x-show="expandido" x-transition
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3 pt-3 border-t border-gray-800">
-                <div class="form-group">
-                    <label class="form-label text-[10px]">Acción</label>
-                    <select name="accion" class="form-select text-xs">
-                        <option value="">Todas</option>
-                        @foreach ($acciones as $accionOpcion)
-                            <option value="{{ $accionOpcion->value }}" @selected(($filtros['accion'] ?? '') === $accionOpcion->value)>
-                                {{ $accionOpcion->etiqueta() }}
-                            </option>
-                        @endforeach
-                    </select>
+            {{-- Panel Expandible de Filtros --}}
+            <div x-show="expandido" x-cloak x-transition
+                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 pt-4 border-t border-stroke dark:border-strokedark">
+                
+                {{-- Acción --}}
+                <div>
+                    <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">Acción</label>
+                    <div class="relative z-20">
+                        <select name="accion" class="w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-3 text-xs outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white cursor-pointer">
+                            <option value="" class="bg-[#1c2434] text-gray-400">Todas las acciones</option>
+                            @foreach ($acciones as $accionOpcion)
+                                <option value="{{ $accionOpcion->value }}" @selected(($filtros['accion'] ?? '') === $accionOpcion->value) class="bg-[#1c2434] text-white">
+                                    {{ $accionOpcion->etiqueta() }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="absolute top-1/2 right-3 -translate-y-1/2 z-30 pointer-events-none">
+                            <i class="fas fa-chevron-down text-[10px] text-bodydark2"></i>
+                        </span>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label text-[10px]">Dirección IP</label>
-                    <input type="text" name="ip" value="{{ $filtros['ip'] ?? '' }}" placeholder="192.168.1.10"
-                        class="form-input text-xs">
+
+                {{-- Dirección IP --}}
+                <div>
+                    <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">Dirección IP</label>
+                    <input type="text" name="ip" value="{{ $filtros['ip'] ?? '' }}" placeholder="Ej: 192.168.1.10"
+                           class="w-full rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-mono outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white">
                 </div>
-                <div class="form-group">
-                    <label class="form-label text-[10px]">Desde</label>
-                    <input type="date" name="desde" value="{{ $filtros['desde'] ?? '' }}" class="form-input text-xs">
+
+                {{-- Desde --}}
+                <div>
+                    <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">Desde</label>
+                    <input type="date" name="desde" value="{{ $filtros['desde'] ?? '' }}"
+                           class="w-full rounded border border-stroke bg-transparent py-1.5 px-3 text-xs outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white">
                 </div>
-                <div class="form-group">
-                    <label class="form-label text-[10px]">Hasta</label>
-                    <input type="date" name="hasta" value="{{ $filtros['hasta'] ?? '' }}" class="form-input text-xs">
+
+                {{-- Hasta --}}
+                <div>
+                    <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">Hasta</label>
+                    <input type="date" name="hasta" value="{{ $filtros['hasta'] ?? '' }}"
+                           class="w-full rounded border border-stroke bg-transparent py-1.5 px-3 text-xs outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white">
                 </div>
             </div>
 
             @if (!empty($filtrosActivos))
-                <div class="text-[10px] text-gray-500 mt-3 pt-3 border-t border-gray-800">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    Mostrando resultados filtrados. {{ $registros->total() }} registro(s) encontrado(s).
+                <div class="text-[10px] text-bodydark2 mt-3 pt-3 border-t border-stroke dark:border-strokedark flex items-center gap-1.5">
+                    <i class="fas fa-info-circle text-primary"></i>
+                    <span>Mostrando resultados filtrados. <strong>{{ $registros->total() }}</strong> registro(s) encontrado(s).</span>
                 </div>
             @endif
-        </div>
-    </form>
+        </form>
+    </div>
 
-    <div class="db-card">
-        <div class="overflow-x-auto">
-            <table class="db-table w-full">
+    {{-- ── Tabla de Auditoría ────────────────────────────────────────── --}}
+    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark mb-6">
+        <div class="max-w-full overflow-x-auto">
+            <table class="w-full table-auto">
                 <thead>
-                    <tr>
-                        <th class="px-6 py-4">Fecha / Hora</th>
-                        <th class="px-6 py-4">Documento</th>
-                        <th class="px-6 py-4">Acción</th>
-                        <th class="px-6 py-4">Usuario</th>
-                        <th class="px-6 py-4">Dirección IP</th>
-                        <th class="px-6 py-4 text-center">Detalle</th>
+                    <tr class="bg-gray-2 text-left dark:bg-meta-4">
+                        <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase min-w-[140px]">Fecha / Hora</th>
+                        <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase min-w-[180px]">Documento</th>
+                        <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase">Acción</th>
+                        <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase min-w-[180px]">Usuario</th>
+                        <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase w-32">Dirección IP</th>
+                        <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase text-center w-24">Detalle</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-stroke dark:divide-strokedark">
                     @forelse ($registros as $registro)
-                        <tr class="group transition-colors hover:bg-[var(--db-surface-2)]">
-                            <td class="px-6 py-4">
-                                <p class="text-xs text-white">{{ $registro->created_at->format('d/m/Y H:i:s') }}</p>
-                                <p class="text-[10px] text-gray-500">{{ $registro->created_at->diffForHumans() }}</p>
+                        <tr class="hover:bg-gray-2 dark:hover:bg-meta-4/50 transition">
+                            
+                            {{-- Fecha / Hora --}}
+                            <td class="py-3.5 px-4">
+                                <span class="text-xs font-bold text-black dark:text-white block">{{ $registro->created_at->format('d/m/Y H:i:s') }}</span>
+                                <span class="text-[10px] text-bodydark2 block mt-0.5">{{ $registro->created_at->diffForHumans() }}</span>
                             </td>
-                            <td class="px-6 py-4">
-                                <p class="text-[10px] text-gray-500 font-mono uppercase tracking-wider">
+
+                            {{-- Documento --}}
+                            <td class="py-3.5 px-4">
+                                <span class="text-[10px] text-bodydark2 font-mono uppercase block">
                                     {{ $registro->documento_codigo ?? '—' }}
-                                </p>
+                                </span>
                                 <a href="{{ route('auditoria.show', $registro->workflow_instance_id) }}"
-                                    class="text-sm font-bold text-white hover:text-[#007acc] transition-colors">
+                                   class="text-xs font-bold text-black dark:text-white hover:text-primary transition block truncate max-w-xs">
                                     {{ $registro->documento_titulo ?? 'Documento #' . $registro->workflow_instance_id }}
                                 </a>
                             </td>
-                            <td class="px-6 py-4">
+
+                            {{-- Acción --}}
+                            <td class="py-3.5 px-4">
                                 @include('auditoria.partials._badge_accion', ['accion' => $registro->accion])
                             </td>
-                            <td class="px-6 py-4">
+
+                            {{-- Usuario --}}
+                            <td class="py-3.5 px-4">
                                 @if ($registro->user_name)
-                                    <div class="flex items-center gap-2">
-                                        <div class="db-avatar text-xs w-7 h-7">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold shrink-0 uppercase">
                                             {{ substr($registro->user_name, 0, 1) }}
                                         </div>
-                                        <div>
-                                            <p class="text-xs text-white leading-tight">{{ $registro->user_name }}</p>
-                                            <p class="text-[10px] text-gray-500 leading-tight">{{ $registro->user_email }}</p>
+                                        <div class="min-w-0">
+                                            <span class="text-xs font-bold text-black dark:text-white block truncate">{{ $registro->user_name }}</span>
+                                            <span class="text-[10px] text-bodydark2 block truncate">{{ $registro->user_email }}</span>
                                         </div>
                                     </div>
                                 @else
-                                    <span class="db-sub">Sistema</span>
+                                    <span class="inline-flex rounded-full bg-gray-2 px-2.5 py-0.5 text-[10px] font-bold uppercase text-bodydark2 dark:bg-meta-4">
+                                        Sistema
+                                    </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4">
-                                <span class="text-xs text-gray-400 font-mono">{{ $registro->ip_address ?? '—' }}</span>
+
+                            {{-- Dirección IP --}}
+                            <td class="py-3.5 px-4">
+                                <span class="text-xs font-mono text-black dark:text-white">{{ $registro->ip_address ?? '—' }}</span>
                             </td>
-                            <td class="px-6 py-4 text-center">
+
+                            {{-- Detalle Contexto Dropdown --}}
+                            <td class="py-3.5 px-4 text-center">
                                 @if (!empty($registro->contexto))
                                     <div class="relative inline-block" x-data="{ open: false }">
-                                        <button type="button" class="db-btn outline" @click="open = !open" title="Ver contexto">
-                                            <i class="fas fa-info-circle"></i>
+                                        <button type="button" @click="open = !open"
+                                                class="flex h-7 w-7 items-center justify-center rounded border border-stroke text-bodydark2 hover:border-primary hover:text-primary dark:border-strokedark transition mx-auto"
+                                                title="Ver detalle del contexto">
+                                            <i class="fas fa-info-circle text-[10px]"></i>
                                         </button>
-                                        <div x-show="open" @click.outside="open = false" x-transition
-                                            class="absolute right-0 z-10 mt-2 w-72 text-left db-card p-3 text-[11px] text-gray-300"
-                                            style="display: none;">
-                                            @foreach ($registro->contexto as $clave => $valor)
-                                                <p class="mb-1">
-                                                    <span class="text-gray-500 uppercase tracking-wider text-[10px]">{{ $clave }}:</span>
-                                                    {{ is_array($valor) ? implode(', ', $valor) : $valor }}
-                                                </p>
-                                            @endforeach
+                                        
+                                        <div x-show="open" @click.outside="open = false" x-cloak x-transition
+                                             class="absolute right-0 z-50 mt-2 w-72 rounded border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-3 text-xs text-left">
+                                            <span class="text-[10px] font-bold text-black dark:text-white uppercase tracking-wider block mb-2 pb-1 border-b border-stroke dark:border-strokedark">
+                                                Contexto de la Acción
+                                            </span>
+                                            <div class="space-y-1.5 max-h-48 overflow-y-auto">
+                                                @foreach ($registro->contexto as $clave => $valor)
+                                                    <div class="text-[11px]">
+                                                        <span class="font-bold text-black dark:text-white uppercase text-[9px]">{{ $clave }}:</span>
+                                                        <span class="text-bodydark2 block break-words">{{ is_array($valor) ? json_encode($valor) : $valor }}</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
                                         </div>
                                     </div>
                                 @else
-                                    <span class="db-sub">—</span>
+                                    <span class="text-bodydark2 text-xs">—</span>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6">
-                                <div class="db-empty py-8 text-center">
-                                    <i class="fas fa-shield-alt text-4xl mb-3 text-gray-700"></i>
-                                    <p class="text-gray-400">No hay registros de auditoría con estos filtros.</p>
+                            <td colspan="6" class="py-8 text-center">
+                                <div class="flex flex-col items-center text-bodydark2">
+                                    <i class="fas fa-shield-alt text-3xl mb-2"></i>
+                                    <p class="text-xs">No se encontraron registros de auditoría que coincidan con los filtros.</p>
                                 </div>
                             </td>
                         </tr>
@@ -168,8 +217,9 @@
             </table>
         </div>
 
+        {{-- Paginación --}}
         @if ($registros->hasPages())
-            <div class="px-4 py-3 border-t border-gray-800">
+            <div class="border-t border-stroke py-3 px-4 dark:border-strokedark">
                 {{ $registros->links() }}
             </div>
         @endif

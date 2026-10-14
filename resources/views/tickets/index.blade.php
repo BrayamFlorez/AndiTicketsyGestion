@@ -1,6 +1,6 @@
 {{-- resources/views/tickets/index.blade.php --}}
 <x-app-layout>
-    <x-slot name="title">Tickets</x-slot>
+    <x-slot name="title">Gestión de Tickets</x-slot>
 
     @php
         $partial = match ($modo) {
@@ -10,50 +10,37 @@
         };
     @endphp
 
-    {{-- Alertas estilo TailAdmin --}}
+    {{-- Alertas Compactas TailAdmin --}}
     @if (session('success'))
-        <div class="mb-6 flex w-full border-l-6 border-meta-3 bg-meta-3/10 px-7 py-3 shadow-md dark:bg-meta-3/20 dark:border-meta-3 rounded-sm">
-            <div class="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-meta-3 text-white">
-                <i class="fas fa-check"></i>
-            </div>
-            <div class="w-full">
-                <h5 class="mb-1 font-bold text-meta-3">¡Éxito!</h5>
-                <p class="text-sm text-meta-3">{{ session('success') }}</p>
-            </div>
+        <div class="mb-3 flex w-full border-l-4 border-meta-3 bg-meta-3/10 px-3 py-2 shadow-sm rounded-sm">
+            <i class="fas fa-check-circle text-meta-3 mr-2 mt-0.5 text-xs"></i>
+            <p class="text-xs text-meta-3 font-medium">{{ session('success') }}</p>
         </div>
     @endif
 
     @if (session('error') || $errors->any())
-        <div class="mb-6 flex w-full border-l-6 border-meta-1 bg-meta-1/10 px-7 py-3 shadow-md dark:bg-meta-1/20 dark:border-meta-1 rounded-sm">
-            <div class="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-meta-1 text-white">
-                <i class="fas fa-exclamation"></i>
-            </div>
-            <div class="w-full">
-                <h5 class="mb-1 font-bold text-meta-1">Atención</h5>
-                <p class="text-sm text-meta-1">{{ session('error') ?? $errors->first() }}</p>
-            </div>
+        <div class="mb-3 flex w-full border-l-4 border-meta-1 bg-meta-1/10 px-3 py-2 shadow-sm rounded-sm">
+            <i class="fas fa-exclamation-triangle text-meta-1 mr-2 mt-0.5 text-xs"></i>
+            <p class="text-xs text-meta-1 font-medium">{{ session('error') ?? $errors->first() }}</p>
         </div>
     @endif
 
-    {{-- Carga del Partial --}}
+    {{-- Carga del Partial según el Rol / Modo --}}
     @include('tickets.partials.' . $partial)
 
-    {{-- Helper Dropdown (Mantiene el script pero renderizará componentes de TailAdmin) --}}
+    {{-- Script Helper Dropdown Teleportado --}}
     @push('scripts')
         @once
         <script>
             function dropdownMenu() {
                 return {
-                    open: false,
-                    top: 0,
-                    left: 0,
+                    open: false, top: 0, left: 0,
                     toggle() {
                         this.open = !this.open;
                         if (this.open) {
                             this.$nextTick(() => {
                                 const rect = this.$refs.trigger.getBoundingClientRect();
-                                const ancho = 220;
-                                const margen = 8;
+                                const ancho = 200, margen = 8;
                                 let left = rect.right - ancho;
                                 if (left < margen) left = rect.left;
                                 this.top = rect.bottom + 4;

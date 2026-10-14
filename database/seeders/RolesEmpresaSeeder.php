@@ -16,6 +16,7 @@ class RolesEmpresaSeeder extends Seeder
      */
     private const CATALOGO_PERMISOS = [
         // ── Tickets ─────────────────────────────────────────────
+        'reportes.inventario',
         'tickets.crear',
         'tickets.ver-todos',
         'tickets.ver-asignados',

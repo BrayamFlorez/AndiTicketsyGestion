@@ -4,7 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Ticket extends Model
 {
@@ -39,6 +42,7 @@ class Ticket extends Model
         'abierto'     => 'Abierto',
         'asignado'    => 'Asignado',
         'en_progreso' => 'En progreso',
+        'esperando_partes' => 'Esperando partes',
         'resuelto'    => 'Resuelto',
         'cerrado'     => 'Cerrado',
         'cancelado'   => 'Cancelado',
@@ -48,6 +52,7 @@ class Ticket extends Model
         'abierto'     => 'secondary',
         'asignado'    => 'primary',
         'en_progreso' => 'warning',
+        'esperando_partes' => 'info',
         'resuelto'    => 'success',
         'cerrado'     => 'dark',
         'cancelado'   => 'danger',
@@ -61,7 +66,7 @@ class Ticket extends Model
     ];
 
     protected $fillable = [
-        'solicitante_id', 'asignado_a', 'empresa_id', 'sede_id',
+        'solicitante_id', 'asignado_a', 'empresa_id', 'sede_id', 'equipo_id', 'impresora_id',
         'titulo', 'categoria', 'prioridad', 'estado', 'descripcion',
         'foto_solicitud', 'evidencia_resolucion', 'notas_resolucion',
         'asignado_at', 'iniciado_at', 'resuelto_at', 'cerrado_at',
@@ -88,6 +93,25 @@ class Ticket extends Model
     }
     public function empresa(): BelongsTo      { return $this->belongsTo(Empresa::class); }
     public function sede(): BelongsTo         { return $this->belongsTo(Sede::class); }
+    public function equipo(): BelongsTo       { return $this->belongsTo(Equipo::class); }
+    public function impresora(): BelongsTo    { return $this->belongsTo(Impresora::class); }
+
+    /** Línea de tiempo, de la más antigua a la más reciente */
+    public function eventos(): HasMany
+    {
+        return $this->hasMany(TicketEvento::class)->oldest('created_at')->oldest('id');
+    }
+
+    public function solicitudesPartes(): HasMany
+    {
+        return $this->hasMany(TicketSolicitudParte::class)->latest()->latest('id');
+    }
+
+    /** La solicitud de partes que todavía no llega (como máximo una) */
+    public function solicitudParteAbierta(): HasOne
+    {
+        return $this->hasOne(TicketSolicitudParte::class)->whereNull('recibido_at')->latestOfMany();
+    }
 
     // Scopes
 
@@ -114,6 +138,17 @@ class Ticket extends Model
     public function scopeDeEmpresa($query, int $empresaId)
     {
         return $query->where('empresa_id', $empresaId);
+    }
+
+    /** Los tickets que este usuario puede ver, con el mismo criterio del listado. */
+    public function scopeVisiblesPara(Builder $query, User $user): Builder
+    {
+        return match (true) {
+            $user->can('tickets.ver-todos')     => $query,
+            $user->can('tickets.ver-asignados') => $query->where('asignado_a', $user->id),
+            $user->can('tickets.ver-propios')   => $query->where('solicitante_id', $user->id),
+            default                             => $query->whereRaw('1 = 0'),
+        };
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -202,11 +237,20 @@ class Ticket extends Model
         return self::ICONOS_CATEGORIA[$this->categoria] ?? 'fa-ticket-alt';
     }
 
+    /** El equipo o la impresora del ticket (o null) */
+    public function getActivoVinculadoAttribute(): Equipo|Impresora|null
+    {
+        return $this->equipo ?? $this->impresora;
+    }
+
     // Estados del ciclo de vida
 
     public function puedeIniciar(): bool   { return $this->estado === 'asignado'; }
-    public function puedeResolver(): bool  { return $this->estado === 'en_progreso'; }
-    public function puedeCerrar(): bool    { return in_array($this->estado, ['resuelto', 'en_progreso']); }
-    public function puedeCancelar(): bool  { return in_array($this->estado, ['abierto', 'asignado', 'en_progreso']); }
+    // Se puede resolver directo desde "esperando partes" (las partes llegaron y se instalaron)
+    public function puedeResolver(): bool  { return in_array($this->estado, ['en_progreso', 'esperando_partes']); }
+    public function puedeSolicitarPartes(): bool { return $this->estado === 'en_progreso'; }
+    public function puedeRecibirPartes(): bool   { return $this->estado === 'esperando_partes'; }
+    public function puedeCerrar(): bool    { return in_array($this->estado, ['resuelto', 'en_progreso', 'esperando_partes']); }
+    public function puedeCancelar(): bool  { return in_array($this->estado, ['abierto', 'asignado', 'en_progreso', 'esperando_partes']); }
     public function estaActivo(): bool     { return ! in_array($this->estado, ['cerrado', 'cancelado']); }
 }

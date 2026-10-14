@@ -22,7 +22,7 @@ class Sede extends Model
         'activo' => 'boolean',
     ];
 
-    // Relaciones
+    // ── Relaciones ───────────────────────────────────────────────────────────
 
     public function empresa(): BelongsTo
     {
@@ -38,9 +38,7 @@ class Sede extends Model
     }
 
     /**
-     * Tecnicos asignados especificamente a esta sede.
-     * NO incluye tecnicos con asignacion global a la empresa.
-     * Para "todos los tecnicos que pueden operar aqui", usar tecnicosConAcceso().
+     * Técnicos asignados específicamente a esta sede.
      */
     public function tecnicosAsignados(): BelongsToMany
     {
@@ -59,7 +57,15 @@ class Sede extends Model
         return $this->hasMany(Equipo::class);
     }
 
-    // Scopes
+    /**
+     * Impresoras asignadas a esta sede.
+     */
+    public function impresoras(): HasMany
+    {
+        return $this->hasMany(Impresora::class);
+    }
+
+    // ── Scopes ───────────────────────────────────────────────────────────────
 
     public function scopeActivas($query)
     {

@@ -9,8 +9,10 @@ use App\Models\Equipo;
 use App\Models\Sede;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -27,6 +29,9 @@ class EquipoController extends Controller
         $user = $request->user();
         abort_unless($user->can('equipos.ver'), 403);
 
+        $empresas = $this->empresasDisponiblesPara($user);
+        $sedes    = $this->sedesDisponiblesPara($user, $empresas->pluck('id'));
+
         $query = $this->scopePorRol($user);
         $this->aplicarFiltros($query, $request);
 
@@ -37,9 +42,11 @@ class EquipoController extends Controller
             ->withQueryString();
 
         return view('equipos.index', [
-            'equipos'  => $equipos,
-            'filtros'  => $this->filtrosActivos($request),
-            'empresas' => $this->empresasDisponiblesPara($user),
+            'equipos'         => $equipos,
+            'filtros'         => $this->filtrosActivos($request),
+            'empresas'        => $empresas,
+            'sedesPorEmpresa' => $sedes->groupBy('empresa_id'),
+            'resumen'         => $this->resumenPorUbicacion($user, $request, $empresas, $sedes),
         ]);
     }
 
@@ -96,7 +103,12 @@ class EquipoController extends Controller
         $data = $this->extraerDatosValidados($request);
         $data['creado_por'] = Auth::id();
 
-        $equipo = Equipo::create($data);
+        try {
+            $equipo = Equipo::create($data);
+        } catch (UniqueConstraintViolationException) {
+            // El request ya valida el serial; esto solo cubre dos registros simultáneos
+            return $this->serialDuplicado();
+        }
 
         return redirect()
             ->route('equipos.index')
@@ -133,8 +145,11 @@ class EquipoController extends Controller
         abort_unless($equipo->puedeSerGestionadoPor($request->user()), 403,
             'No tienes cobertura para gestionar este equipo.');
 
-        $data = $this->extraerDatosValidados($request);
-        $equipo->update($data);
+        try {
+            $equipo->update($this->extraerDatosValidados($request));
+        } catch (UniqueConstraintViolationException) {
+            return $this->serialDuplicado();
+        }
 
         return redirect()
             ->route('equipos.index')
@@ -195,6 +210,16 @@ class EquipoController extends Controller
     // ─────────────────────────────────────────────────────────────────────
 
     /**
+     * Respaldo ante el índice único de la BD (condición de carrera entre dos guardados).
+     */
+    private function serialDuplicado(): RedirectResponse
+    {
+        return back()
+            ->withInput()
+            ->withErrors(['numero_serie' => 'El número de serie ya está registrado en otro equipo del sistema.']);
+    }
+
+    /**
      * Extrae datos validados + filtra especificaciones al schema de la categoría.
      * Reutilizado por store() y update() para no duplicar lógica.
      */
@@ -238,20 +263,7 @@ class EquipoController extends Controller
     {
         $empresaIds = $empresas->pluck('id');
 
-        // Sedes según el rol del usuario
-        if ($user->hasAnyRole(['admin', 'super-admin'])) {
-            $sedesPorEmpresa = Sede::activas()
-                ->whereIn('empresa_id', $empresaIds)
-                ->orderBy('nombre')
-                ->get(['id', 'nombre', 'empresa_id'])
-                ->groupBy('empresa_id');
-        } else {
-            $sedesPorEmpresa = $user->sedesAccesibles()
-                ->where('activo', true)
-                ->orderBy('nombre')
-                ->get(['id', 'nombre', 'empresa_id'])
-                ->groupBy('empresa_id');
-        }
+        $sedesPorEmpresa = $this->sedesDisponiblesPara($user, $empresaIds)->groupBy('empresa_id');
 
         // Usuarios (responsables) — por empresa
         $usuariosPorEmpresa = User::activos()
@@ -267,6 +279,72 @@ class EquipoController extends Controller
         ];
     }
 
+    /**
+     * Sedes activas que el usuario puede operar, de las empresas indicadas.
+     */
+    private function sedesDisponiblesPara(User $user, Collection $empresaIds): Collection
+    {
+        $query = $user->hasAnyRole(['admin', 'super-admin'])
+            ? Sede::activas()->whereIn('empresa_id', $empresaIds)
+            : $user->sedesAccesibles()->where('activo', true);
+
+        return $query->orderBy('nombre')->get(['id', 'nombre', 'empresa_id']);
+    }
+
+    /**
+     * Árbol empresa → sedes con la cantidad de equipos de cada sede.
+     *
+     * Respeta el alcance del rol y los filtros de búsqueda, categoría y estado,
+     * pero no los de empresa/sede: es el menú desde el que se eligen.
+     * Incluye las sedes sin equipos y, si los hay, los equipos sin sede.
+     */
+    private function resumenPorUbicacion(User $user, Request $request, Collection $empresas, Collection $sedes): Collection
+    {
+        $alcance = $this->scopePorRol($user);
+        $this->aplicarFiltros($alcance, $request, conUbicacion: false);
+
+        // Subconsulta por id: el agrupado funciona aunque el scope del rol use joins o selects propios
+        $conteos = Equipo::query()
+            ->whereIn('id', $alcance->select('equipos.id'))
+            ->selectRaw('empresa_id, sede_id, COUNT(*) AS total')
+            ->groupBy('empresa_id', 'sede_id')
+            ->toBase()
+            ->get();
+
+        // Equipos de empresas o sedes que ya no están activas: se agregan para no perderlos del conteo
+        $empresas = $empresas->concat(
+            Empresa::whereIn('id', $conteos->pluck('empresa_id')->diff($empresas->pluck('id')))->get(['id', 'nombre'])
+        );
+        $sedes = $sedes->concat(
+            Sede::whereIn('id', $conteos->pluck('sede_id')->filter()->diff($sedes->pluck('id')))->get(['id', 'nombre', 'empresa_id'])
+        );
+
+        $totalPorSede = $conteos->groupBy('empresa_id')
+            ->map(fn ($filas) => $filas->pluck('total', 'sede_id')->map(fn ($t) => (int) $t));
+
+        return $empresas
+            ->map(function ($empresa) use ($sedes, $totalPorSede) {
+                $totales = $totalPorSede->get($empresa->id, collect());
+
+                return [
+                    'id'       => $empresa->id,
+                    'nombre'   => $empresa->nombre,
+                    'total'    => $totales->sum(),
+                    'sin_sede' => $totales->get('', 0),
+                    'sedes'    => $sedes->where('empresa_id', $empresa->id)
+                        ->sortBy('nombre')
+                        ->map(fn ($sede) => [
+                            'id'     => $sede->id,
+                            'nombre' => $sede->nombre,
+                            'total'  => $totales->get($sede->id, 0),
+                        ])
+                        ->values(),
+                ];
+            })
+            ->sortBy('nombre')
+            ->values();
+    }
+
     private function scopePorRol(User $user): Builder
     {
         if ($user->hasAnyRole(['admin', 'super-admin'])) {
@@ -275,12 +353,19 @@ class EquipoController extends Controller
         return Equipo::accesiblesParaTecnico($user);
     }
 
-    private function aplicarFiltros(Builder $query, Request $request): void
+    /**
+     * @param bool $conUbicacion false para ignorar empresa y sede (lo usa el resumen lateral)
+     */
+    private function aplicarFiltros(Builder $query, Request $request, bool $conUbicacion = true): void
     {
         $query
             ->when($request->filled('categoria'),  fn($q) => $q->where('categoria', $request->categoria))
             ->when($request->filled('estado'),     fn($q) => $q->where('estado', $request->estado))
-            ->when($request->filled('empresa_id'), fn($q) => $q->where('empresa_id', $request->empresa_id))
+            ->when($conUbicacion && $request->filled('empresa_id'), fn($q) => $q->where('empresa_id', $request->empresa_id))
+            // sede_id=sin → equipos de la empresa que no tienen sede asignada
+            ->when($conUbicacion && $request->filled('sede_id'), fn($q) => $request->sede_id === 'sin'
+                ? $q->whereNull('sede_id')
+                : $q->where('sede_id', $request->sede_id))
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%' . trim($request->q) . '%';
                 $q->where(fn($sub) => $sub
@@ -293,7 +378,7 @@ class EquipoController extends Controller
 
     private function filtrosActivos(Request $request): array
     {
-        return collect($request->only(['categoria', 'estado', 'empresa_id', 'q']))
+        return collect($request->only(['categoria', 'estado', 'empresa_id', 'sede_id', 'q']))
             ->filter(fn($v) => $v !== null && $v !== '')
             ->toArray();
     }

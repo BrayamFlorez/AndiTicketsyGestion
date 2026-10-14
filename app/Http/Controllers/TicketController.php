@@ -10,20 +10,26 @@ use App\Events\Tickets\TicketIniciado;
 use App\Events\Tickets\TicketResuelto;
 use App\Http\Requests\StoreTicketRequest;
 use App\Models\Empresa;
+use App\Models\Equipo;
+use App\Models\Impresora;
 use App\Models\Sede;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Services\Tickets\CicloTicket;
 use App\Support\Roles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class TicketController extends Controller
 {
+    public function __construct(private readonly CicloTicket $ciclo) {}
+
     /*
     |--------------------------------------------------------------------------
     | INDEX
@@ -69,6 +75,13 @@ class TicketController extends Controller
             'asignado:id,name,email',
             'empresa:id,nombre',
             'sede:id,nombre,ciudad,direccion',
+            'equipo.sede:id,nombre',
+            'impresora.sede:id,nombre',
+            'eventos.usuario:id,name',
+            'eventos.tecnicoAnterior:id,name',
+            'eventos.tecnicoNuevo:id,name',
+            'solicitudesPartes.solicitante:id,name',
+            'solicitudesPartes.receptor:id,name',
         ]);
 
         $user = Auth::user();
@@ -90,10 +103,13 @@ class TicketController extends Controller
     |                transversales (ven todas) y con cobertura (ven las suyas).
     |  - 'usuario' → el ticket HEREDA la empresa/sede del solicitante.
     */
-    public function create(): View|RedirectResponse
+    public function create(Request $request): View|RedirectResponse
     {
         $user = Auth::user();
         abort_unless($user->can('tickets.crear'), 403);
+
+        // Desde la ficha de un equipo o impresora: ?equipo=ID o ?impresora=ID
+        $vinculo = $this->vinculoDesdeFicha($request);
 
         // ── Caso A: elige el destino del ticket ──
         if ($this->puedeElegirDestino($user)) {
@@ -134,6 +150,8 @@ class TicketController extends Controller
                     ->groupBy('empresa_id'),
                 'tecnicos'           => $tecnicos,
                 'coberturas'         => $coberturas,
+                'activosPorEmpresa'  => $this->activosDeEmpresas($idsEmpresas)->groupBy('empresa_id'),
+                'vinculoInicial'     => $vinculo && $idsEmpresas->contains($vinculo['empresa_id']) ? $vinculo : null,
             ]);
         }
 
@@ -145,7 +163,11 @@ class TicketController extends Controller
             );
         }
 
-        return view('tickets.create', ['vista' => 'usuario']);
+        return view('tickets.create', [
+            'vista'          => 'usuario',
+            'activos'        => $this->activosDeEmpresas(collect([$user->empresa_id])),
+            'vinculoInicial' => $vinculo && $vinculo['empresa_id'] === (int) $user->empresa_id ? $vinculo : null,
+        ]);
     }
 
     /*
@@ -182,9 +204,15 @@ class TicketController extends Controller
             }
         }
 
-        $ticket = DB::transaction(function () use ($request, $user, $eligeDestino) {
+        $activo = $request->activoVinculado();
+
+        $ticket = DB::transaction(function () use ($request, $user, $eligeDestino, $activo) {
 
             $data = $request->safe()->only(['titulo', 'categoria', 'prioridad', 'descripcion']);
+
+            // Equipo o impresora vinculada (validada contra la empresa en el request)
+            $data['equipo_id']    = $activo instanceof Equipo ? $activo->id : null;
+            $data['impresora_id'] = $activo instanceof Impresora ? $activo->id : null;
 
             if ($eligeDestino) {
                 // El solicitante puede ser otro usuario, o el propio creador
@@ -208,12 +236,25 @@ class TicketController extends Controller
                 $data['estado']         = 'abierto';
             }
 
+            // La sede del equipo es la ubicación real del problema
+            if ($activo?->sede_id) {
+                $data['sede_id'] = $activo->sede_id;
+            }
+
             if ($request->hasFile('foto_solicitud')) {
                 $data['foto_solicitud'] = $request->file('foto_solicitud')
                     ->store('tickets/solicitudes', 'local');
             }
 
-            return Ticket::create($data);
+            $ticket = Ticket::create($data);
+
+            // Línea de tiempo: creación (y asignación si se asignó al crear)
+            $this->ciclo->registrar($ticket, 'creado', $user, ['estado_nuevo' => 'abierto']);
+            if ($ticket->asignado_a) {
+                $this->ciclo->registrar($ticket, 'asignado', $user, ['tecnico_nuevo_id' => $ticket->asignado_a]);
+            }
+
+            return $ticket;
         });
 
         // Disparar evento según si quedó asignado o no
@@ -247,6 +288,7 @@ class TicketController extends Controller
 
         $data = $request->validate([
             'tecnico_id' => ['required', 'integer', 'exists:users,id'],
+            'motivo'     => ['nullable', 'string', 'max:500'],
         ]);
 
         // 1. Usuario activo con un rol que puede recibir asignaciones
@@ -272,11 +314,16 @@ class TicketController extends Controller
         $asignadoAnteriorId = $ticket->asignado_a;
         $primeraAsignacion  = is_null($asignadoAnteriorId);
 
-        $ticket->update([
+        if ((int) $asignadoAnteriorId === $tecnico->id) {
+            return back()->with('error', "{$tecnico->name} ya es el técnico asignado.");
+        }
+
+        // El trabajo en curso (o la espera de partes) no se pierde al cambiar de técnico
+        $this->ciclo->transicion($ticket, $primeraAsignacion ? 'asignado' : 'reasignado', [
             'asignado_a'  => $tecnico->id,
-            'estado'      => $ticket->estado === 'en_progreso' ? 'en_progreso' : 'asignado',
+            'estado'      => in_array($ticket->estado, ['en_progreso', 'esperando_partes']) ? $ticket->estado : 'asignado',
             'asignado_at' => $primeraAsignacion ? now() : $ticket->asignado_at,
-        ]);
+        ], $request->user(), ['comentario' => $data['motivo'] ?? null]);
 
         // Resolver técnico anterior solo si es distinto del nuevo
         $tecnicoAnterior = null;
@@ -318,7 +365,7 @@ class TicketController extends Controller
             'El ticket no se puede iniciar en su estado actual.'
         );
 
-        $ticket->update(['estado' => 'en_progreso', 'iniciado_at' => now()]);
+        $this->ciclo->transicion($ticket, 'iniciado', ['estado' => 'en_progreso', 'iniciado_at' => now()], $user);
 
         event(new TicketIniciado($ticket->fresh(['solicitante', 'asignado'])));
 
@@ -338,7 +385,7 @@ class TicketController extends Controller
         abort_unless(
             $ticket->puedeResolver(),
             422,
-            'El ticket debe estar en progreso para marcarlo como resuelto.'
+            'El ticket debe estar en progreso o esperando partes para marcarlo como resuelto.'
         );
 
         $data = $request->validate([
@@ -360,7 +407,12 @@ class TicketController extends Controller
                 ->store('tickets/evidencias', 'local');
         }
 
-        $ticket->update($update);
+        DB::transaction(function () use ($ticket, $update, $user) {
+            // Si se resuelve directo desde "esperando partes", las partes llegaron
+            $ticket->solicitudParteAbierta?->update(['recibido_at' => now(), 'recibido_por' => $user->id]);
+
+            $this->ciclo->transicion($ticket, 'resuelto', $update, $user, ['comentario' => $update['notas_resolucion']]);
+        });
 
         event(new TicketResuelto($ticket->fresh(['solicitante', 'asignado'])));
 
@@ -376,7 +428,7 @@ class TicketController extends Controller
             'El ticket no se puede cerrar en su estado actual.'
         );
 
-        $ticket->update(['estado' => 'cerrado', 'cerrado_at' => now()]);
+        $this->ciclo->transicion($ticket, 'cerrado', ['estado' => 'cerrado', 'cerrado_at' => now()], $request->user());
 
         event(new TicketCerrado(
             $ticket->fresh(['solicitante', 'asignado']),
@@ -406,7 +458,7 @@ class TicketController extends Controller
             'El ticket no se puede cancelar en su estado actual.'
         );
 
-        $ticket->update(['estado' => 'cancelado']);
+        $this->ciclo->transicion($ticket, 'cancelado', ['estado' => 'cancelado'], $user);
 
         event(new TicketCancelado(
             $ticket->fresh(['solicitante', 'asignado']),
@@ -502,6 +554,69 @@ class TicketController extends Controller
             ->exists();
     }
 
+    /**
+     * Equipos (sin los dados de baja) e impresoras de las empresas dadas, para el campo
+     * "Equipo vinculado". Valor del option: "equipo:ID" o "impresora:ID".
+     */
+    private function activosDeEmpresas(Collection $idsEmpresas): Collection
+    {
+        $equipos = Equipo::query()
+            ->whereIn('empresa_id', $idsEmpresas)
+            ->where('estado', '!=', 'dado_de_baja')
+            ->with('sede:id,nombre')
+            ->orderBy('nombre')
+            ->get(['id', 'nombre', 'numero_serie', 'categoria', 'empresa_id', 'sede_id'])
+            ->map(fn (Equipo $e) => [
+                'valor'      => "equipo:{$e->id}",
+                'tipo'       => 'equipo',
+                'nombre'     => $e->nombre,
+                'detalle'    => collect([$e->label_categoria, $e->numero_serie, $e->sede?->nombre])->filter()->implode(' · '),
+                'empresa_id' => $e->empresa_id,
+                'sede_id'    => $e->sede_id,
+            ]);
+
+        $impresoras = Impresora::query()
+            ->whereIn('empresa_id', $idsEmpresas)
+            ->with(['sede:id,nombre', 'modelo'])
+            ->orderBy('codigo')
+            ->get()
+            ->map(fn (Impresora $i) => [
+                'valor'      => "impresora:{$i->id}",
+                'tipo'       => 'impresora',
+                'nombre'     => $i->nombre_visible,
+                'detalle'    => collect([$i->codigo, $i->sede?->nombre])->filter()->implode(' · '),
+                'empresa_id' => $i->empresa_id,
+                'sede_id'    => $i->sede_id,
+            ]);
+
+        return $equipos->concat($impresoras)->values();
+    }
+
+    /** ?equipo=ID o ?impresora=ID → datos para precargar el formulario (o null) */
+    private function vinculoDesdeFicha(Request $request): ?array
+    {
+        $activo = match (true) {
+            $request->filled('equipo')    => Equipo::find($request->integer('equipo')),
+            $request->filled('impresora') => Impresora::find($request->integer('impresora')),
+            default                       => null,
+        };
+
+        if (! $activo) {
+            return null;
+        }
+
+        $esImpresora = $activo instanceof Impresora;
+
+        return [
+            'valor'      => ($esImpresora ? 'impresora:' : 'equipo:') . $activo->id,
+            'nombre'     => $esImpresora ? $activo->nombre_visible : $activo->nombre,
+            'empresa_id' => (int) $activo->empresa_id,
+            'sede_id'    => $activo->sede_id ? (int) $activo->sede_id : null,
+            // Categoría sugerida del ticket
+            'categoria'  => $esImpresora || $activo->categoria === 'impresora' ? 'impresora' : 'hardware',
+        ];
+    }
+
     private function modoListadoParaUsuario(User $user): string
     {
         return match (true) {
@@ -528,6 +643,8 @@ class TicketController extends Controller
             ->when($request->filled('prioridad'),   fn ($q) => $q->where('prioridad', $request->prioridad))
             ->when($request->filled('categoria'),   fn ($q) => $q->where('categoria', $request->categoria))
             ->when($request->filled('empresa_id'),  fn ($q) => $q->where('empresa_id', $request->empresa_id))
+            ->when($request->filled('equipo_id'),   fn ($q) => $q->where('equipo_id', $request->equipo_id))
+            ->when($request->filled('impresora_id'), fn ($q) => $q->where('impresora_id', $request->impresora_id))
             ->when($request->boolean('sin_asignar'), fn ($q) => $q->whereNull('asignado_a'))
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%' . trim($request->q) . '%';
@@ -539,7 +656,7 @@ class TicketController extends Controller
 
     private function filtrosActivos(Request $request): array
     {
-        return collect($request->only(['estado', 'prioridad', 'categoria', 'empresa_id', 'sin_asignar', 'q']))
+        return collect($request->only(['estado', 'prioridad', 'categoria', 'empresa_id', 'equipo_id', 'impresora_id', 'sin_asignar', 'q']))
             ->filter(fn ($v) => $v !== null && $v !== '')
             ->toArray();
     }
@@ -557,4 +674,4 @@ class TicketController extends Controller
 
         abort_unless($puede, 403, 'No tienes acceso a este ticket.');
     }
-}
+}

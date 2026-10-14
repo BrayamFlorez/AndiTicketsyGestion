@@ -6,13 +6,14 @@ use App\Models\Empresa;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class EmpresaController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | INDEX — Listado de empresas con filtros y conteos útiles.
+    | INDEX — Listado de empresas con filtros, conteos y lista de migración.
     |--------------------------------------------------------------------------
     */
     public function index(Request $request): View
@@ -24,10 +25,12 @@ class EmpresaController extends Controller
         $this->aplicarFiltros($query, $request);
 
         $empresas = $query
-            ->with(['sedes']) // <-- ¡NUEVO! Carga las sedes para el acordeón
+            ->with(['sedes'])
             ->withCount([
                 'sedes',
                 'usuarios',
+                'equipos',
+                'impresoras',
                 'tickets as tickets_activos_count' => fn($q) => $q->whereNotIn('estado', ['cerrado', 'cancelado']),
             ])
             ->orderBy('nombre')
@@ -35,17 +38,13 @@ class EmpresaController extends Controller
             ->withQueryString();
 
         return view('empresas.index', [
-            'empresas' => $empresas,
-            'filtros'  => $this->filtrosActivos($request),
-            'totales'  => $this->resumen(),
+            'empresas'      => $empresas,
+            'todasEmpresas' => Empresa::orderBy('nombre')->get(['id', 'nombre']), // Para selector de migración
+            'filtros'       => $this->filtrosActivos($request),
+            'totales'       => $this->resumen(),
         ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE / STORE
-    |--------------------------------------------------------------------------
-    */
     public function create(Request $request): View
     {
         abort_unless($request->user()->can('empresas.gestionar'), 403);
@@ -64,7 +63,6 @@ class EmpresaController extends Controller
             'email'    => ['nullable', 'email', 'max:255'],
         ]);
 
-        // Al crear, forzamos que esté activa o tomamos el valor del checkbox si lo envías
         $data['activo'] = $request->has('activo') ? $request->boolean('activo') : true;
 
         $empresa = Empresa::create($data);
@@ -77,7 +75,6 @@ class EmpresaController extends Controller
     {
         abort_unless($request->user()->can('empresas.gestionar'), 403);
 
-        // Cargamos las sedes de la empresa calculando sus usuarios y tickets activos individuales
         $empresa->load([
             'sedes' => fn($q) => $q->withCount([
                 'usuarios',
@@ -88,11 +85,6 @@ class EmpresaController extends Controller
         return view('empresas.show', compact('empresa'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | EDIT / UPDATE
-    |--------------------------------------------------------------------------
-    */
     public function edit(Request $request, Empresa $empresa): View
     {
         abort_unless($request->user()->can('empresas.gestionar'), 403);
@@ -111,7 +103,6 @@ class EmpresaController extends Controller
             'email'    => ['nullable', 'email', 'max:255'],
         ]);
 
-        // Checkbox HTML: si no se marca, no viaja en el request. Usamos boolean().
         $data['activo'] = $request->boolean('activo');
 
         $empresa->update($data);
@@ -122,23 +113,61 @@ class EmpresaController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | DESTROY
+    | DESTROY (CON SISTEMA DE MIGRACIÓN GLOBAL)
     |--------------------------------------------------------------------------
     */
     public function destroy(Request $request, Empresa $empresa): RedirectResponse
     {
         abort_unless($request->user()->can('empresas.gestionar'), 403);
 
-        // Protección contra errores de llave foránea (Integridad Referencial)
-        if ($empresa->sedes()->exists() || $empresa->usuarios()->exists() || $empresa->tickets()->exists()) {
-            return back()->with('error', 'No puedes eliminar esta empresa porque tiene sedes, usuarios o tickets asociados. Te recomendamos desactivarla.');
+        $migrarA = $request->input('migrar_a_empresa_id');
+        $nombreEmpresa = $empresa->nombre;
+
+        if ($migrarA) {
+            $empresaDestino = Empresa::findOrFail($migrarA);
+
+            DB::transaction(function () use ($empresa, $empresaDestino) {
+                // Reasignación masiva de relaciones a la nueva Empresa
+                if (method_exists($empresa, 'sedes')) {
+                    $empresa->sedes()->update(['empresa_id' => $empresaDestino->id]);
+                }
+                if (method_exists($empresa, 'usuarios')) {
+                    $empresa->usuarios()->update(['empresa_id' => $empresaDestino->id]);
+                }
+                if (method_exists($empresa, 'equipos')) {
+                    $empresa->equipos()->update(['empresa_id' => $empresaDestino->id]);
+                }
+                if (method_exists($empresa, 'impresoras')) {
+                    $empresa->impresoras()->update(['empresa_id' => $empresaDestino->id]);
+                }
+                if (method_exists($empresa, 'tickets')) {
+                    $empresa->tickets()->update(['empresa_id' => $empresaDestino->id]);
+                }
+                
+                // Reasignación en tabla pivote de cobertura técnica
+                DB::table('empresa_user')
+                    ->where('empresa_id', $empresa->id)
+                    ->update(['empresa_id' => $empresaDestino->id]);
+            });
+
+            $mensaje = "La empresa '{$nombreEmpresa}' fue eliminada. Todos sus recursos y sedes fueron migrados a '{$empresaDestino->nombre}'.";
+        } else {
+            $tieneDependencias = 
+                $empresa->sedes()->exists() || 
+                $empresa->usuarios()->exists() || 
+                $empresa->equipos()->exists() || 
+                $empresa->impresoras()->exists() || 
+                $empresa->tickets()->exists();
+
+            if ($tieneDependencias) {
+                return back()->with('error', 'La empresa contiene recursos activos. Debes seleccionar una empresa de destino para migrar los datos antes de eliminarla.');
+            }
+            $mensaje = "La empresa '{$nombreEmpresa}' fue eliminada permanentemente.";
         }
 
-        $nombre = $empresa->nombre;
         $empresa->delete();
 
-        return redirect()->route('empresas.index')
-            ->with('success', "La empresa {$nombre} fue eliminada permanentemente.");
+        return redirect()->route('empresas.index')->with('success', $mensaje);
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -165,9 +194,6 @@ class EmpresaController extends Controller
             ->toArray();
     }
 
-    /**
-     * Resumen ligero para mostrar en el encabezado de la vista.
-     */
     private function resumen(): array
     {
         return [

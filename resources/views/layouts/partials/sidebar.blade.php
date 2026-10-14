@@ -10,7 +10,7 @@
         default => null,
     };
 
-    $verGestion = $u->canAny(['empresas.gestionar', 'sedes.gestionar', 'equipos.gestionar']);
+    $verGestion = $u->canAny(['empresas.gestionar', 'sedes.gestionar', 'equipos.ver', 'impresoras.ver']);
     $verFlujos = $u->canAny([
         'flujos.plantillas.gestionar',
         'flujos.tipos-documento.gestionar',
@@ -21,48 +21,52 @@
     $verSistema = $u->canAny(['usuarios.ver', 'roles.gestionar', 'auditoria.ver']);
 @endphp
 
-<aside :class="sidebarToggle ? 'translate-x-0' : '-translate-x-full'"
-    class="fixed left-0 top-0 z-[9999] flex h-screen w-72.5 flex-col overflow-y-hidden bg-[#1c2434] duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0"
-    @click.outside="sidebarToggle = false">
+<aside :class="sidebarToggle ? 'translate-x-0 lg:ml-0' : '-translate-x-full lg:ml-[-290px]'"
+    class="absolute lg:static left-0 top-0 z-[9999] flex h-screen w-[290px] flex-col overflow-y-hidden bg-[#1c2434] duration-300 ease-in-out dark:bg-boxdark shadow-lg"
+    @click.outside="if (window.innerWidth < 1024) sidebarToggle = false">
 
     {{-- Sidebar Header / Logo --}}
-    <div class="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-        <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white">
-                <i class="fas fa-ticket-alt text-lg"></i>
+    <div
+        class="relative flex flex-col items-center justify-center px-6 pt-6 pb-4 lg:pt-8 lg:pb-6 text-center border-b border-white/5">
+
+        <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center gap-2 group">
+            {{-- Logo Más Grande (64x64 px) --}}
+            <div
+                class="flex h-16 w-16 items-center justify-center rounded-xl bg-white/5 p-2 shadow-md border border-white/10 group-hover:border-primary/50 transition duration-200">
+                <img src="{{ asset('img/andi.webp') }}" alt="{{ config('app.name', 'ANDI SOFTWARE') }}"
+                    class="h-full w-full object-contain drop-shadow-sm">
             </div>
-            <span class="text-xl font-bold text-white tracking-wide">
-                {{ config('app.name', env('APP_NAME', 'TailAdmin')) }}
+
+            {{-- Nombre Más Pequeño y Estilizado --}}
+            <span class="text-xs font-bold text-white tracking-widest uppercase truncate max-w-[180px] mt-1">
+                {{ config('app.name', env('APP_NAME', 'ANDI SOFTWARE')) }}
             </span>
         </a>
 
-        <button class="block lg:hidden text-bodydark hover:text-white" @click.stop="sidebarToggle = !sidebarToggle">
-            <svg class="fill-current" width="20" height="18" viewBox="0 0 20 18" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M19 8.175H2.98748L9.36248 1.6875C9.69998 1.35 9.69998 0.825 9.36248 0.4875C9.02498 0.15 8.49998 0.15 8.16248 0.4875L0.399976 8.3625C0.0624756 8.7 0.0624756 9.225 0.399976 9.5625L8.16248 17.4375C8.31248 17.5875 8.53748 17.7 8.76248 17.7C8.98748 17.7 9.21248 17.6125 9.36248 17.4375C9.69998 17.1 9.69998 16.575 9.36248 16.2375L2.98748 9.75H19C19.45 9.75 19.7625 9.4125 19.7625 8.9625C19.7625 8.5125 19.45 8.175 19 8.175Z"
-                    fill="" />
-            </svg>
+        {{-- Botón Cerrar en Móvil (Posición Absoluta Superior Derecha) --}}
+        <button class="absolute top-4 right-4 block lg:hidden text-bodydark hover:text-white transition"
+            @click.stop="sidebarToggle = false">
+            <i class="fas fa-times text-lg"></i>
         </button>
     </div>
 
     {{-- Navigation Menu --}}
     <div class="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-        <nav class="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
+        <nav class="py-2 px-4 lg:px-6">
 
             {{-- Menú Principal Group --}}
             <div>
-                <h3 class="mb-4 ml-4 text-xs font-semibold text-bodydark2 uppercase tracking-wider">
-                    MENÚ PRINCIPAL
+                <h3 class="mb-4 ml-4 text-[11px] font-bold text-bodydark2 uppercase tracking-widest">
+                    Menú Principal
                 </h3>
 
-                <ul class="mb-6 flex flex-col gap-1.5">
+                <ul class="mb-8 flex flex-col gap-1.5">
 
-                    {{-- Dashboard Single Link --}}
+                    {{-- Dashboard --}}
                     <li>
                         <a href="{{ route('dashboard') }}"
-                            class="group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 {{ request()->routeIs('dashboard') ? 'bg-graydark dark:bg-meta-4 text-white' : '' }}">
-                            <i class="fas fa-th-large w-5 text-center text-sm"></i>
+                            class="group relative flex items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium text-bodydark1 transition-all duration-300 ease-in-out hover:text-white hover:bg-white/10 dark:hover:bg-meta-4 {{ request()->routeIs('dashboard') ? 'bg-white/10 dark:bg-meta-4 text-white font-semibold' : '' }}">
+                            <i class="fas fa-th-large w-5 text-center text-[15px]"></i>
                             Dashboard
                         </a>
                     </li>
@@ -70,28 +74,23 @@
                     {{-- Soporte Técnico Dropdown --}}
                     <li x-data="{ open: {{ request()->routeIs(['tickets.*']) ? 'true' : 'false' }} }">
                         <a href="#" @click.prevent="open = !open"
-                            class="group relative flex items-center justify-between rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 {{ request()->routeIs(['tickets.*']) ? 'bg-graydark dark:bg-meta-4 text-white' : '' }}">
-                            <div class="flex items-center gap-2.5">
-                                <i class="fas fa-headset w-5 text-center text-sm"></i>
+                            class="group relative flex items-center justify-between rounded-md px-4 py-2.5 text-sm font-medium text-bodydark1 transition-all duration-300 ease-in-out hover:text-white hover:bg-white/10 dark:hover:bg-meta-4 {{ request()->routeIs(['tickets.*']) ? 'bg-white/10 dark:bg-meta-4 text-white font-semibold' : '' }}">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-headset w-5 text-center text-[15px]"></i>
                                 Soporte Técnico
                             </div>
-                            <svg class="absolute right-4 top-1/2 -translate-y-1/2 fill-current transition-transform duration-200"
-                                :class="open && 'rotate-180'" width="20" height="20" viewBox="0 0 20 20"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M4.41107 6.9107 4.41107 6.9107C4.73651 6.58527 5.26415 6.58527 5.58959 6.9107L10 12.3211L14.4104 6.91071C14.7358 6.58527 15.2635 6.58527 15.5889 6.91071C15.9144 7.23615 15.9144 7.76379 15.5889 8.08923L10.5893 14.0892C10.2638 14.4147 9.73618 14.4147 9.41074 14.0892L4.41107 8.08923C4.08563 7.76379 4.08563 7.23614 4.41107 6.9107Z"
-                                    fill="" />
-                            </svg>
+                            <i class="fas fa-chevron-down text-xs transition-transform duration-200"
+                                :class="open && 'rotate-180'"></i>
                         </a>
 
-                        {{-- Submenu --}}
                         <div x-show="open" x-cloak class="overflow-hidden transition-all duration-300">
-                            <ul class="mt-2 mb-3 flex flex-col gap-1.5 pl-6">
+                            <ul class="mt-2 mb-3 flex flex-col gap-1 pl-8 pr-2">
                                 @if ($ticketsEntry)
                                     <li>
                                         <a href="{{ route('tickets.index') }}"
-                                            class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('tickets.index') && !request()->fullUrlIs('*sin_asignar=1*') ? 'text-white' : '' }}">
-                                            {{ $ticketsEntry['label'] }}
+                                            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('tickets.index') && !request()->fullUrlIs('*sin_asignar=1*') ? 'text-white font-semibold' : '' }}">
+                                            <i class="fas {{ $ticketsEntry['icon'] }} w-4 text-center text-xs"></i>
+                                            <span>{{ $ticketsEntry['label'] }}</span>
                                         </a>
                                     </li>
                                 @endif
@@ -99,8 +98,9 @@
                                 @can('tickets.crear')
                                     <li>
                                         <a href="{{ route('tickets.create') }}"
-                                            class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('tickets.create') ? 'text-white' : '' }}">
-                                            Nuevo Ticket
+                                            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('tickets.create') ? 'text-white font-semibold' : '' }}">
+                                            <i class="fas fa-plus-circle w-4 text-center text-xs"></i>
+                                            <span>Nuevo Ticket</span>
                                         </a>
                                     </li>
                                 @endcan
@@ -108,8 +108,9 @@
                                 @can('tickets.asignar')
                                     <li>
                                         <a href="{{ route('tickets.index', ['estado' => 'abierto', 'sin_asignar' => 1]) }}"
-                                            class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->fullUrlIs('*sin_asignar=1*') ? 'text-white' : '' }}">
-                                            Sin Asignar
+                                            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->fullUrlIs('*sin_asignar=1*') ? 'text-white font-semibold' : '' }}">
+                                            <i class="fas fa-inbox w-4 text-center text-xs"></i>
+                                            <span>Sin Asignar</span>
                                         </a>
                                     </li>
                                 @endcan
@@ -117,31 +118,54 @@
                         </div>
                     </li>
 
-                    {{-- Gestión Dropdown --}}
-                    @if ($verGestion)
-                        <li x-data="{ open: {{ request()->routeIs(['empresas.*', 'sedes.*', 'equipos.*']) ? 'true' : 'false' }} }">
+                    {{-- Proyectos Dropdown --}}
+                    @canany(['proyectos.ver', 'proyectos.ver-todos'])
+                        <li x-data="{ open: {{ request()->routeIs(['proyectos.*', 'clientes.*']) ? 'true' : 'false' }} }">
                             <a href="#" @click.prevent="open = !open"
-                                class="group relative flex items-center justify-between rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 {{ request()->routeIs(['empresas.*', 'sedes.*', 'equipos.*']) ? 'bg-graydark dark:bg-meta-4 text-white' : '' }}">
-                                <div class="flex items-center gap-2.5">
-                                    <i class="fas fa-briefcase w-5 text-center text-sm"></i>
-                                    Gestión
+                                class="group relative flex items-center justify-between rounded-md px-4 py-2.5 text-sm font-medium text-bodydark1 transition-all duration-300 ease-in-out hover:text-white hover:bg-white/10 dark:hover:bg-meta-4 {{ request()->routeIs(['proyectos.*', 'clientes.*']) ? 'bg-white/10 dark:bg-meta-4 text-white font-semibold' : '' }}">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-diagram-project w-5 text-center text-[15px]"></i>
+                                    Proyectos
                                 </div>
-                                <svg class="absolute right-4 top-1/2 -translate-y-1/2 fill-current transition-transform duration-200"
-                                    :class="open && 'rotate-180'" width="20" height="20" viewBox="0 0 20 20"
-                                    fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M4.41107 6.9107 4.41107 6.9107C4.73651 6.58527 5.26415 6.58527 5.58959 6.9107L10 12.3211L14.4104 6.91071C14.7358 6.58527 15.2635 6.58527 15.5889 6.91071C15.9144 7.23615 15.9144 7.76379 15.5889 8.08923L10.5893 14.0892C10.2638 14.4147 9.73618 14.4147 9.41074 14.0892L4.41107 8.08923C4.08563 7.76379 4.08563 7.23614 4.41107 6.9107Z"
-                                        fill="" />
-                                </svg>
+                                <i class="fas fa-chevron-down text-xs transition-transform duration-200"
+                                    :class="open && 'rotate-180'"></i>
                             </a>
 
                             <div x-show="open" x-cloak class="overflow-hidden transition-all duration-300">
-                                <ul class="mt-2 mb-3 flex flex-col gap-1.5 pl-6">
+                                <ul class="mt-2 mb-3 flex flex-col gap-1 pl-8 pr-2">
+                                    <li>
+                                        <a href="{{ route('proyectos.index') }}"
+                                            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('proyectos.*') ? 'text-white font-semibold' : '' }}">
+                                            <i class="fas fa-list w-4 text-center text-xs"></i>
+                                            <span>Todos los Proyectos</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    @endcanany
+
+                    {{-- Gestión Entidades Dropdown --}}
+                    @if ($verGestion)
+                        <li x-data="{ open: {{ request()->routeIs(['empresas.*', 'sedes.*', 'equipos.*', 'impresoras.*']) ? 'true' : 'false' }} }">
+                            <a href="#" @click.prevent="open = !open"
+                                class="group relative flex items-center justify-between rounded-md px-4 py-2.5 text-sm font-medium text-bodydark1 transition-all duration-300 ease-in-out hover:text-white hover:bg-white/10 dark:hover:bg-meta-4 {{ request()->routeIs(['empresas.*', 'sedes.*', 'equipos.*', 'impresoras.*']) ? 'bg-white/10 dark:bg-meta-4 text-white font-semibold' : '' }}">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-briefcase w-5 text-center text-[15px]"></i>
+                                    Gestión Entidades
+                                </div>
+                                <i class="fas fa-chevron-down text-xs transition-transform duration-200"
+                                    :class="open && 'rotate-180'"></i>
+                            </a>
+
+                            <div x-show="open" x-cloak class="overflow-hidden transition-all duration-300">
+                                <ul class="mt-2 mb-3 flex flex-col gap-1 pl-8 pr-2">
                                     @can('empresas.gestionar')
                                         <li>
                                             <a href="{{ route('empresas.index') }}"
-                                                class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('empresas.*') ? 'text-white' : '' }}">
-                                                Empresas
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('empresas.*') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-building w-4 text-center text-xs"></i>
+                                                <span>Empresas</span>
                                             </a>
                                         </li>
                                     @endcan
@@ -149,8 +173,9 @@
                                     @can('sedes.gestionar')
                                         <li>
                                             <a href="{{ route('sedes.index') }}"
-                                                class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('sedes.*') ? 'text-white' : '' }}">
-                                                Sedes
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('sedes.*') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-map-marker-alt w-4 text-center text-xs"></i>
+                                                <span>Sedes</span>
                                             </a>
                                         </li>
                                     @endcan
@@ -158,8 +183,39 @@
                                     @can('equipos.ver')
                                         <li>
                                             <a href="{{ route('equipos.index') }}"
-                                                class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('equipos.*') ? 'text-white' : '' }}">
-                                                Equipos
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('equipos.*') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-desktop w-4 text-center text-xs"></i>
+                                                <span>Equipos</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+
+                                    @can('impresoras.ver')
+                                        <li>
+                                            <a href="{{ route('impresoras.index') }}"
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('impresoras.*') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-print w-4 text-center text-xs"></i>
+                                                <span>Impresoras</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+
+                                    @can('impresoras.gestionar-catalogo')
+                                        <li>
+                                            <a href="{{ route('impresoras.catalogo.index') }}"
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('impresoras.catalogo.*') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-layer-group w-4 text-center text-xs"></i>
+                                                <span>Catálogo de impresoras</span>
+                                            </a>
+                                        </li>
+                                    @endcan
+
+                                    @can('reportes.inventario')
+                                        <li>
+                                            <a href="{{ route('reportes.inventario.index') }}"
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('reportes.inventario.*') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-layer-group w-4 text-center text-xs"></i>
+                                                <span>Reporte de inventario</span>
                                             </a>
                                         </li>
                                     @endcan
@@ -172,31 +228,29 @@
                     @if ($verFlujos)
                         <li x-data="{ open: {{ request()->routeIs('flujos.*') ? 'true' : 'false' }} }">
                             <a href="#" @click.prevent="open = !open"
-                                class="group relative flex items-center justify-between rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 {{ request()->routeIs('flujos.*') ? 'bg-graydark dark:bg-meta-4 text-white' : '' }}">
-                                <div class="flex items-center gap-2.5">
-                                    <i class="fas fa-project-diagram w-5 text-center text-sm"></i>
-                                    Flujos
+                                class="group relative flex items-center justify-between rounded-md px-4 py-2.5 text-sm font-medium text-bodydark1 transition-all duration-300 ease-in-out hover:text-white hover:bg-white/10 dark:hover:bg-meta-4 {{ request()->routeIs('flujos.*') ? 'bg-white/10 dark:bg-meta-4 text-white font-semibold' : '' }}">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-project-diagram w-5 text-center text-[15px]"></i>
+                                    Flujos de Trabajo
                                 </div>
-                                <svg class="absolute right-4 top-1/2 -translate-y-1/2 fill-current transition-transform duration-200"
-                                    :class="open && 'rotate-180'" width="20" height="20" viewBox="0 0 20 20"
-                                    fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M4.41107 6.9107 4.41107 6.9107C4.73651 6.58527 5.26415 6.58527 5.58959 6.9107L10 12.3211L14.4104 6.91071C14.7358 6.58527 15.2635 6.58527 15.5889 6.91071C15.9144 7.23615 15.9144 7.76379 15.5889 8.08923L10.5893 14.0892C10.2638 14.4147 9.73618 14.4147 9.41074 14.0892L4.41107 8.08923C4.08563 7.76379 4.08563 7.23614 4.41107 6.9107Z"
-                                        fill="" />
-                                </svg>
+                                <i class="fas fa-chevron-down text-xs transition-transform duration-200"
+                                    :class="open && 'rotate-180'"></i>
                             </a>
 
                             <div x-show="open" x-cloak class="overflow-hidden transition-all duration-300">
-                                <ul class="mt-2 mb-3 flex flex-col gap-1.5 pl-6">
+                                <ul class="mt-2 mb-3 flex flex-col gap-1 pl-8 pr-2">
                                     @can('flujos.ver-participando')
                                         @php $countBandeja = $flujosPendientesSidebar ?? 0; @endphp
                                         <li>
                                             <a href="{{ route('flujos.instancias.index') }}"
-                                                class="group relative flex items-center justify-between rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('flujos.instancias.index') || request()->routeIs('flujos.instancias.show') ? 'text-white' : '' }}">
-                                                <span>Mi Bandeja</span>
+                                                class="flex items-center justify-between rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('flujos.instancias.index') || request()->routeIs('flujos.instancias.show') ? 'text-white font-semibold' : '' }}">
+                                                <div class="flex items-center gap-2">
+                                                    <i class="fas fa-inbox w-4 text-center text-xs"></i>
+                                                    <span>Mi Bandeja</span>
+                                                </div>
                                                 @if ($countBandeja > 0)
                                                     <span
-                                                        class="rounded bg-meta-1 px-1.5 py-0.5 text-[10px] font-extrabold text-white">
+                                                        class="rounded bg-meta-1 px-1.5 py-0.2 text-[9px] font-bold text-white shadow-sm">
                                                         {{ $countBandeja > 99 ? '99+' : $countBandeja }}
                                                     </span>
                                                 @endif
@@ -207,8 +261,9 @@
                                     @can('flujos.iniciar')
                                         <li>
                                             <a href="{{ route('flujos.instancias.create') }}"
-                                                class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('flujos.instancias.create') ? 'text-white' : '' }}">
-                                                Nuevo Flujo
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('flujos.instancias.create') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-play-circle w-4 text-center text-xs"></i>
+                                                <span>Nuevo Flujo</span>
                                             </a>
                                         </li>
                                     @endcan
@@ -216,8 +271,9 @@
                                     @can('flujos.tipos-documento.gestionar')
                                         <li>
                                             <a href="{{ route('flujos.tipos-documento.index') }}"
-                                                class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('flujos.tipos-documento.*') ? 'text-white' : '' }}">
-                                                Tipos Documento
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('flujos.tipos-documento.*') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-file-alt w-4 text-center text-xs"></i>
+                                                <span>Tipos de Documento</span>
                                             </a>
                                         </li>
                                     @endcan
@@ -225,8 +281,9 @@
                                     @can('flujos.plantillas.gestionar')
                                         <li>
                                             <a href="{{ route('flujos.plantillas.index') }}"
-                                                class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('flujos.plantillas.*') ? 'text-white' : '' }}">
-                                                Plantillas de flujo
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('flujos.plantillas.*') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-sitemap w-4 text-center text-xs"></i>
+                                                <span>Plantillas de Flujo</span>
                                             </a>
                                         </li>
                                     @endcan
@@ -241,34 +298,30 @@
             {{-- Configuración / Sistema Group --}}
             @if ($verSistema)
                 <div>
-                    <h3 class="mb-4 ml-4 text-xs font-semibold text-bodydark2 uppercase tracking-wider">
-                        CONFIGURACIÓN
+                    <h3 class="mb-4 ml-4 text-[11px] font-bold text-bodydark2 uppercase tracking-widest">
+                        Sistema y Configuración
                     </h3>
 
                     <ul class="mb-6 flex flex-col gap-1.5">
-                        <li x-data="{ open: {{ request()->routeIs(['usuarios.*', 'roles.*', 'auditoria.*']) ? 'true' : 'false' }} }">
+                        <li x-data="{ open: {{ request()->routeIs(['usuarios.*', 'roles.*', 'auditoria.*', 'configuracion.*']) ? 'true' : 'false' }} }">
                             <a href="#" @click.prevent="open = !open"
-                                class="group relative flex items-center justify-between rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 {{ request()->routeIs(['usuarios.*', 'roles.*', 'auditoria.*']) ? 'bg-graydark dark:bg-meta-4 text-white' : '' }}">
-                                <div class="flex items-center gap-2.5">
-                                    <i class="fas fa-cogs w-5 text-center text-sm"></i>
-                                    Sistema
+                                class="group relative flex items-center justify-between rounded-md px-4 py-2.5 text-sm font-medium text-bodydark1 transition-all duration-300 ease-in-out hover:text-white hover:bg-white/10 dark:hover:bg-meta-4 {{ request()->routeIs(['usuarios.*', 'roles.*', 'auditoria.*', 'configuracion.*']) ? 'bg-white/10 dark:bg-meta-4 text-white font-semibold' : '' }}">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-cogs w-5 text-center text-[15px]"></i>
+                                    Ajustes y Seguridad
                                 </div>
-                                <svg class="absolute right-4 top-1/2 -translate-y-1/2 fill-current transition-transform duration-200"
-                                    :class="open && 'rotate-180'" width="20" height="20" viewBox="0 0 20 20"
-                                    fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M4.41107 6.9107 4.41107 6.9107C4.73651 6.58527 5.26415 6.58527 5.58959 6.9107L10 12.3211L14.4104 6.91071C14.7358 6.58527 15.2635 6.58527 15.5889 6.91071C15.9144 7.23615 15.9144 7.76379 15.5889 8.08923L10.5893 14.0892C10.2638 14.4147 9.73618 14.4147 9.41074 14.0892L4.41107 8.08923C4.08563 7.76379 4.08563 7.23614 4.41107 6.9107Z"
-                                        fill="" />
-                                </svg>
+                                <i class="fas fa-chevron-down text-xs transition-transform duration-200"
+                                    :class="open && 'rotate-180'"></i>
                             </a>
 
                             <div x-show="open" x-cloak class="overflow-hidden transition-all duration-300">
-                                <ul class="mt-2 mb-3 flex flex-col gap-1.5 pl-6">
+                                <ul class="mt-2 mb-3 flex flex-col gap-1 pl-8 pr-2">
                                     @can('usuarios.ver')
                                         <li>
                                             <a href="{{ route('usuarios.index') }}"
-                                                class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('usuarios.*') ? 'text-white' : '' }}">
-                                                Usuarios
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('usuarios.*') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-users w-4 text-center text-xs"></i>
+                                                <span>Usuarios</span>
                                             </a>
                                         </li>
                                     @endcan
@@ -276,24 +329,29 @@
                                     @can('roles.gestionar')
                                         <li>
                                             <a href="{{ route('roles.index') }}"
-                                                class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('roles.*') ? 'text-white' : '' }}">
-                                                Roles y Accesos
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('roles.*') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-user-shield w-4 text-center text-xs"></i>
+                                                <span>Roles y Permisos</span>
                                             </a>
                                         </li>
                                     @endcan
-                                    @can('roles.gestionar')
+
+                                    @role('super-admin')
                                         <li>
                                             <a href="{{ route('configuracion.ajustes.index') }}"
-                                                class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('roles.*') ? 'text-white' : '' }}">
-                                                Ajustes globales
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('configuracion.ajustes.*') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-sliders-h w-4 text-center text-xs"></i>
+                                                <span>Ajustes Globales</span>
                                             </a>
                                         </li>
-                                    @endcan
+                                    @endrole
+
                                     @can('auditoria.ver')
                                         <li>
                                             <a href="{{ route('auditoria.index') }}"
-                                                class="group relative flex items-center gap-2.5 rounded-md font-medium text-bodydark2 duration-300 ease-in-out hover:text-white {{ request()->routeIs('roles.*') ? 'text-white' : '' }}">
-                                                Auditoria
+                                                class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-bodydark2 transition-colors duration-300 hover:text-white {{ request()->routeIs('auditoria.*') ? 'text-white font-semibold' : '' }}">
+                                                <i class="fas fa-shield-alt w-4 text-center text-xs"></i>
+                                                <span>Auditoría</span>
                                             </a>
                                         </li>
                                     @endcan
@@ -303,8 +361,6 @@
                     </ul>
                 </div>
             @endif
-
-
 
         </nav>
     </div>

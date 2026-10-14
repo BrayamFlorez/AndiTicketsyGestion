@@ -20,7 +20,7 @@ class Empresa extends Model
         'activo' => 'boolean',
     ];
 
-    // Relaciones
+    // ── Relaciones ───────────────────────────────────────────────────────────
 
     public function sedes(): HasMany
     {
@@ -28,7 +28,7 @@ class Empresa extends Model
     }
 
     /**
-     * Usuarios cuya empresa "principal" es esta (sobre todo usuarios finales).
+     * Usuarios cuya empresa "principal" es esta.
      */
     public function usuarios(): HasMany
     {
@@ -36,7 +36,7 @@ class Empresa extends Model
     }
 
     /**
-     * Tecnicos asignados a cubrir esta empresa.
+     * Técnicos asignados a cubrir esta empresa.
      */
     public function tecnicosAsignados(): BelongsToMany
     {
@@ -55,7 +55,15 @@ class Empresa extends Model
         return $this->hasMany(Equipo::class);
     }
 
-    // Scopes
+    /**
+     * Impresoras registradas bajo esta empresa.
+     */
+    public function impresoras(): HasMany
+    {
+        return $this->hasMany(Impresora::class);
+    }
+
+    // ── Scopes ───────────────────────────────────────────────────────────────
 
     public function scopeActivas($query)
     {

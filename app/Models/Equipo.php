@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Equipo extends Model
 {
@@ -74,7 +75,7 @@ class Equipo extends Model
     public function sede(): BelongsTo         { return $this->belongsTo(Sede::class); }
     public function responsable(): BelongsTo  { return $this->belongsTo(User::class, 'responsable_id'); }
     public function creador(): BelongsTo      { return $this->belongsTo(User::class, 'creado_por'); }
-
+    
     // Cuando agreguemos el módulo de servicios:
     // public function servicios(): HasMany {
     //     return $this->hasMany(Servicio::class);
@@ -85,6 +86,11 @@ class Equipo extends Model
     public function scopeActivos($query)        { return $query->where('estado', 'activo'); }
     public function scopeDeEmpresa($query, int $empresaId)    { return $query->where('empresa_id', $empresaId); }
     public function scopeDeCategoria($query, string $cat)     { return $query->where('categoria', $cat); }
+
+    public function agente(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(EquipoAgente::class);
+    }
 
     public function scopeAccesiblesParaTecnico($query, User $tecnico)
     {
@@ -161,5 +167,10 @@ class Equipo extends Model
             $razones[] = 'tiene servicios de mantenimiento registrados';
         }
         return $razones;
+    }
+
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
     }
 }

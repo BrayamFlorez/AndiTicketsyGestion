@@ -8,6 +8,7 @@ class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
         \App\Models\WorkflowInstance::class => \App\Policies\WorkflowInstancePolicy::class,
+        \App\Models\Impresora::class => \App\Policies\ImpresoraPolicy::class,
     ];
 
     public function boot(): void

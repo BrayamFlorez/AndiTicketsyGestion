@@ -20,8 +20,9 @@
     </a>
 
     {{-- Dropdown de Notificaciones --}}
+    {{-- Agregamos z-50 para que siempre flote por encima del contenido principal --}}
     <div x-show="dropdownOpen" x-cloak
-         class="absolute -right-27 mt-2.5 flex h-90 w-80 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark sm:right-0 sm:w-96">
+         class="absolute z-50 -right-27 mt-2.5 flex h-90 w-80 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark sm:right-0 sm:w-96">
         
         {{-- Cabecera --}}
         <div class="flex items-center justify-between px-4 py-3 border-b border-stroke dark:border-strokedark">

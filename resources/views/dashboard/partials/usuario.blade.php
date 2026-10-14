@@ -1,143 +1,134 @@
 {{-- resources/views/dashboard/partials/usuario.blade.php --}}
+@php
+    $mostrarCodigoInterno = \App\Models\Setting::get('flujos.mostrar_codigo_interno', true);
+@endphp
 
 <div x-data="{ tab: 'tickets' }">
 
-    {{-- Breadcrumb & Selector de Pestañas Estilo TailAdmin --}}
-    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-stroke pb-4 dark:border-strokedark">
-        <div>
-            <h2 class="text-title-md2 font-bold text-black dark:text-white flex items-center gap-2">
-                <i class="fas fa-user-circle text-primary"></i> Mi Actividad
-            </h2>
-            <p class="text-xs text-bodydark2 mt-1">
-                Hola, <strong class="text-black dark:text-white">{{ auth()->user()->name }}</strong> — Seguimiento de tus tickets y trámites
-            </p>
-        </div>
+    {{-- ── Header Compacto: Saludo + Selector de Pestañas + KPIs Inline ──────────────── --}}
+    <div class="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between border-b border-stroke pb-3.5 dark:border-strokedark">
+        
+        {{-- Saludo y Selector de Pestañas --}}
+        <div class="flex items-center gap-3 flex-wrap">
+            <div class="shrink-0 mr-2">
+                <h2 class="text-xs font-bold text-black dark:text-white flex items-center gap-1.5 uppercase tracking-wider">
+                    <i class="fas fa-user-circle text-primary"></i> Mi Actividad
+                </h2>
+                <p class="text-[10px] text-bodydark2">
+                    Hola, <strong class="text-black dark:text-white">{{ auth()->user()->name }}</strong>
+                </p>
+            </div>
 
-        {{-- Tabs de Navegación --}}
-        <div class="flex items-center gap-2">
-            <button type="button" 
-                    @click="tab = 'tickets'" 
-                    :class="tab === 'tickets' ? 'bg-primary text-white font-bold shadow-sm' : 'bg-white text-black hover:bg-stroke border border-stroke dark:bg-meta-4 dark:text-white dark:border-strokedark'" 
-                    class="rounded-sm py-2 px-4 text-xs uppercase tracking-wider transition cursor-pointer">
+            <button type="button" @click="tab = 'tickets'"
+                :class="tab === 'tickets' ? 'bg-primary text-white font-bold shadow-sm' : 'bg-white text-black hover:bg-stroke border border-stroke dark:bg-meta-4 dark:text-white dark:border-strokedark'"
+                class="rounded-sm py-1.5 px-3 text-xs uppercase tracking-wider transition cursor-pointer">
                 <i class="fas fa-ticket-alt mr-1.5"></i> Mis Tickets
             </button>
-            <button type="button" 
-                    @click="tab = 'flujos'" 
-                    :class="tab === 'flujos' ? 'bg-primary text-white font-bold shadow-sm' : 'bg-white text-black hover:bg-stroke border border-stroke dark:bg-meta-4 dark:text-white dark:border-strokedark'" 
-                    class="rounded-sm py-2 px-4 text-xs uppercase tracking-wider transition cursor-pointer">
+            <button type="button" @click="tab = 'flujos'"
+                :class="tab === 'flujos' ? 'bg-primary text-white font-bold shadow-sm' : 'bg-white text-black hover:bg-stroke border border-stroke dark:bg-meta-4 dark:text-white dark:border-strokedark'"
+                class="rounded-sm py-1.5 px-3 text-xs uppercase tracking-wider transition cursor-pointer">
                 <i class="fas fa-project-diagram mr-1.5"></i> Mis Flujos
             </button>
+        </div>
+
+        {{-- KPIs Compactos Inline --}}
+        <div class="flex items-center gap-2 flex-wrap">
+            
+            {{-- Métricas Compactas de Mis Tickets --}}
+            <div x-show="tab === 'tickets'" class="flex items-center gap-1.5 flex-wrap text-xs">
+                <span class="inline-flex items-center gap-1 rounded bg-gray-2 dark:bg-meta-4/60 px-2.5 py-1 text-[11px] font-medium text-black dark:text-white border border-stroke dark:border-strokedark">
+                    <span class="font-bold text-primary">{{ $totalMisTickets }}</span> Totales
+                </span>
+                <span class="inline-flex items-center gap-1 rounded bg-meta-6/10 px-2.5 py-1 text-[11px] font-medium text-meta-6 border border-meta-6/20">
+                    <i class="fas fa-hourglass-half text-[10px]"></i>
+                    <span class="font-bold">{{ $abiertos }}</span> En Proceso
+                </span>
+                <span class="inline-flex items-center gap-1 rounded bg-meta-3/10 px-2.5 py-1 text-[11px] font-medium text-meta-3 border border-meta-3/20">
+                    <i class="fas fa-check-circle text-[10px]"></i>
+                    <span class="font-bold">{{ $ticketsPorEstado['resuelto'] ?? 0 }}</span> Resueltos
+                </span>
+            </div>
+
+            {{-- Métricas Compactas de Mis Flujos --}}
+            <div x-show="tab === 'flujos'" class="flex items-center gap-1.5 flex-wrap text-xs">
+                <span class="inline-flex items-center gap-1 rounded bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary border border-primary/20">
+                    <i class="fas fa-play-circle text-[10px]"></i>
+                    <span class="font-bold">{{ $misFlujosAbiertos }}</span> Abiertos
+                </span>
+                <span class="inline-flex items-center gap-1 rounded bg-meta-1/10 px-2.5 py-1 text-[11px] font-medium text-meta-1 border border-meta-1/20">
+                    <i class="fas fa-exclamation-triangle text-[10px]"></i>
+                    <span class="font-bold">{{ $misFlujosCorreccion }}</span> Requiere Corrección
+                </span>
+                <span class="inline-flex items-center gap-1 rounded bg-meta-3/10 px-2.5 py-1 text-[11px] font-medium text-meta-3 border border-meta-3/20">
+                    <i class="fas fa-check-double text-[10px]"></i>
+                    <span class="font-bold">{{ $misFlujosAprobados }}</span> Aprobados
+                </span>
+            </div>
         </div>
     </div>
 
     {{-- 🟢 PESTAÑA 1: MIS TICKETS DE SOPORTE --}}
-    <div x-show="tab === 'tickets'" x-cloak class="space-y-6">
-        
-        {{-- KPIs Tickets del Usuario --}}
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6 2xl:gap-7.5">
-            
-            {{-- Mis Tickets --}}
-            <div class="rounded-sm border border-stroke bg-white py-5 px-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 text-primary dark:bg-meta-4">
-                    <i class="fas fa-ticket-alt text-base"></i>
-                </div>
-                <div class="mt-4 flex items-end justify-between">
-                    <div>
-                        <h4 class="text-title-md font-bold text-black dark:text-white">{{ $totalMisTickets }}</h4>
-                        <span class="text-xs font-semibold text-bodydark2 uppercase">Mis Tickets</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- En Proceso --}}
-            <div class="rounded-sm border border-stroke bg-white py-5 px-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-6/10 text-meta-6">
-                    <i class="fas fa-hourglass-half text-base"></i>
-                </div>
-                <div class="mt-4 flex items-end justify-between">
-                    <div>
-                        <h4 class="text-title-md font-bold text-meta-6">{{ $abiertos }}</h4>
-                        <span class="text-xs font-semibold text-bodydark2 uppercase">En Proceso</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Resueltos --}}
-            <div class="rounded-sm border border-stroke bg-white py-5 px-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-3/10 text-meta-3">
-                    <i class="fas fa-check-circle text-base"></i>
-                </div>
-                <div class="mt-4 flex items-end justify-between">
-                    <div>
-                        <h4 class="text-title-md font-bold text-meta-3">{{ $ticketsPorEstado['resuelto'] ?? 0 }}</h4>
-                        <span class="text-xs font-semibold text-bodydark2 uppercase">Resueltos</span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        {{-- Tabla Mis Tickets Recientes (TailAdmin Table) --}}
-        <div class="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
-            <div class="mb-4 flex items-center justify-between flex-wrap gap-2">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-black dark:text-white">Mis Tickets Recientes</h3>
+    <div x-show="tab === 'tickets'" x-cloak class="space-y-5">
+        <div class="rounded-sm border border-stroke bg-white px-4 pt-4 pb-2 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-6">
+            <div class="mb-3 flex items-center justify-between flex-wrap gap-2">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-black dark:text-white">Mis Tickets Recientes</h3>
                 <div class="flex items-center gap-2">
                     @can('tickets.crear')
                         <a href="{{ route('tickets.create') }}" 
-                           class="inline-flex items-center justify-center gap-1.5 rounded bg-primary py-1.5 px-3 text-center text-xs font-bold uppercase tracking-wider text-white hover:bg-opacity-90 transition shadow-sm">
-                            <i class="fas fa-plus text-[10px]"></i> Nuevo Ticket
+                           class="inline-flex items-center justify-center gap-1.5 rounded bg-primary py-1 px-2.5 text-center text-[11px] font-bold uppercase tracking-wider text-white hover:bg-opacity-90 transition shadow-sm">
+                            <i class="fas fa-plus text-[9px]"></i> Nuevo Ticket
                         </a>
                     @endcan
-                    <a href="{{ route('tickets.index') }}" class="text-xs font-bold text-primary hover:underline uppercase">
+                    <a href="{{ route('tickets.index') }}" class="text-[11px] font-bold text-primary hover:underline uppercase">
                         Ver Todos <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
             </div>
 
             <div class="max-w-full overflow-x-auto">
-                <table class="w-full table-auto">
+                <table class="w-full table-auto border-collapse">
                     <thead>
                         <tr class="bg-gray-2 text-left dark:bg-meta-4">
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase w-12">#</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase min-w-[200px]">Título</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase">Categoría</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase text-center w-28">Estado</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase">Técnico Asignado</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase w-24">Fecha</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase w-12">#</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase min-w-[220px]">Título</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase">Categoría</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase text-center w-28">Estado</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase min-w-[150px]">Técnico Asignado</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase text-right w-24">Fecha</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stroke dark:divide-strokedark">
                         @forelse ($misTickets as $ticket)
+                            @php
+                                $colorEst = match($ticket->estado) {
+                                    'resuelto' => 'bg-meta-3/10 text-meta-3',
+                                    'en_progreso' => 'bg-meta-6/10 text-meta-6',
+                                    'cerrado','cancelado' => 'bg-meta-1/10 text-meta-1',
+                                    default => 'bg-primary/10 text-primary',
+                                };
+                            @endphp
                             <tr class="hover:bg-gray-2 dark:hover:bg-meta-4/50 transition">
-                                <td class="py-3 px-4 text-xs font-mono text-bodydark2">#{{ $ticket->id }}</td>
-                                <td class="py-3 px-4">
-                                    <a href="{{ route('tickets.show', $ticket) }}" class="font-bold text-xs text-black dark:text-white hover:text-primary transition truncate block max-w-[280px]">
+                                <td class="py-2 px-3 text-xs font-mono text-bodydark2 whitespace-nowrap">#{{ $ticket->id }}</td>
+                                <td class="py-2 px-3">
+                                    <a href="{{ route('tickets.show', $ticket) }}" class="font-bold text-xs text-black dark:text-white hover:text-primary transition truncate block max-w-[320px]">
                                         {{ $ticket->titulo }}
                                     </a>
                                 </td>
-                                <td class="py-3 px-4 text-xs text-black dark:text-white">
+                                <td class="py-2 px-3 text-xs text-black dark:text-white whitespace-nowrap">
                                     <i class="fas {{ $ticket->icono_categoria }} text-[10px] mr-1 text-primary"></i>{{ $ticket->label_categoria }}
                                 </td>
-                                <td class="py-3 px-4 text-center">
-                                    @php
-                                        $colorEst = match($ticket->estado) {
-                                            'resuelto' => 'bg-meta-3/10 text-meta-3',
-                                            'en_progreso' => 'bg-meta-6/10 text-meta-6',
-                                            'cerrado','cancelado' => 'bg-meta-1/10 text-meta-1',
-                                            default => 'bg-primary/10 text-primary',
-                                        };
-                                    @endphp
-                                    <span class="inline-flex rounded-full py-1 px-3 text-[10px] font-bold uppercase {{ $colorEst }}">
+                                <td class="py-2 px-3 text-center whitespace-nowrap">
+                                    <span class="inline-flex rounded-full py-0.5 px-2 text-[9px] font-bold uppercase {{ $colorEst }}">
                                         {{ $ticket->label_estado }}
                                     </span>
                                 </td>
-                                <td class="py-3 px-4">
+                                <td class="py-2 px-3 whitespace-nowrap">
                                     @if ($ticket->asignado)
-                                        <div class="flex items-center gap-2">
-                                            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-meta-3/20 text-meta-3 font-bold text-[10px] shrink-0">
+                                        <div class="flex items-center gap-1.5">
+                                            <div class="flex h-5 w-5 items-center justify-center rounded-full bg-meta-3/20 text-meta-3 font-bold text-[9px] shrink-0">
                                                 {{ substr($ticket->asignado->name, 0, 1) }}
                                             </div>
-                                            <span class="text-xs text-black dark:text-white truncate max-w-[120px]">
+                                            <span class="text-xs text-black dark:text-white truncate max-w-[140px]">
                                                 {{ $ticket->asignado->name }}
                                             </span>
                                         </div>
@@ -145,20 +136,20 @@
                                         <span class="text-[10px] text-bodydark2 font-mono">Pendiente</span>
                                     @endif
                                 </td>
-                                <td class="py-3 px-4 text-xs font-mono text-bodydark2">
+                                <td class="py-2 px-3 text-right font-mono text-[11px] text-bodydark2 whitespace-nowrap">
                                     {{ $ticket->created_at->format('d/m/Y') }}
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="py-8 text-center">
+                                <td colspan="6" class="py-6 text-center">
                                     <div class="flex flex-col items-center text-bodydark2">
-                                        <i class="fas fa-ticket-alt text-3xl mb-2"></i>
-                                        <p class="text-xs mb-3">Aún no has registrado ningún ticket de soporte.</p>
+                                        <i class="fas fa-ticket-alt text-2xl mb-1.5"></i>
+                                        <p class="text-xs mb-2">Aún no has registrado ningún ticket de soporte.</p>
                                         @can('tickets.crear')
                                             <a href="{{ route('tickets.create') }}" 
-                                               class="inline-flex items-center gap-1.5 rounded bg-primary py-1.5 px-4 text-xs font-bold uppercase text-white hover:bg-opacity-90 transition">
-                                                <i class="fas fa-plus text-[10px]"></i> Crear mi primer ticket
+                                               class="inline-flex items-center gap-1.5 rounded bg-primary py-1 px-3 text-xs font-bold uppercase text-white hover:bg-opacity-90 transition">
+                                                <i class="fas fa-plus text-[9px]"></i> Crear mi primer ticket
                                             </a>
                                         @endcan
                                     </div>
@@ -169,92 +160,55 @@
                 </table>
             </div>
         </div>
-
     </div>
 
     {{-- 🟣 PESTAÑA 2: MIS FLUJOS DE TRABAJO --}}
-    <div x-show="tab === 'flujos'" x-cloak class="space-y-6">
-        
-        {{-- KPIs Flujos del Usuario --}}
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6 2xl:gap-7.5">
-            
-            <div class="rounded-sm border border-stroke bg-white py-5 px-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 text-primary dark:bg-meta-4">
-                    <i class="fas fa-play-circle text-base"></i>
-                </div>
-                <div class="mt-4 flex items-end justify-between">
-                    <div>
-                        <h4 class="text-title-md font-bold text-black dark:text-white">{{ $misFlujosAbiertos }}</h4>
-                        <span class="text-xs font-semibold text-bodydark2 uppercase">Flujos Abiertos</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="rounded-sm border border-stroke bg-white py-5 px-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-1/10 text-meta-1">
-                    <i class="fas fa-exclamation-triangle text-base"></i>
-                </div>
-                <div class="mt-4 flex items-end justify-between">
-                    <div>
-                        <h4 class="text-title-md font-bold text-meta-1">{{ $misFlujosCorreccion }}</h4>
-                        <span class="text-xs font-semibold text-bodydark2 uppercase">Requiere Corrección</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="rounded-sm border border-stroke bg-white py-5 px-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-3/10 text-meta-3">
-                    <i class="fas fa-check-double text-base"></i>
-                </div>
-                <div class="mt-4 flex items-end justify-between">
-                    <div>
-                        <h4 class="text-title-md font-bold text-meta-3">{{ $misFlujosAprobados }}</h4>
-                        <span class="text-xs font-semibold text-bodydark2 uppercase">Aprobados</span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        {{-- Tabla Mis Flujos Recientes --}}
-        <div class="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
-            <div class="mb-4 flex items-center justify-between flex-wrap gap-2">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-black dark:text-white">Mis Flujos Recientes</h3>
+    <div x-show="tab === 'flujos'" x-cloak class="space-y-5">
+        <div class="rounded-sm border border-stroke bg-white px-4 pt-4 pb-2 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-6">
+            <div class="mb-3 flex items-center justify-between flex-wrap gap-2">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-black dark:text-white">Mis Flujos Recientes</h3>
                 <div class="flex items-center gap-2">
                     @can('flujos.iniciar')
                         <a href="{{ route('flujos.instancias.create') }}" 
-                           class="inline-flex items-center justify-center gap-1.5 rounded bg-primary py-1.5 px-3 text-center text-xs font-bold uppercase tracking-wider text-white hover:bg-opacity-90 transition shadow-sm">
-                            <i class="fas fa-play-circle text-[10px]"></i> Iniciar Flujo
+                           class="inline-flex items-center justify-center gap-1.5 rounded bg-primary py-1 px-2.5 text-center text-[11px] font-bold uppercase tracking-wider text-white hover:bg-opacity-90 transition shadow-sm">
+                            <i class="fas fa-play-circle text-[9px]"></i> Iniciar Flujo
                         </a>
                     @endcan
-                    <a href="{{ route('flujos.instancias.index', ['tab' => 'iniciados']) }}" class="text-xs font-bold text-primary hover:underline uppercase">
+                    <a href="{{ route('flujos.instancias.index', ['tab' => 'iniciados']) }}" class="text-[11px] font-bold text-primary hover:underline uppercase">
                         Ver Todos <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
             </div>
 
             <div class="max-w-full overflow-x-auto">
-                <table class="w-full table-auto">
+                <table class="w-full table-auto border-collapse">
                     <thead>
                         <tr class="bg-gray-2 text-left dark:bg-meta-4">
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase">Código / Trámite</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase">Etapa Actual</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase text-center w-28">Estado</th>
+                            @if($mostrarCodigoInterno)
+                                <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase w-32">Código</th>
+                            @endif
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase min-w-[260px]">Trámite / Documento</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase min-w-[200px]">Etapa / Progreso</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase text-center w-28">Estado</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase text-right w-24">Fecha</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stroke dark:divide-strokedark">
                         @forelse ($misFlujos as $flujo)
-                            @include('dashboard.partials._flujo_row', ['flujo' => $flujo])
+                            @include('dashboard.partials._flujo_row', [
+                                'flujo' => $flujo, 
+                                'mostrarCodigoInterno' => $mostrarCodigoInterno
+                            ])
                         @empty
                             <tr>
-                                <td colspan="3" class="py-8 text-center">
+                                <td colspan="{{ $mostrarCodigoInterno ? 5 : 4 }}" class="py-6 text-center">
                                     <div class="flex flex-col items-center text-bodydark2">
-                                        <i class="fas fa-project-diagram text-3xl mb-2"></i>
-                                        <p class="text-xs mb-3">Aún no has iniciado ningún flujo de trabajo.</p>
+                                        <i class="fas fa-project-diagram text-2xl mb-1.5"></i>
+                                        <p class="text-xs mb-2">Aún no has iniciado ningún flujo de trabajo.</p>
                                         @can('flujos.iniciar')
                                             <a href="{{ route('flujos.instancias.create') }}" 
-                                               class="inline-flex items-center gap-1.5 rounded bg-primary py-1.5 px-4 text-xs font-bold uppercase text-white hover:bg-opacity-90 transition">
-                                                <i class="fas fa-play-circle text-[10px]"></i> Iniciar mi primer flujo
+                                               class="inline-flex items-center gap-1.5 rounded bg-primary py-1 px-3 text-xs font-bold uppercase text-white hover:bg-opacity-90 transition">
+                                                <i class="fas fa-play-circle text-[9px]"></i> Iniciar mi primer flujo
                                             </a>
                                         @endcan
                                     </div>
@@ -265,7 +219,6 @@
                 </table>
             </div>
         </div>
-
     </div>
 
 </div>

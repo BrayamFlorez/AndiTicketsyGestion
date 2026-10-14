@@ -1,114 +1,92 @@
 {{-- resources/views/dashboard/partials/tecnico.blade.php --}}
+@php
+    $mostrarCodigoInterno = \App\Models\Setting::get('flujos.mostrar_codigo_interno', true);
+@endphp
 
 <div x-data="{ tab: 'tickets' }">
 
-    {{-- Breadcrumb & Selector de Pestañas Estilo TailAdmin --}}
-    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-stroke pb-4 dark:border-strokedark">
-        <div>
-            <h2 class="text-title-md2 font-bold text-black dark:text-white flex items-center gap-2">
-                <i class="fas fa-user-cog text-primary"></i> Mi Jornada Técnica
-            </h2>
-            <p class="text-xs text-bodydark2 mt-1">
-                Hola, <strong class="text-black dark:text-white">{{ auth()->user()->name }}</strong> — Tickets asignados y decisiones pendientes
-            </p>
-        </div>
+    {{-- ── Header Compacto: Saludo + Selector de Pestañas + KPIs Inline ──────────────── --}}
+    <div class="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between border-b border-stroke pb-3.5 dark:border-strokedark">
+        
+        {{-- Saludo y Selector de Pestañas --}}
+        <div class="flex items-center gap-3 flex-wrap">
+            <div class="shrink-0 mr-2">
+                <h2 class="text-xs font-bold text-black dark:text-white flex items-center gap-1.5 uppercase tracking-wider">
+                    <i class="fas fa-user-cog text-primary"></i> Mi Jornada Técnica
+                </h2>
+                <p class="text-[10px] text-bodydark2">
+                    Hola, <strong class="text-black dark:text-white">{{ auth()->user()->name }}</strong>
+                </p>
+            </div>
 
-        {{-- Tabs de Navegación --}}
-        <div class="flex items-center gap-2">
-            <button type="button" 
-                    @click="tab = 'tickets'" 
-                    :class="tab === 'tickets' ? 'bg-primary text-white font-bold shadow-sm' : 'bg-white text-black hover:bg-stroke border border-stroke dark:bg-meta-4 dark:text-white dark:border-strokedark'" 
-                    class="rounded-sm py-2 px-4 text-xs uppercase tracking-wider transition cursor-pointer">
-                <i class="fas fa-ticket-alt mr-1.5"></i> Mis Tickets Activos
+            <button type="button" @click="tab = 'tickets'"
+                :class="tab === 'tickets' ? 'bg-primary text-white font-bold shadow-sm' : 'bg-white text-black hover:bg-stroke border border-stroke dark:bg-meta-4 dark:text-white dark:border-strokedark'"
+                class="rounded-sm py-1.5 px-3 text-xs uppercase tracking-wider transition cursor-pointer">
+                <i class="fas fa-ticket-alt mr-1.5"></i> Tickets Activos
             </button>
-            <button type="button" 
-                    @click="tab = 'flujos'" 
-                    :class="tab === 'flujos' ? 'bg-primary text-white font-bold shadow-sm' : 'bg-white text-black hover:bg-stroke border border-stroke dark:bg-meta-4 dark:text-white dark:border-strokedark'" 
-                    class="rounded-sm py-2 px-4 text-xs uppercase tracking-wider transition cursor-pointer">
+            <button type="button" @click="tab = 'flujos'"
+                :class="tab === 'flujos' ? 'bg-primary text-white font-bold shadow-sm' : 'bg-white text-black hover:bg-stroke border border-stroke dark:bg-meta-4 dark:text-white dark:border-strokedark'"
+                class="rounded-sm py-1.5 px-3 text-xs uppercase tracking-wider transition cursor-pointer">
                 <i class="fas fa-check-double mr-1.5"></i> Aprobaciones & Flujos
             </button>
+        </div>
+
+        {{-- KPIs Compactos Inline --}}
+        <div class="flex items-center gap-2 flex-wrap">
+            
+            {{-- Métricas Compactas de Tickets Técnico --}}
+            <div x-show="tab === 'tickets'" class="flex items-center gap-1.5 flex-wrap text-xs">
+                <span class="inline-flex items-center gap-1 rounded bg-gray-2 dark:bg-meta-4/60 px-2.5 py-1 text-[11px] font-medium text-black dark:text-white border border-stroke dark:border-strokedark">
+                    <span class="font-bold text-primary">{{ $totalAsignados }}</span> Asignados
+                </span>
+                <span class="inline-flex items-center gap-1 rounded bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary border border-primary/20">
+                    <i class="fas fa-user-check text-[10px]"></i>
+                    <span class="font-bold">{{ $ticketsPorEstado['asignado'] ?? 0 }}</span> Por Iniciar
+                </span>
+                <span class="inline-flex items-center gap-1 rounded bg-meta-6/10 px-2.5 py-1 text-[11px] font-medium text-meta-6 border border-meta-6/20">
+                    <i class="fas fa-sync-alt text-[10px]"></i>
+                    <span class="font-bold">{{ $ticketsPorEstado['en_progreso'] ?? 0 }}</span> En Progreso
+                </span>
+                <span class="inline-flex items-center gap-1 rounded bg-meta-3/10 px-2.5 py-1 text-[11px] font-medium text-meta-3 border border-meta-3/20">
+                    <i class="fas fa-check-circle text-[10px]"></i>
+                    <span class="font-bold">{{ $resueltos }}</span> Resueltos
+                </span>
+            </div>
+
+            {{-- Métricas Compactas de Flujos Técnico --}}
+            <div x-show="tab === 'flujos'" class="flex items-center gap-1.5 flex-wrap text-xs">
+                <span class="inline-flex items-center gap-1 rounded bg-meta-1/10 px-2.5 py-1 text-[11px] font-medium text-meta-1 border border-meta-1/20">
+                    <i class="fas fa-hourglass-half text-[10px]"></i>
+                    <span class="font-bold">{{ $flujosPendientesCount }}</span> Requieren Mi Decisión
+                </span>
+                <span class="inline-flex items-center gap-1 rounded bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary border border-primary/20">
+                    <i class="fas fa-user-friends text-[10px]"></i>
+                    <span class="font-bold">{{ $flujosParticipandoCount }}</span> Participando
+                </span>
+            </div>
         </div>
     </div>
 
     {{-- 🟢 PESTAÑA 1: TICKETS ASIGNADOS --}}
-    <div x-show="tab === 'tickets'" x-cloak class="space-y-6">
-        
-        {{-- KPIs Tickets del Técnico --}}
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-6 2xl:gap-7.5">
-            
-            {{-- Asignados --}}
-            <div class="rounded-sm border border-stroke bg-white py-5 px-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 text-primary dark:bg-meta-4">
-                    <i class="fas fa-ticket-alt text-base"></i>
-                </div>
-                <div class="mt-4 flex items-end justify-between">
-                    <div>
-                        <h4 class="text-title-md font-bold text-black dark:text-white">{{ $totalAsignados }}</h4>
-                        <span class="text-xs font-semibold text-bodydark2 uppercase">Asignados</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- En Progreso --}}
-            <div class="rounded-sm border border-stroke bg-white py-5 px-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-6/10 text-meta-6">
-                    <i class="fas fa-sync-alt text-base"></i>
-                </div>
-                <div class="mt-4 flex items-end justify-between">
-                    <div>
-                        <h4 class="text-title-md font-bold text-meta-6">{{ $ticketsPorEstado['en_progreso'] ?? 0 }}</h4>
-                        <span class="text-xs font-semibold text-bodydark2 uppercase">En Progreso</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Por Iniciar --}}
-            <div class="rounded-sm border border-stroke bg-white py-5 px-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <i class="fas fa-user-check text-base"></i>
-                </div>
-                <div class="mt-4 flex items-end justify-between">
-                    <div>
-                        <h4 class="text-title-md font-bold text-primary">{{ $ticketsPorEstado['asignado'] ?? 0 }}</h4>
-                        <span class="text-xs font-semibold text-bodydark2 uppercase">Por Iniciar</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Resueltos --}}
-            <div class="rounded-sm border border-stroke bg-white py-5 px-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-3/10 text-meta-3">
-                    <i class="fas fa-check-circle text-base"></i>
-                </div>
-                <div class="mt-4 flex items-end justify-between">
-                    <div>
-                        <h4 class="text-title-md font-bold text-meta-3">{{ $resueltos }}</h4>
-                        <span class="text-xs font-semibold text-bodydark2 uppercase">Resueltos</span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        {{-- Tabla Tickets Activos --}}
-        <div class="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
-            <div class="mb-4 flex items-center justify-between flex-wrap gap-2">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-black dark:text-white">Tickets Activos — Ordenados por Prioridad</h3>
-                <a href="{{ route('tickets.index') }}" class="text-xs font-bold text-primary hover:underline uppercase">
+    <div x-show="tab === 'tickets'" x-cloak class="space-y-5">
+        <div class="rounded-sm border border-stroke bg-white px-4 pt-4 pb-2 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-6">
+            <div class="mb-3 flex items-center justify-between flex-wrap gap-2">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-black dark:text-white">Tickets Activos — Ordenados por Prioridad</h3>
+                <a href="{{ route('tickets.index') }}" class="text-[11px] font-bold text-primary hover:underline uppercase">
                     Ver Todos <i class="fas fa-arrow-right ml-1"></i>
                 </a>
             </div>
 
             <div class="max-w-full overflow-x-auto">
-                <table class="w-full table-auto">
+                <table class="w-full table-auto border-collapse">
                     <thead>
                         <tr class="bg-gray-2 text-left dark:bg-meta-4">
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase w-12">#</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase min-w-[200px]">Título / Solicitante</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase">Empresa / Sede</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase text-center w-24">Prioridad</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase text-center w-28">Estado</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase text-center w-16">Acción</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase w-12">#</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase min-w-[220px]">Título / Solicitante</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase min-w-[180px]">Empresa / Sede</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase text-center w-24">Prioridad</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase text-center w-28">Estado</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase text-center w-16">Acción</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stroke dark:divide-strokedark">
@@ -127,53 +105,57 @@
                                 };
                             @endphp
                             <tr class="hover:bg-gray-2 dark:hover:bg-meta-4/50 transition">
-                                <td class="py-3.5 px-4 font-mono text-xs text-bodydark2">#{{ $ticket->id }}</td>
+                                <td class="py-2 px-3 font-mono text-xs text-bodydark2 whitespace-nowrap">#{{ $ticket->id }}</td>
                                 
-                                <td class="py-3.5 px-4">
-                                    <a href="{{ route('tickets.show', $ticket) }}" class="font-bold text-xs text-black dark:text-white hover:text-primary transition truncate block max-w-[280px]">
-                                        {{ $ticket->titulo }}
-                                    </a>
-                                    <span class="text-[10px] text-bodydark2 block mt-0.5">
-                                        <i class="fas fa-user text-[9px] mr-1 text-primary"></i>{{ $ticket->solicitante?->name ?? 'Usuario Eliminado' }}
-                                    </span>
-                                </td>
-
-                                <td class="py-3.5 px-4">
-                                    <span class="text-xs font-medium text-black dark:text-white block truncate max-w-[160px]">
-                                        {{ $ticket->empresa?->nombre ?? '—' }}
-                                    </span>
-                                    @if ($ticket->sede)
-                                        <span class="text-[10px] text-bodydark2 block truncate max-w-[160px]">
-                                            <i class="fas fa-map-marker-alt text-[9px] mr-1 text-primary"></i>{{ $ticket->sede->nombre }}
+                                <td class="py-2 px-3">
+                                    <div class="flex items-center gap-2 whitespace-nowrap">
+                                        <a href="{{ route('tickets.show', $ticket) }}" class="font-bold text-xs text-black dark:text-white hover:text-primary transition truncate max-w-[280px]">
+                                            {{ $ticket->titulo }}
+                                        </a>
+                                        <span class="text-[10px] text-bodydark2 shrink-0">
+                                            · {{ $ticket->solicitante?->name ?? 'Usuario Eliminado' }}
                                         </span>
-                                    @endif
+                                    </div>
                                 </td>
 
-                                <td class="py-3.5 px-4 text-center">
-                                    <span class="inline-flex rounded-full py-1 px-3 text-[10px] font-bold uppercase {{ $colorPrio }}">
+                                <td class="py-2 px-3 whitespace-nowrap">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs font-medium text-black dark:text-white truncate max-w-[140px]">
+                                            {{ $ticket->empresa?->nombre ?? '—' }}
+                                        </span>
+                                        @if ($ticket->sede)
+                                            <span class="text-[10px] text-bodydark2 shrink-0">
+                                                ({{ $ticket->sede->nombre }})
+                                            </span>
+                                        @endif
+                                    </div>
+                                </td>
+
+                                <td class="py-2 px-3 text-center whitespace-nowrap">
+                                    <span class="inline-flex rounded-full py-0.5 px-2 text-[9px] font-bold uppercase {{ $colorPrio }}">
                                         {{ $ticket->label_prioridad }}
                                     </span>
                                 </td>
 
-                                <td class="py-3.5 px-4 text-center">
-                                    <span class="inline-flex rounded-full py-1 px-3 text-[10px] font-bold uppercase {{ $colorEst }}">
+                                <td class="py-2 px-3 text-center whitespace-nowrap">
+                                    <span class="inline-flex rounded-full py-0.5 px-2 text-[9px] font-bold uppercase {{ $colorEst }}">
                                         {{ $ticket->label_estado }}
                                     </span>
                                 </td>
 
-                                <td class="py-3.5 px-4 text-center">
+                                <td class="py-2 px-3 text-center whitespace-nowrap">
                                     <a href="{{ route('tickets.show', $ticket) }}" 
-                                       class="inline-flex h-7 w-7 items-center justify-center rounded border border-stroke text-bodydark2 hover:border-primary hover:text-primary dark:border-strokedark transition"
+                                       class="inline-flex h-6 w-6 items-center justify-center rounded border border-stroke text-bodydark2 hover:border-primary hover:text-primary dark:border-strokedark transition mx-auto"
                                        title="Ver Detalle">
-                                        <i class="fas fa-eye text-xs"></i>
+                                        <i class="fas fa-eye text-[10px]"></i>
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="py-8 text-center">
+                                <td colspan="6" class="py-6 text-center">
                                     <div class="flex flex-col items-center text-bodydark2">
-                                        <i class="fas fa-check-double text-3xl mb-2 text-meta-3"></i>
+                                        <i class="fas fa-check-double text-2xl mb-1.5 text-meta-3"></i>
                                         <p class="text-xs">No tienes tickets activos asignados en este momento. ¡Todo al día!</p>
                                     </div>
                                 </td>
@@ -183,67 +165,42 @@
                 </table>
             </div>
         </div>
-
     </div>
 
     {{-- 🟣 PESTAÑA 2: FLUJOS & APROBACIONES --}}
-    <div x-show="tab === 'flujos'" x-cloak class="space-y-6">
-        
-        {{-- KPIs Flujos del Técnico --}}
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 2xl:gap-7.5">
-            
-            <div class="rounded-sm border border-stroke bg-white py-5 px-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-1/10 text-meta-1">
-                    <i class="fas fa-hourglass-half text-base"></i>
-                </div>
-                <div class="mt-4 flex items-end justify-between">
-                    <div>
-                        <h4 class="text-title-md font-bold text-meta-1">{{ $flujosPendientesCount }}</h4>
-                        <span class="text-xs font-semibold text-bodydark2 uppercase">Requieren Mi Decisión</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="rounded-sm border border-stroke bg-white py-5 px-6 shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <i class="fas fa-user-friends text-base"></i>
-                </div>
-                <div class="mt-4 flex items-end justify-between">
-                    <div>
-                        <h4 class="text-title-md font-bold text-primary">{{ $flujosParticipandoCount }}</h4>
-                        <span class="text-xs font-semibold text-bodydark2 uppercase">Participando</span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        {{-- Tabla Aprobaciones Pendientes --}}
-        <div class="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
-            <div class="mb-4 flex items-center justify-between flex-wrap gap-2">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-black dark:text-white">Aprobaciones y Trámites Pendientes</h3>
-                <a href="{{ route('flujos.instancias.index', ['tab' => 'pendientes']) }}" class="text-xs font-bold text-primary hover:underline uppercase">
+    <div x-show="tab === 'flujos'" x-cloak class="space-y-5">
+        <div class="rounded-sm border border-stroke bg-white px-4 pt-4 pb-2 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-6">
+            <div class="mb-3 flex items-center justify-between flex-wrap gap-2">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-black dark:text-white">Aprobaciones y Trámites Pendientes</h3>
+                <a href="{{ route('flujos.instancias.index', ['tab' => 'pendientes']) }}" class="text-[11px] font-bold text-primary hover:underline uppercase">
                     Ir a Bandeja <i class="fas fa-arrow-right ml-1"></i>
                 </a>
             </div>
 
             <div class="max-w-full overflow-x-auto">
-                <table class="w-full table-auto">
+                <table class="w-full table-auto border-collapse">
                     <thead>
                         <tr class="bg-gray-2 text-left dark:bg-meta-4">
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase">Código / Trámite</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase">Etapa Actual</th>
-                            <th class="py-3.5 px-4 font-bold text-black dark:text-white text-xs uppercase text-center w-28">Estado</th>
+                            @if($mostrarCodigoInterno)
+                                <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase w-32">Código</th>
+                            @endif
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase min-w-[260px]">Trámite / Documento</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase min-w-[200px]">Etapa / Progreso</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase text-center w-28">Estado</th>
+                            <th class="py-2.5 px-3 font-bold text-black dark:text-white text-[11px] uppercase text-right w-24">Fecha</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stroke dark:divide-strokedark">
                         @forelse ($flujosPendientes as $flujo)
-                            @include('dashboard.partials._flujo_row', ['flujo' => $flujo])
+                            @include('dashboard.partials._flujo_row', [
+                                'flujo' => $flujo, 
+                                'mostrarCodigoInterno' => $mostrarCodigoInterno
+                            ])
                         @empty
                             <tr>
-                                <td colspan="3" class="py-8 text-center">
+                                <td colspan="{{ $mostrarCodigoInterno ? 5 : 4 }}" class="py-6 text-center">
                                     <div class="flex flex-col items-center text-bodydark2">
-                                        <i class="fas fa-check-circle text-3xl mb-2 text-meta-3"></i>
+                                        <i class="fas fa-check-circle text-2xl mb-1.5 text-meta-3"></i>
                                         <p class="text-xs">Sin decisiones pendientes por el momento.</p>
                                     </div>
                                 </td>
@@ -253,7 +210,6 @@
                 </table>
             </div>
         </div>
-
     </div>
 
 </div>

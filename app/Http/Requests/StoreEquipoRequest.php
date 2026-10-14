@@ -29,7 +29,7 @@ class StoreEquipoRequest extends FormRequest
             'nombre'         => ['required', 'string', 'max:150'],
             'marca'          => ['nullable', 'string', 'max:100'],
             'modelo'         => ['nullable', 'string', 'max:100'],
-            'numero_serie'   => ['nullable', 'string', 'max:100'],
+            'numero_serie'   => ['nullable', 'string', 'max:100', Rule::unique('equipos', 'numero_serie')],
             'ubicacion'      => ['nullable', 'string', 'max:255'],
             'estado'         => ['nullable', Rule::in(array_keys(Equipo::ESTADOS))],
             'notas'          => ['nullable', 'string', 'max:2000'],
@@ -59,7 +59,57 @@ class StoreEquipoRequest extends FormRequest
     }
 
     /**
-     * Validaciones cruzadas — coherencia y autorizacion granular.
+     * Nombres amigables y en español para los atributos.
+     */
+    public function attributes(): array
+    {
+        $categoria = $this->input('categoria');
+        $schema    = Equipo::ESPECIFICACIONES_SCHEMA[$categoria] ?? [];
+
+        $attributes = [
+            'categoria'      => 'categoría',
+            'empresa_id'     => 'empresa',
+            'sede_id'        => 'sede',
+            'responsable_id' => 'responsable',
+            'nombre'         => 'nombre identificador',
+            'marca'          => 'marca',
+            'modelo'         => 'modelo',
+            'numero_serie'   => 'número de serie',
+            'ubicacion'      => 'ubicación física',
+            'estado'         => 'estado',
+            'notas'          => 'notas internas',
+        ];
+
+        // Nombres en español para las especificaciones dinámicas
+        foreach ($schema as $campo => $config) {
+            $attributes["especificaciones.{$campo}"] = mb_strtolower($config['label'] ?? $campo);
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Mensajes globales y específicos en español.
+     */
+    public function messages(): array
+    {
+        return [
+            'required' => 'El campo :attribute es obligatorio.',
+            'integer'  => 'El campo :attribute debe ser un número entero.',
+            'numeric'  => 'El campo :attribute debe ser un número válido.',
+            'string'   => 'El campo :attribute debe ser una cadena de texto.',
+            'max'      => 'El campo :attribute no debe superar los :max caracteres.',
+            'min'      => 'El campo :attribute debe ser como mínimo :min.',
+            'exists'   => 'El valor seleccionado para :attribute no es válido.',
+            'in'       => 'El valor seleccionado para :attribute no es válido.',
+
+            // Mensaje específico para seriales duplicados
+            'numero_serie.unique' => 'El número de serie ingresado ya existe en la base de datos. Si se trata de una board o equipo genérico (ej: "To be filled by O.E.M."), agrégale un sufijo diferenciador (ej: "OEM-RECEP-01") para poder registrarlo sin duplicar.',
+        ];
+    }
+
+    /**
+     * Validaciones cruzadas — coherencia y autorización granular.
      */
     public function withValidator($validator): void
     {
@@ -97,16 +147,13 @@ class StoreEquipoRequest extends FormRequest
                     return;
                 }
 
-                // Si especificó sede, debe tener acceso a esa sede específicamente
                 if ($this->filled('sede_id')) {
                     $sede = Sede::find($this->sede_id);
                     if ($sede && ! $user->puedeAccederSede($sede)) {
                         $validator->errors()->add('sede_id',
                             'No tienes acceso a esta sede. Solo puedes registrar equipos en las sedes que tienes asignadas.');
                     }
-                }
-                // Si NO especificó sede (equipo "de empresa"), exigir asignación global
-                else {
+                } else {
                     if (! $user->tieneAsignacionGlobalEmpresa($this->empresa_id)) {
                         $validator->errors()->add('sede_id',
                             'Tu asignación es solo a sedes específicas. Debes elegir una sede para el equipo.');

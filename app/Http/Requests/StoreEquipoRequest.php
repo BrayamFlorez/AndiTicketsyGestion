@@ -33,6 +33,7 @@ class StoreEquipoRequest extends FormRequest
             'ubicacion'      => ['nullable', 'string', 'max:255'],
             'estado'         => ['nullable', Rule::in(array_keys(Equipo::ESTADOS))],
             'notas'          => ['nullable', 'string', 'max:2000'],
+            'codigo_interno' => ['nullable', 'string', 'max:60'],
         ];
 
         // Reglas dinámicas según schema de la categoría
@@ -78,6 +79,7 @@ class StoreEquipoRequest extends FormRequest
             'ubicacion'      => 'ubicación física',
             'estado'         => 'estado',
             'notas'          => 'notas internas',
+            'codigo_interno' => 'código interno',
         ];
 
         // Nombres en español para las especificaciones dinámicas

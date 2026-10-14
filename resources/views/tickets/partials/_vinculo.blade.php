@@ -39,10 +39,19 @@
                     </div>
                 @endif
             </div>
-            <a href="{{ route('tickets.index', $filtro) }}"
-               class="inline-flex items-center gap-1 text-[9px] font-bold uppercase text-bodydark2 hover:text-primary transition">
-                <i class="fas fa-history text-[8px]"></i> {{ $esImpresora ? 'Ver tickets de esta impresora' : 'Ver tickets de este equipo' }}
-            </a>
+<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <a href="{{ route('tickets.index', $filtro) }}"
+                   class="inline-flex items-center gap-1 text-[9px] font-bold uppercase text-bodydark2 hover:text-primary transition">
+                    <i class="fas fa-history text-[8px]"></i> {{ $esImpresora ? 'Ver tickets de esta impresora' : 'Ver tickets de este equipo' }}
+                </a>
+                {{-- El servicio queda con este ticket como orden de trabajo --}}
+                @if (! $esImpresora && $activo->admiteMantenimiento() && auth()->user()->can('equipos.mantenimientos.gestionar') && Route::has('equipos.mantenimientos.create'))
+                    <a href="{{ route('equipos.mantenimientos.create', [$activo, 'ticket' => $ticket->id]) }}"
+                       class="inline-flex items-center gap-1 text-[9px] font-bold uppercase text-meta-3 hover:underline">
+                        <i class="fas fa-tools text-[8px]"></i> Registrar servicio
+                    </a>
+                @endif
+            </div>
         </div>
     </div>
 @endif

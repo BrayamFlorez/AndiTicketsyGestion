@@ -87,7 +87,8 @@ class EquipoController extends Controller
             'sede', 
             'responsable', 
             'creador',
-            'mantenimientosPreventivos.tecnico' // Cargamos mantenimientos y el técnico de cada uno
+            'mantenimientos.tecnico:id,name',
+            'perifericos',
         ]);
 
         return view('equipos.show', compact('equipo'));
@@ -228,7 +229,7 @@ class EquipoController extends Controller
         $data = $request->safe()->only([
             'empresa_id', 'sede_id', 'responsable_id',
             'categoria', 'nombre', 'marca', 'modelo',
-            'numero_serie', 'ubicacion', 'estado', 'notas',
+            'numero_serie', 'ubicacion', 'estado', 'notas','codigo_interno',
         ]);
 
         $data['estado'] = $data['estado'] ?? 'activo';

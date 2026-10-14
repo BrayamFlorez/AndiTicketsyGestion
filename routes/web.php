@@ -15,7 +15,6 @@ use App\Http\Controllers\ImpresoraConsumibleController;
 use App\Http\Controllers\ImpresoraController;
 use App\Http\Controllers\ImpresoraMantenimientoController;
 use App\Http\Controllers\ImpresoraModeloController;
-use App\Http\Controllers\MantenimientoPreventivoController;
 use App\Http\Controllers\NoticiaController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\ProfileController;
@@ -34,6 +33,10 @@ use App\Http\Controllers\WorkflowTemplateController;
 use App\Http\Controllers\ImpresoraConsumibleRecargaController;
 use App\Http\Controllers\ImpresoraContadorController;
 use App\Http\Controllers\TicketPartesController;
+use App\Http\Controllers\ImpresoraMantenimientoReporteController;
+use App\Http\Controllers\EquipoMantenimientoController;
+use App\Http\Controllers\EquipoMantenimientoReporteController;
+use App\Http\Controllers\EquipoPerifericoController;
 /*
 |--------------------------------------------------------------------------
 | Rutas públicas
@@ -126,17 +129,29 @@ Route::middleware('auth')->group(function () {
          ->middleware('can:equipos.editar')->name('equipos.agente.revocar');
     });
 
-    // ── Mantenimiento preventivo de equipos ──────────────────────────────
-    Route::controller(MantenimientoPreventivoController::class)->name('mpreventivo.')->group(function () {
-        // Dependen de un equipo
-        Route::get('equipos/{equipo}/mantenimientos/create', 'create')->name('create');
-        Route::post('equipos/{equipo}/mantenimientos', 'store')->name('store');
+        Route::prefix('equipos/{equipo}')->name('equipos.')->group(function () {
+        Route::controller(EquipoPerifericoController::class)->prefix('perifericos')->name('perifericos.')->group(function () {
+            Route::post('/', 'store')->name('store');
+            Route::put('/{periferico}', 'update')->name('update');
+            Route::delete('/{periferico}', 'destroy')->name('destroy');
+        });
 
-        // Sobre el mantenimiento directamente
-        Route::get('mantenimientos/{mantenimiento}', 'show')->name('show');
-        Route::get('mantenimientos/{mantenimiento}/edit', 'edit')->name('edit');
-        Route::put('mantenimientos/{mantenimiento}', 'update')->name('update');
-        Route::delete('mantenimientos/{mantenimiento}', 'destroy')->name('destroy');
+        Route::controller(EquipoMantenimientoController::class)->prefix('mantenimientos')->name('mantenimientos.')->group(function () {
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{mantenimiento}', 'show')->name('show');
+            Route::get('/{mantenimiento}/edit', 'edit')->name('edit');
+            Route::put('/{mantenimiento}', 'update')->name('update');
+            Route::delete('/{mantenimiento}', 'destroy')->name('destroy');
+        });
+
+        Route::controller(EquipoMantenimientoReporteController::class)->prefix('mantenimientos/{mantenimiento}')->name('mantenimientos.')->group(function () {
+            Route::post('evidencias', 'subirEvidencia')->name('evidencias.store');
+            Route::delete('evidencias/{evidencia}', 'eliminarEvidencia')->name('evidencias.destroy');
+            Route::post('firmar', 'firmar')->name('firmar');
+            Route::get('archivo/{archivo}', 'archivo')->name('archivo');
+            Route::get('pdf', 'pdf')->name('pdf');
+        });
     });
 
     // ── Reportes ─────────────────────────────────────────────────────────
@@ -184,6 +199,16 @@ Route::middleware('auth')->group(function () {
             Route::put('/{consumible}', 'update')->name('update');
             Route::post('/{consumible}/reemplazar', 'reemplazar')->name('reemplazar');
             Route::delete('/{consumible}', 'destroy')->name('destroy');
+        });
+
+        // Detalle del mantenimiento: evidencia, firmas y reporte PDF
+        Route::controller(ImpresoraMantenimientoReporteController::class)->prefix('mantenimientos/{mantenimiento}')->name('mantenimientos.')->group(function () {
+            Route::get('/', 'show')->name('show');
+            Route::post('evidencias', 'subirEvidencia')->name('evidencias.store');
+            Route::delete('evidencias/{evidencia}', 'eliminarEvidencia')->name('evidencias.destroy');
+            Route::post('firmar', 'firmar')->name('firmar');
+            Route::get('archivo/{archivo}', 'archivo')->name('archivo');
+            Route::get('pdf', 'pdf')->name('pdf');
         });
 
         // Recarga parcial (solo en tiempo real) y lecturas del contador

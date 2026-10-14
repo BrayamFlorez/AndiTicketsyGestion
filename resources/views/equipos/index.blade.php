@@ -286,12 +286,6 @@
                                             @endif
 
                                             @can('equipos.editar')
-                                                <a href="{{ route('mpreventivo.create', $equipo) }}" class="flex items-center gap-2 px-3 py-1.5 text-black dark:text-white hover:bg-gray-2 dark:hover:bg-meta-4 transition">
-                                                    <i class="fas fa-tools w-4 text-center text-meta-3"></i> Mantenimiento
-                                                </a>
-                                            @endcan
-
-                                            @can('equipos.editar')
                                                 @if ($puedeGestionar)
                                                     <a href="{{ route('equipos.edit', $equipo) }}" class="flex items-center gap-2 px-3 py-1.5 text-black dark:text-white hover:bg-gray-2 dark:hover:bg-meta-4 transition">
                                                         <i class="fas fa-pen w-4 text-center text-bodydark2"></i> Editar

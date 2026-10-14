@@ -16,6 +16,11 @@
             <span class="font-mono text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
                 {{ $equipo->numero_serie ?? 'SIN-SERIE' }}
             </span>
+            @if ($equipo->codigo_interno)
+                <span class="font-mono text-[11px] text-bodydark2 bg-gray-2 dark:bg-meta-4 px-2 py-0.5 rounded border border-stroke dark:border-strokedark" title="Código interno">
+                    #{{ $equipo->codigo_interno }}
+                </span>
+            @endif
 
             <h2 class="text-title-md font-bold text-black dark:text-white truncate" title="{{ $equipo->nombre }}">
                 {{ $equipo->nombre }}
@@ -36,12 +41,14 @@
 
         {{-- Acciones del Equipo --}}
         <div class="flex items-center gap-1.5 shrink-0">
-            @can('mpreventivo.crear')
-                <a href="{{ route('mpreventivo.create', $equipo) }}" 
-                   class="inline-flex items-center gap-1 rounded bg-meta-3 py-1 px-3 text-xs font-bold uppercase text-white hover:bg-opacity-90 transition shadow-sm">
-                    <i class="fas fa-tools text-[10px]"></i> Programar Preventivo
-                </a>
-            @endcan
+            @if ($equipo->admiteMantenimiento())
+                @can('equipos.mantenimientos.gestionar')
+                    <a href="{{ route('equipos.mantenimientos.create', $equipo) }}"
+                       class="inline-flex items-center gap-1 rounded bg-meta-3 py-1 px-3 text-xs font-bold uppercase text-white hover:bg-opacity-90 transition shadow-sm">
+                        <i class="fas fa-tools text-[10px]"></i> Registrar servicio
+                    </a>
+                @endcan
+            @endif
 
             @can('equipos.editar')
                 <a href="{{ route('equipos.edit', $equipo) }}" 
@@ -102,7 +109,7 @@
             <div class="min-w-0">
                 <span class="text-[8px] font-bold text-bodydark2 uppercase block">Mantenimientos</span>
                 <span class="text-[11px] font-bold font-mono text-black dark:text-white block">
-                    {{ $equipo->mantenimientosPreventivos->count() }} Registrados
+                    {{ $equipo->mantenimientos->count() }} Registrados
                 </span>
             </div>
         </div>
@@ -181,104 +188,11 @@
                 </div>
             </div>
 
-            {{-- Historial de Mantenimientos Preventivos --}}
-            <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-                <div class="border-b border-stroke py-2.5 px-4 dark:border-strokedark flex items-center justify-between">
-                    <h3 class="font-bold text-black dark:text-white text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fas fa-history text-primary"></i> Historial de Mantenimientos Preventivos
-                    </h3>
-                    @can('mpreventivo.crear')
-                        <a href="{{ route('mpreventivo.create', $equipo) }}" 
-                           class="text-[10px] font-bold uppercase text-primary hover:underline flex items-center gap-1">
-                            <i class="fas fa-plus text-[8px]"></i> Nuevo Registro
-                        </a>
-                    @endcan
-                </div>
+            {{-- Periféricos vinculados (pantalla, teclado, mouse...) --}}
+            @includeWhen($equipo->admiteMantenimiento(), 'equipos.partials._perifericos')
 
-                <div class="max-w-full overflow-x-auto">
-                    <table class="w-full table-auto border-collapse">
-                        <thead>
-                            <tr class="bg-gray-2 text-left dark:bg-meta-4">
-                                <th class="py-2 px-3 text-[10px] font-bold uppercase tracking-wider text-black dark:text-white w-28">ID / Fecha</th>
-                                <th class="py-2 px-3 text-[10px] font-bold uppercase tracking-wider text-black dark:text-white min-w-[140px]">Técnico</th>
-                                <th class="py-2 px-3 text-[10px] font-bold uppercase tracking-wider text-black dark:text-white text-center w-24">Estado</th>
-                                <th class="py-2 px-3 text-[10px] font-bold uppercase tracking-wider text-black dark:text-white text-right w-16">Ver</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-stroke dark:divide-strokedark">
-                            @forelse($equipo->mantenimientosPreventivos as $maint)
-                                <tr class="hover:bg-gray-2 dark:hover:bg-meta-4/40 transition">
-                                    <td class="py-2 px-3 whitespace-nowrap">
-                                        <div class="font-mono text-xs font-bold text-primary">#{{ $maint->id }}</div>
-                                        <div class="text-[9px] font-mono text-bodydark2">
-                                            {{ $maint->fecha_inicio ? $maint->fecha_inicio->format('d/m/Y H:i') : 'Sin fecha' }}
-                                        </div>
-                                    </td>
-                                    <td class="py-2 px-3 whitespace-nowrap">
-                                        @if($maint->tecnico)
-                                            <div class="flex items-center gap-1.5">
-                                                <div class="flex h-5 w-5 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-[9px] shrink-0">
-                                                    {{ substr($maint->tecnico->name, 0, 1) }}
-                                                </div>
-                                                <span class="text-xs text-black dark:text-white truncate max-w-[130px]">{{ $maint->tecnico->name }}</span>
-                                            </div>
-                                        @else
-                                            <span class="text-xs text-bodydark2 italic">No asignado</span>
-                                        @endif
-                                    </td>
-                                    <td class="py-2 px-3 text-center whitespace-nowrap">
-                                        @php
-                                            $colorMaint = match($maint->estado) {
-                                                'completado'  => 'bg-meta-3/10 text-meta-3 border-meta-3/20',
-                                                'en_progreso' => 'bg-meta-6/10 text-meta-6 border-meta-6/20',
-                                                default       => 'bg-primary/10 text-primary border-primary/20',
-                                            };
-                                        @endphp
-                                        <span class="inline-flex rounded-full px-2 py-0.5 text-[8px] font-bold uppercase border {{ $colorMaint }}">
-                                            {{ ucfirst($maint->estado) }}
-                                        </span>
-                                    </td>
-                                    <td class="py-2 px-3 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-1">
-                                            @can('mpreventivo.ver')
-                                                <a href="{{ route('mpreventivo.show', $maint) }}" 
-                                                   class="flex h-6 w-6 items-center justify-center rounded border border-stroke text-bodydark2 hover:border-primary hover:text-primary dark:border-strokedark transition" title="Ver detalle">
-                                                    <i class="fas fa-eye text-[9px]"></i>
-                                                </a>
-                                            @endcan
-
-                                            @can('mpreventivo.editar')
-                                                <a href="{{ route('mpreventivo.edit', $maint) }}" 
-                                                   class="flex h-6 w-6 items-center justify-center rounded border border-stroke text-meta-6 hover:border-meta-6 dark:border-strokedark transition" title="Editar">
-                                                    <i class="fas fa-pen text-[9px]"></i>
-                                                </a>
-                                            @endcan
-
-                                            @can('mpreventivo.eliminar')
-                                                <form action="{{ route('mpreventivo.destroy', $maint) }}" method="POST" onsubmit="return confirm('¿Eliminar mantenimiento?')" class="inline-block">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="flex h-6 w-6 items-center justify-center rounded border border-stroke text-meta-1 hover:border-meta-1 dark:border-strokedark transition" title="Eliminar">
-                                                        <i class="fas fa-trash text-[9px]"></i>
-                                                    </button>
-                                                </form>
-                                            @endcan
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="py-6 text-center">
-                                        <div class="flex flex-col items-center text-bodydark2">
-                                            <i class="fas fa-clipboard-check text-xl mb-1"></i>
-                                            <p class="text-xs">Sin mantenimientos registrados en el historial.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {{-- Servicios técnicos: preventivos y correctivos, con reporte PDF --}}
+            @include('equipos.partials._mantenimientos')
 
         </div>
 
@@ -345,4 +259,4 @@
 
         </div>
     </div>
-</x-app-layout>
+</x-app-layout>

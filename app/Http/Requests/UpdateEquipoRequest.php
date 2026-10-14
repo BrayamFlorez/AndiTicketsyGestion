@@ -40,6 +40,7 @@ class UpdateEquipoRequest extends FormRequest
             'ubicacion'      => ['nullable', 'string', 'max:255'],
             'estado'         => ['nullable', Rule::in(array_keys(Equipo::ESTADOS))],
             'notas'          => ['nullable', 'string', 'max:2000'],
+            'codigo_interno' => ['nullable', 'string', 'max:60'],
         ];
 
         foreach ($schema as $campo => $config) {

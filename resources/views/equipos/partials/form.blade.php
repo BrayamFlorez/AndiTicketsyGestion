@@ -268,6 +268,16 @@
                     @enderror
                 </div>
 
+                {{-- Código interno (placa de inventario del cliente; aparece en el reporte de servicio) --}}
+                <div>
+                    <label for="codigo_interno" class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">Código Interno</label>
+                    <input type="text" id="codigo_interno" name="codigo_interno" maxlength="60"
+                           value="{{ old('codigo_interno', $editing ? $equipo->codigo_interno : '') }}"
+                           placeholder="Placa o código de inventario"
+                           class="w-full rounded border border-stroke bg-transparent py-1.5 px-3 text-xs font-mono outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input text-black dark:text-white @error('codigo_interno') border-meta-1 @enderror">
+                    @error('codigo_interno')<p class="mt-0.5 text-[10px] text-meta-1 font-medium">{{ $message }}</p>@enderror
+                </div>
+
                 {{-- Estado --}}
                 <div>
                     <label class="mb-1 block text-[10px] font-bold uppercase text-black dark:text-white">Estado</label>
@@ -640,4 +650,4 @@
         };
     }
 </script>
-@endpush
+@endpush

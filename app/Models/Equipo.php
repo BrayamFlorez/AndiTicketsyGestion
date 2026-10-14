@@ -14,8 +14,20 @@ class Equipo extends Model
     const CATEGORIAS = [
         'computadora' => 'Computadora de escritorio',
         'portatil'    => 'Portátil / Laptop',
+        'aio'         => 'Todo en uno (AIO)',
         'impresora'   => 'Impresora',
     ];
+
+    // "Tipo de equipo" del reporte de servicio
+    const TIPOS_EQUIPO = [
+        'computadora' => 'Cómputo',
+        'portatil'    => 'Cómputo',
+        'aio'         => 'Cómputo',
+        'impresora'   => 'Impresión',
+    ];
+
+    // Categorías a las que se les registra mantenimiento en este módulo (las impresoras tienen el suyo)
+    const CATEGORIAS_CON_MANTENIMIENTO = ['computadora', 'portatil', 'aio'];
 
     const ESTADOS = [
         'activo'         => 'Activo',
@@ -40,6 +52,15 @@ class Equipo extends Model
             'tarjeta_grafica'   => ['label' => 'Tarjeta gráfica',    'type' => 'text',   'required' => false, 'placeholder' => 'Opcional'],
         ],
 
+        'aio' => [
+            'procesador'        => ['label' => 'Procesador',          'type' => 'text',   'placeholder' => 'Ej: Intel Core i5-12400T'],
+            'ram_gb'            => ['label' => 'RAM (GB)',            'type' => 'number'],
+            'almacenamiento_gb' => ['label' => 'Almacenamiento (GB)', 'type' => 'number'],
+            'tipo_disco'        => ['label' => 'Tipo de disco',       'type' => 'select', 'options' => ['HDD', 'SSD', 'NVMe']],
+            'sistema_operativo' => ['label' => 'Sistema operativo',   'type' => 'text',   'placeholder' => 'Ej: Windows 11 Pro'],
+            'pantalla_pulgadas' => ['label' => 'Tamaño de pantalla (pulgadas)', 'type' => 'number'],
+        ],
+
         'portatil' => [
             'procesador'        => ['label' => 'Procesador',          'type' => 'text', 'placeholder' => 'Ej: AMD Ryzen 5 5500U'],
             'ram_gb'            => ['label' => 'RAM (GB)',            'type' => 'number'],
@@ -61,7 +82,7 @@ class Equipo extends Model
 
     protected $fillable = [
         'empresa_id', 'sede_id', 'responsable_id', 'creado_por',
-        'categoria', 'nombre', 'marca', 'modelo', 'numero_serie',
+        'categoria', 'nombre', 'marca', 'modelo', 'numero_serie', 'codigo_interno',
         'ubicacion', 'estado', 'especificaciones', 'notas',
     ];
 
@@ -75,6 +96,17 @@ class Equipo extends Model
     public function sede(): BelongsTo         { return $this->belongsTo(Sede::class); }
     public function responsable(): BelongsTo  { return $this->belongsTo(User::class, 'responsable_id'); }
     public function creador(): BelongsTo      { return $this->belongsTo(User::class, 'creado_por'); }
+
+    public function perifericos(): HasMany
+    {
+        return $this->hasMany(EquipoPeriferico::class)->orderBy('tipo')->orderBy('id');
+    }
+
+    /** Servicios técnicos (preventivos y correctivos), del más reciente al más antiguo */
+    public function mantenimientos(): HasMany
+    {
+        return $this->hasMany(EquipoMantenimiento::class)->latest('fecha_servicio')->latest('id');
+    }
     
     // Cuando agreguemos el módulo de servicios:
     // public function servicios(): HasMany {
@@ -146,24 +178,55 @@ class Equipo extends Model
         return self::ESPECIFICACIONES_SCHEMA[$this->categoria] ?? [];
     }
 
-    public function mantenimientosPreventivos()
+    public function getLabelTipoEquipoAttribute(): string
     {
-        // Ordenamos del más reciente al más antiguo
-        return $this->hasMany(MantenimientoPreventivo::class)->orderBy('fecha_inicio', 'desc');
+        return self::TIPOS_EQUIPO[$this->categoria] ?? 'Otro';
+    }
+
+    public function admiteMantenimiento(): bool
+    {
+        return in_array($this->categoria, self::CATEGORIAS_CON_MANTENIMIENTO, true);
+    }
+
+    /**
+     * Filas sugeridas para "Unidades revisadas": componentes según las especificaciones
+     * (procesador, RAM, disco...) y los periféricos vinculados.
+     *
+     * @return array<int, array{unidad: string, periferico_id: ?int}>
+     */
+    public function unidadesParaRevision(): array
+    {
+        $e = $this->especificaciones ?? [];
+        $v = fn (string $k) => isset($e[$k]) && $e[$k] !== '' ? trim((string) $e[$k]) : null;
+
+        $componentes = array_filter([
+            $v('procesador') ? 'Procesador ' . $v('procesador') : null,
+            $v('ram_gb') ? "RAM {$v('ram_gb')} GB" : null,
+            $v('almacenamiento_gb') ? trim('Disco ' . ($v('tipo_disco') ?? '') . " {$v('almacenamiento_gb')} GB") : null,
+            $v('tarjeta_grafica') ? 'Tarjeta gráfica ' . $v('tarjeta_grafica') : null,
+            $v('pantalla_pulgadas') ? "Pantalla {$v('pantalla_pulgadas')}\"" : null,
+            $v('estado_bateria') ? 'Batería (' . mb_strtolower($v('estado_bateria')) . ')' : null,
+            $v('sistema_operativo') ? 'Sistema operativo ' . $v('sistema_operativo') : null,
+        ]);
+
+        $filas = array_map(fn ($u) => ['unidad' => $u, 'periferico_id' => null], array_values($componentes));
+
+        foreach ($this->perifericos as $p) {
+            $filas[] = ['unidad' => $p->descripcion, 'periferico_id' => $p->id];
+        }
+
+        return $filas;
     }
 
     public function tieneHistorial(): bool
     {
-        if ($this->mantenimientosPreventivos()->exists()) {
-            return true;
-        }
-        return false;
+        return $this->mantenimientos()->exists();
     }
 
     public function razonesParaNoEliminar(): array
     {
         $razones = [];
-        if ($this->mantenimientosPreventivos()->exists()) {
+        if ($this->mantenimientos()->exists()) {
             $razones[] = 'tiene servicios de mantenimiento registrados';
         }
         return $razones;

@@ -6,11 +6,12 @@ use App\Http\Requests\StoreImpresoraMantenimientoRequest;
 use App\Models\Impresora;
 use App\Models\ImpresoraAlertaEnviada;
 use App\Models\ImpresoraConsumible;
-use App\Models\ImpresoraContador;
 use App\Models\ImpresoraMantenimiento;
+use App\Services\Impresoras\RegistroContador;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ImpresoraMantenimientoController extends Controller
 {
@@ -22,12 +23,13 @@ class ImpresoraMantenimientoController extends Controller
     public function store(
         StoreImpresoraMantenimientoRequest $request,
         Impresora $impresora,
+        RegistroContador $contadores,
     ): RedirectResponse {
 
         $datos = $request->validated();
         $user  = $request->user();
 
-        DB::transaction(function () use ($datos, $impresora, $user) {
+        $mantenimiento = DB::transaction(function () use ($datos, $impresora, $user, $contadores) {
 
             // 1. Crear el mantenimiento
             $mantenimiento = ImpresoraMantenimiento::create([
@@ -42,24 +44,18 @@ class ImpresoraMantenimientoController extends Controller
                 'registrado_por'     => $user->id,
             ]);
 
-            // 2. Actualizar contador de páginas de la impresora si vino (y dejarlo en el histórico)
+            // 2. Lectura del contador en el histórico, con la fecha del mantenimiento
             if (! empty($datos['contador_paginas'])) {
-                $anterior = $impresora->contador_paginas_actual;
-                $nuevo    = (int) $datos['contador_paginas'];
-                $reinicio = $anterior !== null && $nuevo < $anterior;
+                $fecha = Carbon::parse($datos['fecha_realizado']);
 
-                ImpresoraContador::create([
-                    'impresora_id'           => $impresora->id,
-                    'contador'               => $nuevo,
-                    'paginas_desde_anterior' => $anterior !== null && ! $reinicio ? $nuevo - $anterior : null,
-                    'reinicio'               => $reinicio,
-                    'registrado_por'         => $user->id,
-                ]);
-
-                $impresora->update([
-                    'contador_paginas_actual' => $nuevo,
-                    'contador_actualizado_en' => now(),
-                ]);
+                $contadores->registrar(
+                    $impresora,
+                    (int) $datos['contador_paginas'],
+                    $user->id,
+                    $fecha->isToday() ? now() : $fecha->setTime(12, 0),
+                    reinicio: null, // un valor menor al anterior se toma como reinicio
+                    mantenimientoId: $mantenimiento->id,
+                );
             }
 
             // 3. Reemplazar consumibles seleccionados (integrado)
@@ -89,8 +85,8 @@ class ImpresoraMantenimientoController extends Controller
                     ? $duracionReal
                     : (int) $ent['dias_estimados'];
 
-                // Crear el nuevo
-                ImpresoraConsumible::create([
+                // Crear el nuevo (forceCreate: mantenimiento_id lo fija el sistema)
+                ImpresoraConsumible::forceCreate([
                     'impresora_id'           => $impresora->id,
                     'tipo'                   => $consumible->tipo,
                     'color'                  => $consumible->color,
@@ -99,6 +95,7 @@ class ImpresoraMantenimientoController extends Controller
                     'fecha_instalacion'      => $fechaReemplazo,
                     'activo'                 => true,
                     'consumible_anterior_id' => $consumible->id,
+                    'mantenimiento_id'       => $mantenimiento->id,
                     'observaciones'          => "Reemplazado en mantenimiento #{$mantenimiento->id}",
                     'registrado_por'         => $user->id,
                 ]);
@@ -119,9 +116,14 @@ class ImpresoraMantenimientoController extends Controller
                 $impresora->id,
                 ImpresoraAlertaEnviada::TIPO_MANTENIMIENTO_PROXIMO,
             );
+
+            return $mantenimiento;
         });
 
-        return back()->with('exito', 'Mantenimiento registrado correctamente.');
+        // Siguiente paso: evidencia y firmas para finalizarlo
+        return redirect()
+            ->route('impresoras.mantenimientos.show', [$impresora, $mantenimiento])
+            ->with('exito', 'Mantenimiento registrado. Agregue la evidencia y las firmas para finalizarlo.');
     }
 
     /*
@@ -137,11 +139,15 @@ class ImpresoraMantenimientoController extends Controller
         abort_if($mantenimiento->impresora_id !== $impresora->id, 404);
         $this->authorize('gestionarMantenimientos', $impresora);
 
+        $carpeta = $mantenimiento->carpetaArchivos();
         $mantenimiento->delete();
+
+        // Evidencia y firmas
+        Storage::disk('local')->deleteDirectory($carpeta);
 
         // Recalcular después de eliminar
         $impresora->recalcularProximoMantenimiento();
 
         return back()->with('exito', 'Mantenimiento eliminado.');
     }
-}
+}
